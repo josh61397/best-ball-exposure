@@ -154,9 +154,9 @@
       rtv: 'Real-Time Value (RTV)\n\n' +
            'How much value those same picks hold right now, using today\'s market ADP. Positive numbers mean you got the player later than the market does today.',
       clvAdp: 'Total ADP CLV. Each pick\'s ADP CLV is calculated as:\n  Your pick # − Market ADP at draft date\n\nPositive = drafted later than market = value. Treats every pick as equally valuable.',
-      clvDcv: 'Total Draft Capital CLV. Each pick\'s Draft Capital CLV is calculated as:\n  The Draft Capital value at the player\'s ADP at draft date − The Draft Capital value used to select that player\n\nUses Michael Leone\'s Draft Capital weights, so a +5 ADP gain near the top of the draft is worth more than a +5 ADP gain in the middle.',
+      clvDcv: 'Total Draft Capital CLV. Each pick\'s Draft Capital CLV is calculated as:\n  The Draft Capital used to select the player − The Draft Capital value at the player\'s ADP at draft date\n\nNegative = you spent less draft capital than the player was worth at the time = value. Positive = reach. Uses Michael Leone\'s Draft Capital weights so early-round value > late-round value.',
       rtvAdp: 'Total ADP RTV. Each pick\'s ADP RTV is calculated as:\n  Your pick # − Today\'s Market ADP\n\nPositive = today\'s market would draft this player earlier than you did = your pick aged well.',
-      rtvDcv: 'Total Draft Capital RTV. Each pick\'s Draft Capital RTV is calculated as:\n  The Draft Capital value at the player\'s current ADP − The Draft Capital value used to select that player\n\nUses Michael Leone\'s Draft Capital weights to give early picks more weight than late picks.',
+      rtvDcv: 'Total Draft Capital RTV. Each pick\'s Draft Capital RTV is calculated as:\n  The Draft Capital used to select the player − The Draft Capital value at the player\'s current ADP\n\nNegative = you spent less draft capital than the player is worth today = value. Positive = reach.',
     };
 
     var headerCells = [
@@ -216,9 +216,9 @@
         '<td class="num">' + (r.draftSize != null ? r.draftSize : '—') + '</td>' +
         '<td class="num">' + (pos != null ? pos : '—') + '</td>' +
         '<td class="num"' + BB.heatStyle(v.clv.totalADP, rClvAdp) + '>' + fmtClvCell(v.clv.totalADP) + '</td>' +
-        '<td class="num"' + BB.heatStyle(v.dcvClv.total, rClvDcv) + '>' + fmtClvCell(v.dcvClv.total) + '</td>' +
+        '<td class="num"' + BB.heatStyle(v.dcvClv.total, rClvDcv, { invert: true }) + '>' + fmtClvCell(v.dcvClv.total) + '</td>' +
         '<td class="num"' + BB.heatStyle(v.rtv.totalADP, rRtvAdp) + '>' + fmtClvCell(v.rtv.totalADP) + '</td>' +
-        '<td class="num"' + BB.heatStyle(v.dcvRtv.total, rRtvDcv) + '>' + fmtClvCell(v.dcvRtv.total) + '</td>' +
+        '<td class="num"' + BB.heatStyle(v.dcvRtv.total, rRtvDcv, { invert: true }) + '>' + fmtClvCell(v.dcvRtv.total) + '</td>' +
         '</tr>';
     }).join('');
 

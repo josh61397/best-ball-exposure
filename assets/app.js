@@ -589,9 +589,12 @@
     return v == null ? null : v;
   };
 
-  // Roster-level Draft Capital Value = Σ (DCap(ADP) − DCap(Pick #))
-  // Weights early picks more heavily than the linear ADP delta does, so the
-  // same +5 ADP value gain at pick 15 is worth more than +5 at pick 125.
+  // Roster-level Draft Capital Value = Σ (DCap(Pick #) − DCap(ADP))
+  // "My drafted capital − the draft capital the player should have cost."
+  // Sign convention here is the inverse of ADP CLV:
+  //   negative = drafted LATER than market, spent less DC than they're worth = value
+  //   positive = drafted EARLIER than market, spent more DC than they're worth = reach
+  // Heat-map invert keeps green = value visually on the rosters page.
   BB.rosterDcv = function (roster, adpSource) {
     var picks = roster.picks || [];
     var totalDcv = 0, n = 0;
@@ -602,7 +605,7 @@
       var dcAdp = BB.draftCapital(adp);
       var dcPick = BB.draftCapital(p.overallPick);
       if (dcAdp == null || dcPick == null) return;
-      totalDcv += dcAdp - dcPick;
+      totalDcv += dcPick - dcAdp;
       n++;
     });
     return {
