@@ -146,23 +146,24 @@
     var rRtvTot = rangeFor(function (r) { return r.value.rtv.totalADP; });
 
     // Tooltip copy for the CLV / RTV columns.
+    // Convention: positive = drafted LATER than market = value mined.
     var TT = {
       clv: 'Closing Line Value\n\n' +
            'How much value you mined relative to where the market was drafting these players around the time of your draft.\n\n' +
            'Uses the market ADP snapshot from your draft date (when we have one). For drafts older than our daily ADP history, falls back to today\'s ADP — so for those rows CLV will match RTV until we re-import.',
       rtv: 'Real-Time Value\n\n' +
-           'How much value those same picks hold right now, using today\'s market ADP. Positive numbers mean the players you drafted have moved up in market consensus since your pick.',
+           'How much value those same picks hold right now, using today\'s market ADP. Positive numbers mean you got the player later than the market does today.',
       clvAvg: 'Average CLV per pick\n\n' +
-              'Formula:\n  Σ (Market ADP at draft date − Your pick #) / # of picks where market ADP is known\n\n' +
-              'Positive = you got the player later than the market did = value.',
+              'Formula:\n  Σ (Your pick # − Market ADP at draft date) / # of picks where market ADP is known\n\n' +
+              'Positive = you got the player later than market expected = value. Negative = you reached.',
       clvTotal: 'Total CLV (Draft Capital)\n\n' +
-                'Formula:\n  Σ (Market ADP at draft date − Your pick #) across every pick\n\n' +
-                'The total ADP value accumulated across the whole roster.',
+                'Formula:\n  Σ (Your pick # − Market ADP at draft date) across every pick\n\n' +
+                'The total ADP value mined across the whole roster.',
       rtvAvg: 'Average RTV per pick\n\n' +
-              'Formula:\n  Σ (Today\'s Market ADP − Your pick #) / # of picks where market ADP is known\n\n' +
-              'Positive = the player has risen in market consensus since you drafted them.',
+              'Formula:\n  Σ (Your pick # − Today\'s Market ADP) / # of picks where market ADP is known\n\n' +
+              'Positive = today\'s market would draft this player earlier than you did = your pick aged well.',
       rtvTotal: 'Total RTV (Draft Capital)\n\n' +
-                'Formula:\n  Σ (Today\'s Market ADP − Your pick #) across every pick\n\n' +
+                'Formula:\n  Σ (Your pick # − Today\'s Market ADP) across every pick\n\n' +
                 'The total real-time ADP value across the whole roster.',
     };
 
@@ -330,7 +331,7 @@
         roster.picks.map(function (p) {
           var refADP = window.BB_DATA ? window.BB_DATA.lookupADP(p.player) : null;
           var udAdp = refADP && refADP.ud != null ? refADP.ud : (p.siteADP != null ? p.siteADP : null);
-          var clv = (p.overallPick != null && udAdp != null) ? udAdp - p.overallPick : null;
+          var clv = (p.overallPick != null && udAdp != null) ? p.overallPick - udAdp : null;
           var clvCls = clv == null ? '' : clv > 0 ? 'clv-pos' : (clv < 0 ? 'clv-neg' : '');
           var clvText = clv == null ? '—' : (clv > 0 ? '+' : '') + clv.toFixed(1);
           var nameCell = p.player ? BB.playerCell(p.player, p.team, { linkToPlayer: true }) : '—';

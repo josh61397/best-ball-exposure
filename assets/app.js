@@ -575,9 +575,10 @@
   // Computes value metrics for a single roster.
   //   adpSource(playerName) -> ADP number or null
   // Returns { avgADP, totalADP, picksWithADP }.
-  //   avgADP   = average (marketADP - actualPick) per pick where ADP known
-  //   totalADP = sum of (marketADP - actualPick) per pick where ADP known
-  // Positive means you drafted players later than market = value mined.
+  //   avgADP   = average (yourPick - marketADP) per pick where ADP known
+  //   totalADP = sum of (yourPick - marketADP) per pick where ADP known
+  // Positive means you drafted players LATER than market = value mined.
+  // Negative means you reached.
   BB.rosterValue = function (roster, adpSource) {
     var picks = roster.picks || [];
     var totalDelta = 0;
@@ -587,7 +588,7 @@
       if (!p.overallPick) return;
       var adp = adpSource(p.player);
       if (adp == null) return;
-      var delta = adp - p.overallPick;
+      var delta = p.overallPick - adp;
       totalDelta += delta;
       n++;
       if (delta > bestDelta) bestDelta = delta;
