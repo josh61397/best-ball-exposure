@@ -128,10 +128,12 @@
       return (av - bv) * dir;
     });
 
-    // Heat-map ranges for the four value columns
+    // Heat-map ranges for the four value columns. Skip Superflex rosters —
+    // their numbers are computed against 1-QB ADP and would distort the scale.
     function rangeFor(getter) {
       var min = Infinity, max = -Infinity;
       rows.forEach(function (r) {
+        if (BB.rosterIsSuperflex(r.roster)) return;
         var v = getter(r);
         if (v == null || isNaN(v)) return;
         if (v < min) min = v;
@@ -206,19 +208,29 @@
       var r = row.roster;
       var v = row.value;
       var fmt = BB.rosterFormat(r);
+      var qb = BB.rosterQbFormat(r);
+      var isSf = BB.rosterIsSuperflex(r);
       var pos = BB.rosterDraftPosition(r);
       var rosterHref = 'rosters.html?id=' + encodeURIComponent(r.rosterId);
-      return '<tr class="row-link" data-href="' + escapeHtml(rosterHref) + '">' +
+      // Compose the Type cell — include the QB format badge for Superflex,
+      // so users can see why the value columns are dashed.
+      var typeBadge = fmt ? '<span class="badge">' + escapeHtml(fmt) + '</span>' : '—';
+      if (qb && /superflex|super[\s_-]?flex/i.test(qb)) {
+        typeBadge += ' <span class="badge" style="margin-left:4px;">SF</span>';
+      }
+      var sfTip = isSf ? ' title="Superflex roster — Superflex ADP not tracked, value disabled"' : '';
+      var dashCell = '<td class="num"' + sfTip + '>—</td>';
+      return '<tr class="row-link' + (isSf ? ' superflex' : '') + '" data-href="' + escapeHtml(rosterHref) + '">' +
         '<td><a href="' + escapeHtml(rosterHref) + '">' + escapeHtml(r.tournament || '(unknown)') + '</a></td>' +
         '<td class="num">' + fmtDate(r.draftedAt) + '</td>' +
-        '<td>' + (fmt ? '<span class="badge">' + escapeHtml(fmt) + '</span>' : '—') + '</td>' +
+        '<td>' + typeBadge + '</td>' +
         '<td class="num">' + (r.entryFee != null ? BB.fmtMoney(r.entryFee) : '—') + '</td>' +
         '<td class="num">' + (r.draftSize != null ? r.draftSize : '—') + '</td>' +
         '<td class="num">' + (pos != null ? pos : '—') + '</td>' +
-        '<td class="num"' + BB.heatStyle(v.clv.totalADP, rClvAdp) + '>' + fmtClvCell(v.clv.totalADP) + '</td>' +
-        '<td class="num"' + BB.heatStyle(v.dcvClv.total, rClvDcv, { invert: true }) + '>' + fmtClvCell(v.dcvClv.total) + '</td>' +
-        '<td class="num"' + BB.heatStyle(v.rtv.totalADP, rRtvAdp) + '>' + fmtClvCell(v.rtv.totalADP) + '</td>' +
-        '<td class="num"' + BB.heatStyle(v.dcvRtv.total, rRtvDcv, { invert: true }) + '>' + fmtClvCell(v.dcvRtv.total) + '</td>' +
+        (isSf ? dashCell : '<td class="num"' + BB.heatStyle(v.clv.totalADP, rClvAdp) + '>' + fmtClvCell(v.clv.totalADP) + '</td>') +
+        (isSf ? dashCell : '<td class="num"' + BB.heatStyle(v.dcvClv.total, rClvDcv, { invert: true }) + '>' + fmtClvCell(v.dcvClv.total) + '</td>') +
+        (isSf ? dashCell : '<td class="num"' + BB.heatStyle(v.rtv.totalADP, rRtvAdp) + '>' + fmtClvCell(v.rtv.totalADP) + '</td>') +
+        (isSf ? dashCell : '<td class="num"' + BB.heatStyle(v.dcvRtv.total, rRtvDcv, { invert: true }) + '>' + fmtClvCell(v.dcvRtv.total) + '</td>') +
         '</tr>';
     }).join('');
 
@@ -286,11 +298,20 @@
 
     var fmt = BB.rosterFormat(roster);
     var pos = BB.rosterDraftPosition(roster);
+    var isSf = BB.rosterIsSuperflex(roster);
+
+    var sfBanner = isSf
+      ? '<div class="flash info" style="margin-bottom:16px;">' +
+          '<strong>Superflex roster</strong> — ADP comparisons disabled. ' +
+          'Our market ADP only covers 1-QB best ball, so per-pick ADP value and Draft Capital can\'t be computed meaningfully.' +
+        '</div>'
+      : '';
 
     var head =
       '<div style="margin-bottom:16px;">' +
         '<a href="rosters.html" style="font-size:13px;color:var(--text-dim);">← Back to all rosters</a>' +
       '</div>' +
+      sfBanner +
       '<div class="card" style="margin-bottom:16px;">' +
         '<div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;">' +
           '<div style="flex:1;min-width:240px;">' +
@@ -348,9 +369,9 @@
             '<td>' + nameCell + '</td>' +
             '<td>' + (p.position ? '<span class="badge pos-' + escapeHtml(p.position) + '">' + escapeHtml(p.position) + '</span>' : '—') + '</td>' +
             '<td>' + escapeHtml(p.team || '—') + '</td>' +
-            '<td class="num">' + BB.fmtADP(udAdp) + '</td>' +
-            '<td class="num ' + adpValCls + '">' + adpValText + '</td>' +
-            '<td class="num ' + dcvCls + '">' + dcvText + '</td>' +
+            '<td class="num">' + (isSf ? '—' : BB.fmtADP(udAdp)) + '</td>' +
+            '<td class="num ' + (isSf ? '' : adpValCls) + '">' + (isSf ? '—' : adpValText) + '</td>' +
+            '<td class="num ' + (isSf ? '' : dcvCls) + '">' + (isSf ? '—' : dcvText) + '</td>' +
             '</tr>';
         }).join('') +
         '</tbody></table>';

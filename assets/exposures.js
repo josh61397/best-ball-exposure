@@ -90,12 +90,14 @@
       return;
     }
     var rows = BB.computeExposures(rosters);
+    var superflexExcluded = rows.__superflexExcluded || 0;
     var search = state.search.toLowerCase().trim();
     rows = rows.filter(function (r) {
       if (state.pos && r.position !== state.pos) return false;
       if (search && (r.player || '').toLowerCase().indexOf(search) === -1) return false;
       return true;
     });
+    rows.__superflexExcluded = superflexExcluded;
 
     var key = state.sortKey;
     var dir = state.sortDir === 'asc' ? 1 : -1;
@@ -113,6 +115,18 @@
     });
 
     rowCountEl.textContent = rows.length.toLocaleString();
+
+    // Surface how many Superflex rosters were excluded from ADP/CLV calcs
+    var sfNote = document.getElementById('sf-note');
+    if (!sfNote) {
+      sfNote = document.createElement('div');
+      sfNote.id = 'sf-note';
+      sfNote.style.cssText = 'color:var(--text-muted);font-size:12px;margin-bottom:8px;';
+      contentEl.parentNode.insertBefore(sfNote, contentEl);
+    }
+    sfNote.textContent = superflexExcluded
+      ? superflexExcluded + ' Superflex roster' + (superflexExcluded === 1 ? '' : 's') + ' excluded from My ADP / CLV (no Superflex market ADP available). Counts and fees still include them.'
+      : '';
 
     var head = '<thead><tr>' + COLS.map(function (c) {
       var ind = c.key === state.sortKey ? (state.sortDir === 'asc' ? '↑' : '↓') : '';

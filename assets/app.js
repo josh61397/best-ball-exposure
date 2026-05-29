@@ -348,7 +348,12 @@
     });
 
     var map = {};
+    // Track how many Superflex rosters we excluded from ADP calcs so the
+    // page can surface that to the user.
+    var superflexExcluded = 0;
     rosters.forEach(function (r) {
+      var isSf = BB.rosterIsSuperflex(r);
+      if (isSf) superflexExcluded++;
       var seen = {};
       r.picks.forEach(function (p) {
         var key = (p.player || '').toLowerCase();
@@ -370,7 +375,13 @@
         e.count++;
         e.fees += r.entryFee || 0;
         e.byPlatform[r.platform] = (e.byPlatform[r.platform] || 0) + 1;
-        if (p.overallPick) { e.sumPick += p.overallPick; e.samplePicks++; }
+        // ADP-related aggregation excludes Superflex rosters — we only have
+        // 1-QB market ADP, so mixing Superflex picks in would distort the
+        // My ADP / CLV numbers (especially for QBs).
+        if (p.overallPick && !isSf) {
+          e.sumPick += p.overallPick;
+          e.samplePicks++;
+        }
         if (!e.team && p.team) e.team = p.team;
         if (!e.position && p.position) e.position = p.position;
       });
@@ -413,6 +424,7 @@
         clv: clv,
       };
     });
+    results.__superflexExcluded = superflexExcluded;
     return results;
   };
 
@@ -803,6 +815,25 @@
       clvGained: clvGained, clvLost: clvLost, clvEven: clvEven,
       rtvGained: rtvGained, rtvLost: rtvLost, rtvEven: rtvEven,
     };
+  };
+
+  // Returns the QB format ("1-QB" / "SuperFlex") for a roster's tournament.
+  BB.rosterQbFormat = function (roster) {
+    if (!roster || !window.BB_DATA || !window.BB_DATA.tournaments) return null;
+    var hit = window.BB_DATA.tournaments.find(function (t) {
+      return (t.name === roster.tournament) || (t.id && t.id === roster.tournamentId);
+    });
+    if (hit && hit.qbFormat) return hit.qbFormat;
+    // Fallback: look at the tournament name itself.
+    if (roster.tournament && /superflex|super[\s_-]?flex/i.test(roster.tournament)) {
+      return 'SuperFlex';
+    }
+    return null;
+  };
+
+  BB.rosterIsSuperflex = function (roster) {
+    var fmt = BB.rosterQbFormat(roster);
+    return fmt ? /superflex|super[\s_-]?flex/i.test(fmt) : false;
   };
 
   // Tournament format from the reference list (e.g., "Standard", "Eliminator").

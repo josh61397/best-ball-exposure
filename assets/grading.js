@@ -121,18 +121,65 @@
       '<table class="data">' + head + '<tbody>' + body + '</tbody></table>';
   }
 
+  var state = {
+    mode: (function () {
+      try { return localStorage.getItem('bb_grading_mode') || 'normal'; }
+      catch (e) { return 'normal'; }
+    })(),
+  };
+
+  function persistMode() {
+    try { localStorage.setItem('bb_grading_mode', state.mode); } catch (e) {}
+  }
+
+  function renderToggle(normalCount, superflexCount) {
+    return '<div class="seg-toggle" role="tablist" style="margin-bottom:16px;">' +
+      '<button type="button" data-mode="normal" class="' + (state.mode === 'normal' ? 'active' : '') + '">Normal <span class="seg-count">' + normalCount + '</span></button>' +
+      '<button type="button" data-mode="superflex" class="' + (state.mode === 'superflex' ? 'active' : '') + '">Superflex <span class="seg-count">' + superflexCount + '</span></button>' +
+    '</div>';
+  }
+
+  function bindToggle() {
+    document.querySelectorAll('.seg-toggle button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var m = btn.getAttribute('data-mode');
+        if (m === state.mode) return;
+        state.mode = m;
+        persistMode();
+        init();
+      });
+    });
+  }
+
   async function init() {
-    var rosters = BB.loadRosters();
-    if (!rosters.length) {
+    var allRosters = BB.loadRosters();
+    if (!allRosters.length) {
       contentEl.innerHTML = '<div class="empty-state"><h2>No rosters yet</h2><p>Drop a CSV on the <a href="index.html">upload</a> page to see your grading.</p></div>';
+      return;
+    }
+
+    var normalRosters    = allRosters.filter(function (r) { return !BB.rosterIsSuperflex(r); });
+    var superflexRosters = allRosters.filter(function (r) { return BB.rosterIsSuperflex(r); });
+    var rosters = state.mode === 'superflex' ? superflexRosters : normalRosters;
+
+    // Toggle is rendered immediately even before async work finishes.
+    contentEl.innerHTML = renderToggle(normalRosters.length, superflexRosters.length) +
+      '<div class="empty-state" style="padding:24px;">Crunching numbers…</div>';
+    bindToggle();
+
+    if (!rosters.length) {
+      var msg = state.mode === 'superflex'
+        ? 'No Superflex rosters loaded. Upload Superflex CSVs (or switch to Normal).'
+        : 'No 1-QB rosters loaded.';
+      contentEl.innerHTML = renderToggle(normalRosters.length, superflexRosters.length) +
+        '<div class="empty-state"><h2>Nothing to grade</h2><p>' + msg + '</p></div>';
+      bindToggle();
       return;
     }
 
     var grade = await BB.gradeRosters(rosters);
     var playerValues = await BB.aggregatePlayerValue(rosters);
 
-    // Filter to players drafted at least 2x for the top-10 lists to surface
-    // patterns rather than one-off picks. (Keep all if user has few rosters.)
     var minDrafts = rosters.length >= 10 ? 2 : 1;
     var withCLV = playerValues.filter(function (p) { return p.clvTotal != null && p.draftedCount >= minDrafts; });
     var withRTV = playerValues.filter(function (p) { return p.rtvTotal != null && p.draftedCount >= minDrafts; });
@@ -143,6 +190,14 @@
     var topLossRTV = withRTV.slice().sort(function (a, b) { return a.rtvTotal - b.rtvTotal; }).slice(0, 10);
 
     var html = '';
+    html += renderToggle(normalRosters.length, superflexRosters.length);
+
+    if (state.mode === 'superflex') {
+      html += '<div class="flash info" style="margin-bottom:16px;">' +
+        '<strong>Superflex view.</strong> Our market ADP only covers 1-QB best ball, so the value metrics below are computed against 1-QB ADP and will be noisy — especially for QBs. Use them as a rough signal, not a precise grade.' +
+      '</div>';
+    }
+
     html += renderHero(grade);
     html += renderWinLoss(grade);
     html += '<div class="grade-grid">';
@@ -154,10 +209,14 @@
 
     html += '<p style="color:var(--text-muted);font-size:12px;margin-top:16px;">' +
       'CLV uses ADP from each pick\'s draft date when we have a history snapshot for that day, otherwise falls back to today\'s ADP. ' +
+      (state.mode === 'normal' && superflexRosters.length
+        ? superflexRosters.length + ' Superflex roster' + (superflexRosters.length === 1 ? '' : 's') + ' excluded from this view. '
+        : '') +
       (minDrafts === 2 ? 'Top-10 lists restricted to players you\'ve drafted at least twice to surface patterns rather than one-off picks.' : '') +
     '</p>';
 
     contentEl.innerHTML = html;
+    bindToggle();
   }
 
   init();

@@ -377,6 +377,36 @@ table.roster-table tbody tr.row-link { cursor: pointer; }
 h2.grade-section.positive { color: var(--accent-2); }
 h2.grade-section.negative { color: var(--danger); }
 
+.seg-toggle {
+  display: inline-flex;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+.seg-toggle button {
+  background: transparent;
+  border: 0;
+  padding: 6px 14px;
+  border-radius: 6px;
+  color: var(--text-dim);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.seg-toggle button:hover { color: var(--text); background: var(--bg-elev-2); }
+.seg-toggle button.active { background: var(--accent); color: var(--accent-on); }
+.seg-toggle .seg-count {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 15%, transparent);
+}
+
 /* Hover tooltips on column headers and any other element with data-tooltip. */
 .tooltip-trigger {
   position: relative;
