@@ -318,14 +318,29 @@
       picksHtml += '<div class="empty-state">No picks on this roster.</div>';
     } else {
       picksHtml += '<table class="data"><thead><tr>' +
-        '<th class="num">Rd</th><th class="num">Pick</th><th>Player</th><th>Pos</th><th>Tm</th><th class="num">Market ADP</th><th class="num">CLV</th>' +
+        '<th class="num">Rd</th>' +
+        '<th class="num">Pick</th>' +
+        '<th>Player</th>' +
+        '<th>Pos</th>' +
+        '<th>Tm</th>' +
+        '<th class="num">Market ADP</th>' +
+        '<th class="num">ADP</th>' +
+        '<th class="num">Draft Capital</th>' +
         '</tr></thead><tbody>' +
         roster.picks.map(function (p) {
           var refADP = window.BB_DATA ? window.BB_DATA.lookupADP(p.player) : null;
           var udAdp = refADP && refADP.ud != null ? refADP.ud : (p.siteADP != null ? p.siteADP : null);
-          var clv = (p.overallPick != null && udAdp != null) ? p.overallPick - udAdp : null;
-          var clvCls = clv == null ? '' : clv > 0 ? 'clv-pos' : (clv < 0 ? 'clv-neg' : '');
-          var clvText = clv == null ? '—' : (clv > 0 ? '+' : '') + clv.toFixed(1);
+          // ADP value (Pick − ADP): positive = drafted later than market = value (green)
+          var adpVal = (p.overallPick != null && udAdp != null) ? p.overallPick - udAdp : null;
+          var adpValCls = adpVal == null ? '' : adpVal > 0 ? 'clv-pos' : (adpVal < 0 ? 'clv-neg' : '');
+          var adpValText = adpVal == null ? '—' : (adpVal > 0 ? '+' : '') + adpVal.toFixed(1);
+          // Draft Capital value (DC(Pick) − DC(ADP)): negative = value (drafted later)
+          var dcPick = p.overallPick != null ? BB.draftCapital(p.overallPick) : null;
+          var dcAdp = udAdp != null ? BB.draftCapital(udAdp) : null;
+          var dcv = (dcPick != null && dcAdp != null) ? dcPick - dcAdp : null;
+          // Negative DCV is value, so we flip the classification for color.
+          var dcvCls = dcv == null ? '' : dcv < 0 ? 'clv-pos' : (dcv > 0 ? 'clv-neg' : '');
+          var dcvText = dcv == null ? '—' : (dcv > 0 ? '+' : '') + dcv.toFixed(1);
           var nameCell = p.player ? BB.playerCell(p.player, p.team, { linkToPlayer: true }) : '—';
           return '<tr>' +
             '<td class="num">' + (p.round != null ? p.round : '—') + '</td>' +
@@ -334,7 +349,8 @@
             '<td>' + (p.position ? '<span class="badge pos-' + escapeHtml(p.position) + '">' + escapeHtml(p.position) + '</span>' : '—') + '</td>' +
             '<td>' + escapeHtml(p.team || '—') + '</td>' +
             '<td class="num">' + BB.fmtADP(udAdp) + '</td>' +
-            '<td class="num ' + clvCls + '">' + clvText + '</td>' +
+            '<td class="num ' + adpValCls + '">' + adpValText + '</td>' +
+            '<td class="num ' + dcvCls + '">' + dcvText + '</td>' +
             '</tr>';
         }).join('') +
         '</tbody></table>';
