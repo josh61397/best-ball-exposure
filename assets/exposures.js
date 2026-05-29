@@ -112,6 +112,32 @@
     }).join('') + '</tr></thead>';
 
     var totalRosters = rows.length && rows[0].exposurePct ? Math.round(rows[0].count / rows[0].exposurePct) : 0;
+
+    // Heat-map ranges for % Drafted and % of Fees — relative to the
+    // currently visible rows so the gradient highlights your portfolio's
+    // own spread, not a fixed 0-100% scale.
+    function rangeFor(key) {
+      var min = Infinity, max = -Infinity;
+      rows.forEach(function (r) {
+        var v = r[key];
+        if (v == null || isNaN(v)) return;
+        if (v < min) min = v;
+        if (v > max) max = v;
+      });
+      if (!isFinite(min) || !isFinite(max) || min === max) return null;
+      return { min: min, max: max };
+    }
+    var rExp = rangeFor('exposurePct');
+    var rFees = rangeFor('feesPct');
+    function heatStyle(v, range) {
+      if (range == null || v == null || isNaN(v)) return '';
+      var t = (v - range.min) / (range.max - range.min);
+      if (t < 0) t = 0; else if (t > 1) t = 1;
+      // 0 = red (0deg), 120 = green. Subtle alpha so text stays legible on both themes.
+      var hue = Math.round(t * 120);
+      return ' style="background: hsla(' + hue + ', 70%, 50%, 0.18);"';
+    }
+
     var body = '<tbody>' + rows.map(function (r) {
       var denom = (r.count && r.exposurePct) ? Math.round(r.count / r.exposurePct) : totalRosters;
       var cell = BB.playerCell(r.player, r.team, { linkToPlayer: true });
@@ -120,9 +146,9 @@
         '<td>' + (r.position ? '<span class="badge pos-' + escapeHtml(r.position) + '">' + escapeHtml(r.position) + '</span>' : '—') + '</td>' +
         '<td>' + escapeHtml(r.team || '—') + '</td>' +
         '<td class="num"><span title="' + r.count + ' of ' + denom + ' rosters">' + r.count + '</span></td>' +
-        '<td class="num">' + BB.fmtPct(r.exposurePct) + '</td>' +
+        '<td class="num"' + heatStyle(r.exposurePct, rExp) + '>' + BB.fmtPct(r.exposurePct) + '</td>' +
         '<td class="num">' + BB.fmtMoney(r.fees) + '</td>' +
-        '<td class="num">' + BB.fmtPct(r.feesPct) + '</td>' +
+        '<td class="num"' + heatStyle(r.feesPct, rFees) + '>' + BB.fmtPct(r.feesPct) + '</td>' +
         '<td class="num">' + BB.fmtADP(r.myADP) + '</td>' +
         '<td class="num">' + BB.fmtADP(r.marketADP) + '</td>' +
         '<td class="num ' + clvClass(r.clv) + '">' + clvText(r.clv) + '</td>' +
