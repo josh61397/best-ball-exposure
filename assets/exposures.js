@@ -18,17 +18,26 @@
     tournament: '',
   };
 
+  var TT = {
+    pctDrafted: '% of your rosters that contain this player.\n\nFormula: rosters with player / total rosters.\n\nHeat-mapped green→red relative to the currently visible rows.',
+    fees:       'Sum of the entry fees of every roster that contains this player.\n\nFormula: Σ entryFee for rosters with player.',
+    feesPct:    'Player\'s share of your total entry fees.\n\nFormula: this player\'s Fees / total entry fees across all rosters.\n\nHeat-mapped green→red relative to the currently visible rows.',
+    myADP:      'Your average draft pick number for this player across the rosters where you drafted them.',
+    marketADP:  'Market ADP today (Underdog when available, else DraftKings, else Drafters).',
+    clv:        'Closing Line Value per pick.\n\nFormula: My ADP − Market ADP.\n\nPositive (green) = you got the player later than market expected = value. Negative (red) = you reached.',
+  };
+
   var COLS = [
     { key: 'player',      label: 'Player',     sortable: true },
     { key: 'position',    label: 'Pos',        sortable: true },
     { key: 'team',        label: 'Tm',         sortable: true },
     { key: 'count',       label: 'Drafted',    sortable: true, num: true },
-    { key: 'exposurePct', label: '% Drafted',  sortable: true, num: true },
-    { key: 'fees',        label: 'Fees',       sortable: true, num: true },
-    { key: 'feesPct',     label: '% of Fees',  sortable: true, num: true },
-    { key: 'myADP',       label: 'My ADP',     sortable: true, num: true },
-    { key: 'marketADP',   label: 'ADP',        sortable: true, num: true },
-    { key: 'clv',         label: 'CLV',        sortable: true, num: true },
+    { key: 'exposurePct', label: '% Drafted',  sortable: true, num: true, tooltip: TT.pctDrafted },
+    { key: 'fees',        label: 'Fees',       sortable: true, num: true, tooltip: TT.fees },
+    { key: 'feesPct',     label: '% of Fees',  sortable: true, num: true, tooltip: TT.feesPct },
+    { key: 'myADP',       label: 'My ADP',     sortable: true, num: true, tooltip: TT.myADP },
+    { key: 'marketADP',   label: 'ADP',        sortable: true, num: true, tooltip: TT.marketADP },
+    { key: 'clv',         label: 'CLV',        sortable: true, num: true, tooltip: TT.clv },
   ];
 
   function escapeHtml(s) {
@@ -107,8 +116,11 @@
 
     var head = '<thead><tr>' + COLS.map(function (c) {
       var ind = c.key === state.sortKey ? (state.sortDir === 'asc' ? '↑' : '↓') : '';
-      return '<th class="' + (c.num ? 'num ' : '') + (c.sortable ? 'sortable' : '') + '" data-key="' + c.key + '">' +
-        c.label + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
+      var classes = (c.num ? 'num ' : '') + (c.sortable ? 'sortable' : '') + (c.tooltip ? ' tooltip-trigger' : '');
+      var ttAttr = c.tooltip ? ' data-tooltip="' + c.tooltip.replace(/"/g, '&quot;') + '"' : '';
+      var info = c.tooltip ? ' <span class="info-mark">ⓘ</span>' : '';
+      return '<th class="' + classes + '" data-key="' + c.key + '"' + ttAttr + '>' +
+        c.label + info + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
     }).join('') + '</tr></thead>';
 
     var totalRosters = rows.length && rows[0].exposurePct ? Math.round(rows[0].count / rows[0].exposurePct) : 0;

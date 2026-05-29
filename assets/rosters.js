@@ -145,6 +145,27 @@
     var rRtvAdp = rangeFor(function (r) { return r.value.rtv.avgADP; });
     var rRtvTot = rangeFor(function (r) { return r.value.rtv.totalADP; });
 
+    // Tooltip copy for the CLV / RTV columns.
+    var TT = {
+      clv: 'Closing Line Value\n\n' +
+           'How much value you mined relative to where the market was drafting these players around the time of your draft.\n\n' +
+           'Uses the market ADP snapshot from your draft date (when we have one). For drafts older than our daily ADP history, falls back to today\'s ADP — so for those rows CLV will match RTV until we re-import.',
+      rtv: 'Real-Time Value\n\n' +
+           'How much value those same picks hold right now, using today\'s market ADP. Positive numbers mean the players you drafted have moved up in market consensus since your pick.',
+      clvAvg: 'Average CLV per pick\n\n' +
+              'Formula:\n  Σ (Market ADP at draft date − Your pick #) / # of picks where market ADP is known\n\n' +
+              'Positive = you got the player later than the market did = value.',
+      clvTotal: 'Total CLV (Draft Capital)\n\n' +
+                'Formula:\n  Σ (Market ADP at draft date − Your pick #) across every pick\n\n' +
+                'The total ADP value accumulated across the whole roster.',
+      rtvAvg: 'Average RTV per pick\n\n' +
+              'Formula:\n  Σ (Today\'s Market ADP − Your pick #) / # of picks where market ADP is known\n\n' +
+              'Positive = the player has risen in market consensus since you drafted them.',
+      rtvTotal: 'Total RTV (Draft Capital)\n\n' +
+                'Formula:\n  Σ (Today\'s Market ADP − Your pick #) across every pick\n\n' +
+                'The total real-time ADP value across the whole roster.',
+    };
+
     var headerCells = [
       { key: 'tournament', label: 'Title',           group: 'Draft Info' },
       { key: 'draftedAt',  label: 'Date',            group: 'Draft Info', num: true },
@@ -152,10 +173,10 @@
       { key: 'entryFee',   label: 'Fee',             group: 'Draft Info', num: true },
       { key: 'draftSize',  label: 'Size',            group: 'Draft Info', num: true },
       { key: 'position',   label: 'Position',        group: 'Draft Info', num: true },
-      { key: 'clvAvg',     label: 'Avg CLV',         group: 'CLV',        num: true },
-      { key: 'clvTotal',   label: 'Draft Capital',   group: 'CLV',        num: true },
-      { key: 'rtvAvg',     label: 'Avg RTV',         group: 'RTV',        num: true },
-      { key: 'rtvTotal',   label: 'Draft Capital',   group: 'RTV',        num: true },
+      { key: 'clvAvg',     label: 'Avg CLV',         group: 'CLV',        num: true, tooltip: TT.clvAvg },
+      { key: 'clvTotal',   label: 'Draft Capital',   group: 'CLV',        num: true, tooltip: TT.clvTotal },
+      { key: 'rtvAvg',     label: 'Avg RTV',         group: 'RTV',        num: true, tooltip: TT.rtvAvg },
+      { key: 'rtvTotal',   label: 'Draft Capital',   group: 'RTV',        num: true, tooltip: TT.rtvTotal },
     ];
 
     // Build two-tier header (group row + label row)
@@ -165,14 +186,22 @@
       if (last && last.label === c.group) last.span++;
       else groups.push({ label: c.group, span: 1 });
     });
+    var GROUP_TOOLTIPS = { 'CLV': TT.clv, 'RTV': TT.rtv };
     var groupRow = '<tr class="hdr-group">' + groups.map(function (g) {
-      return '<th colspan="' + g.span + '" class="' + (g.label === 'Draft Info' ? '' : 'group-' + g.label.toLowerCase()) + '">' + g.label + '</th>';
+      var tt = GROUP_TOOLTIPS[g.label];
+      var classes = g.label === 'Draft Info' ? '' : 'group-' + g.label.toLowerCase();
+      var ttAttrs = tt ? ' class="' + classes + ' tooltip-trigger" data-tooltip="' + escapeHtml(tt) + '"' : ' class="' + classes + '"';
+      var label = tt ? g.label + ' <span class="info-mark">ⓘ</span>' : g.label;
+      return '<th colspan="' + g.span + '"' + ttAttrs + '>' + label + '</th>';
     }).join('') + '</tr>';
 
     var headerRow = '<tr>' + headerCells.map(function (c) {
       var ind = c.key === state.sortKey ? (state.sortDir === 'asc' ? '↑' : '↓') : '';
-      return '<th class="' + (c.num ? 'num ' : '') + 'sortable" data-key="' + c.key + '">' +
-        c.label + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
+      var classes = (c.num ? 'num ' : '') + 'sortable' + (c.tooltip ? ' tooltip-trigger' : '');
+      var ttAttr = c.tooltip ? ' data-tooltip="' + escapeHtml(c.tooltip) + '"' : '';
+      var info = c.tooltip ? ' <span class="info-mark">ⓘ</span>' : '';
+      return '<th class="' + classes + '" data-key="' + c.key + '"' + ttAttr + '>' +
+        c.label + info + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
     }).join('') + '</tr>';
 
     function fmtClvCell(v) {
