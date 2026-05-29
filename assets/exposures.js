@@ -18,6 +18,18 @@
     tournament: '',
   };
 
+  var COLS = [
+    { key: 'player',      label: 'Player',     sortable: true },
+    { key: 'position',    label: 'Pos',        sortable: true },
+    { key: 'team',        label: 'Tm',         sortable: true },
+    { key: 'exposurePct', label: '% Drafted',  sortable: true, num: true },
+    { key: 'fees',        label: 'Fees',       sortable: true, num: true },
+    { key: 'feesPct',     label: '% of Fees',  sortable: true, num: true },
+    { key: 'myADP',       label: 'My ADP',     sortable: true, num: true },
+    { key: 'marketADP',   label: 'ADP',        sortable: true, num: true },
+    { key: 'clv',         label: 'CLV',        sortable: true, num: true },
+  ];
+
   function escapeHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -48,9 +60,16 @@
     tourneyEl.value = state.tournament;
   }
 
-  function clvClass(myADP, refADP) {
-    if (myADP == null || refADP == null) return '';
-    return myADP < refADP ? 'clv-pos' : 'clv-neg';
+  function clvClass(clv) {
+    if (clv == null) return '';
+    if (clv > 0.05) return 'clv-pos';
+    if (clv < -0.05) return 'clv-neg';
+    return '';
+  }
+  function clvText(clv) {
+    if (clv == null) return '—';
+    var sign = clv > 0 ? '+' : '';
+    return sign + clv.toFixed(1);
   }
 
   function render() {
@@ -76,11 +95,7 @@
         av = (a[key] || '').toLowerCase(); bv = (b[key] || '').toLowerCase();
         return av < bv ? -1 * dir : av > bv ? 1 * dir : 0;
       }
-      if (key === 'udADP') { av = a.adp && a.adp.ud; bv = b.adp && b.adp.ud; }
-      else if (key === 'dkADP') { av = a.adp && a.adp.dk; bv = b.adp && b.adp.dk; }
-      else if (key === 'ffpcADP') { av = a.adp && a.adp.ffpc; bv = b.adp && b.adp.ffpc; }
-      else if (key === 'draftersADP') { av = a.adp && a.adp.drafters; bv = b.adp && b.adp.drafters; }
-      else { av = a[key]; bv = b[key]; }
+      av = a[key]; bv = b[key];
       if (av == null && bv == null) return 0;
       if (av == null) return 1;
       if (bv == null) return -1;
@@ -89,38 +104,23 @@
 
     rowCountEl.textContent = rows.length.toLocaleString();
 
-    var cols = [
-      { key: 'player', label: 'Player', sortable: true },
-      { key: 'position', label: 'Pos', sortable: true },
-      { key: 'team', label: 'Tm', sortable: true },
-      { key: 'count', label: '#', sortable: true, num: true },
-      { key: 'exposurePct', label: 'Exposure', sortable: true, num: true },
-      { key: 'myADP', label: 'My ADP', sortable: true, num: true },
-      { key: 'udADP', label: 'UD', sortable: true, num: true },
-      { key: 'dkADP', label: 'DK', sortable: true, num: true },
-      { key: 'ffpcADP', label: 'FFPC', sortable: true, num: true },
-      { key: 'draftersADP', label: 'Drafters', sortable: true, num: true },
-    ];
-
-    var head = '<thead><tr>' + cols.map(function (c) {
+    var head = '<thead><tr>' + COLS.map(function (c) {
       var ind = c.key === state.sortKey ? (state.sortDir === 'asc' ? '↑' : '↓') : '';
       return '<th class="' + (c.num ? 'num ' : '') + (c.sortable ? 'sortable' : '') + '" data-key="' + c.key + '">' +
         c.label + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
     }).join('') + '</tr></thead>';
 
     var body = '<tbody>' + rows.map(function (r) {
-      var adp = r.adp || {};
       return '<tr>' +
         '<td>' + escapeHtml(r.player) + '</td>' +
         '<td>' + (r.position ? '<span class="badge pos-' + escapeHtml(r.position) + '">' + escapeHtml(r.position) + '</span>' : '—') + '</td>' +
         '<td>' + escapeHtml(r.team || '—') + '</td>' +
-        '<td class="num">' + r.count + '</td>' +
-        '<td class="num">' + BB.fmtPct(r.exposurePct) + '</td>' +
-        '<td class="num ' + clvClass(r.myADP, adp.ud) + '">' + BB.fmtADP(r.myADP) + '</td>' +
-        '<td class="num">' + BB.fmtADP(adp.ud) + '</td>' +
-        '<td class="num">' + BB.fmtADP(adp.dk) + '</td>' +
-        '<td class="num">' + BB.fmtADP(adp.ffpc) + '</td>' +
-        '<td class="num">' + BB.fmtADP(adp.drafters) + '</td>' +
+        '<td class="num"><span title="' + r.count + ' of ' + (r.count && r.exposurePct ? Math.round(r.count / r.exposurePct) : 0) + ' rosters">' + BB.fmtPct(r.exposurePct) + '</span></td>' +
+        '<td class="num">' + BB.fmtMoney(r.fees) + '</td>' +
+        '<td class="num">' + BB.fmtPct(r.feesPct) + '</td>' +
+        '<td class="num">' + BB.fmtADP(r.myADP) + '</td>' +
+        '<td class="num">' + BB.fmtADP(r.marketADP) + '</td>' +
+        '<td class="num ' + clvClass(r.clv) + '">' + clvText(r.clv) + '</td>' +
         '</tr>';
     }).join('') + '</tbody>';
 

@@ -326,15 +326,27 @@
   };
 
   // Compute per-player exposures across all rosters, optionally filtered.
-  // Returns array of { player, position, team, count, exposurePct, byPlatform: {Underdog:#, ...}, exposurePctByPlatform: {...}, adp: {...} }
+  // Returns array of {
+  //   player, position, team,
+  //   count, exposurePct,
+  //   fees,          // sum of entry fees of rosters containing the player
+  //   feesPct,       // player's share of total entry fees across all rosters
+  //   byPlatform: { Underdog: #, ... },
+  //   exposurePctByPlatform: { ... },
+  //   myADP,         // average overall pick across rosters where player appears
+  //   adp,           // reference ADP row { name, pos, team, ud, dk, drafters, ... }
+  //   marketADP,     // canonical reference ADP (Underdog when present, else dk, else drafters, else avg)
+  //   clv,           // myADP - marketADP (positive = got the player later than market, i.e. value)
+  // }
   BB.computeExposures = function (rosters, opts) {
     opts = opts || {};
-    var platforms = {};
-    var totals = { __all__: 0 };
+    var totals = { __all__: 0, fees: 0 };
     rosters.forEach(function (r) {
       totals.__all__++;
       totals[r.platform] = (totals[r.platform] || 0) + 1;
+      totals.fees += r.entryFee || 0;
     });
+
     var map = {};
     rosters.forEach(function (r) {
       var seen = {};
@@ -348,6 +360,7 @@
             position: p.position,
             team: p.team,
             count: 0,
+            fees: 0,
             byPlatform: {},
             sumPick: 0,
             samplePicks: 0,
@@ -355,16 +368,31 @@
         }
         var e = map[key];
         e.count++;
+        e.fees += r.entryFee || 0;
         e.byPlatform[r.platform] = (e.byPlatform[r.platform] || 0) + 1;
         if (p.overallPick) { e.sumPick += p.overallPick; e.samplePicks++; }
         if (!e.team && p.team) e.team = p.team;
         if (!e.position && p.position) e.position = p.position;
       });
     });
+
+    function canonADP(adp) {
+      if (!adp) return null;
+      // Prefer Underdog (dominant best ball ADP), then DraftKings, then Drafters.
+      if (adp.ud != null) return adp.ud;
+      if (adp.dk != null) return adp.dk;
+      if (adp.drafters != null) return adp.drafters;
+      var vals = [adp.ud, adp.dk, adp.drafters, adp.bb10, adp.rtsports].filter(function (v) { return v != null; });
+      if (!vals.length) return null;
+      return vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
+    }
+
     var results = Object.keys(map).map(function (k) {
       var e = map[k];
-      var avgPick = e.samplePicks ? e.sumPick / e.samplePicks : null;
+      var myADP = e.samplePicks ? e.sumPick / e.samplePicks : null;
       var adp = window.BB_DATA ? window.BB_DATA.lookupADP(e.player) : null;
+      var marketADP = canonADP(adp);
+      var clv = (myADP != null && marketADP != null) ? (myADP - marketADP) : null;
       var pctBy = {};
       Object.keys(e.byPlatform).forEach(function (p) {
         if (totals[p]) pctBy[p] = e.byPlatform[p] / totals[p];
@@ -375,10 +403,14 @@
         team: e.team || (adp && adp.team) || '',
         count: e.count,
         exposurePct: e.count / (totals.__all__ || 1),
+        fees: e.fees,
+        feesPct: totals.fees ? e.fees / totals.fees : 0,
         byPlatform: e.byPlatform,
         exposurePctByPlatform: pctBy,
-        myADP: avgPick,
+        myADP: myADP,
         adp: adp,
+        marketADP: marketADP,
+        clv: clv,
       };
     });
     return results;
