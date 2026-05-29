@@ -133,9 +133,14 @@
       if (range == null || v == null || isNaN(v)) return '';
       var t = (v - range.min) / (range.max - range.min);
       if (t < 0) t = 0; else if (t > 1) t = 1;
-      // 0 = red (0deg), 120 = green. Subtle alpha so text stays legible on both themes.
-      var hue = Math.round(t * 120);
-      return ' style="background: hsla(' + hue + ', 70%, 50%, 0.18);"';
+      // Push the midpoint away from neutral so extremes pop more.
+      // Curve maps 0→0, 0.5→0.5, 1→1 but pulls the middle out toward the ends.
+      var curved = t < 0.5
+        ? 0.5 * Math.pow(2 * t, 1.4)
+        : 1 - 0.5 * Math.pow(2 * (1 - t), 1.4);
+      var hue = Math.round(curved * 120);
+      // Bumped alpha + saturation for a more dramatic spread.
+      return ' style="background: hsla(' + hue + ', 85%, 50%, 0.38);"';
     }
 
     var body = '<tbody>' + rows.map(function (r) {
