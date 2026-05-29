@@ -7,6 +7,7 @@
       { href: 'exposures.html', label: 'Exposures' },
       { href: 'rosters.html', label: 'Rosters' },
       { href: 'tournaments.html', label: 'Tournaments' },
+      { href: 'trends.html', label: 'Trends' },
     ];
     var nRosters = (window.BB && BB.loadRosters().length) || 0;
     var adpInfo = '';

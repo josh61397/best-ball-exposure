@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Best Ball Exposure — ADP Trends</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div id="nav-slot"></div>
+  <main>
+    <h1>ADP trends</h1>
+    <p class="lede">Track how a player's ADP moves over time across Underdog, DraftKings, Drafters, BB10, and RTSports. History accumulates one snapshot per day starting from the first refresh.</p>
+
+    <div class="toolbar">
+      <input type="search" id="player-search" list="player-list" placeholder="Search player…" autocomplete="off" style="min-width:280px;" />
+      <datalist id="player-list"></datalist>
+      <select id="range">
+        <option value="7">Last 7 days</option>
+        <option value="30" selected>Last 30 days</option>
+        <option value="90">Last 90 days</option>
+        <option value="all">All history</option>
+      </select>
+      <div id="history-meta" style="margin-left:auto;color:var(--text-muted);font-size:12px;"></div>
+    </div>
+
+    <div id="chart-container"></div>
+    <div id="legend"></div>
+    <div id="player-meta" style="margin-top:16px;"></div>
+  </main>
+
+  <footer class="site">ADP snapshots committed daily by the GitHub Actions workflow.</footer>
+  <script src="assets/data.js"></script>
+  <script src="assets/app.js"></script>
+  <script src="assets/nav.js"></script>
+  <script src="assets/trends.js"></script>
+</body>
+</html>

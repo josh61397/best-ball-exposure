@@ -27,6 +27,8 @@ from bs4 import BeautifulSoup
 ROOT = Path(__file__).resolve().parent.parent
 DATA_JS_PATH = ROOT / "assets" / "data.js"
 SNAPSHOT_PATH = ROOT / "data" / "adp.json"
+HISTORY_DIR = ROOT / "data" / "history"
+HISTORY_INDEX_PATH = HISTORY_DIR / "index.json"
 
 ADP_URL = "https://www.fantasypros.com/nfl/adp/best-ball-overall.php"
 USER_AGENT = (
@@ -193,6 +195,55 @@ def write_data_js(adp: list[dict], existing: dict, source_url: str) -> None:
     )
 
 
+def write_history(adp: list[dict], source_url: str) -> str:
+    """Append today's snapshot to data/history/.
+
+    Each day file is a compact array of {name, pos, team, ud, dk, drafters, bb10, rtsports}.
+    index.json lists every available date so the frontend can enumerate them
+    without directory listing (GitHub Pages doesn't expose it).
+    """
+    HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+    today = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+    day_path = HISTORY_DIR / f"{today}.json"
+
+    compact = [
+        {
+            "name": p["name"],
+            "pos": p["pos"],
+            "team": p["team"],
+            "ud": p.get("ud"),
+            "dk": p.get("dk"),
+            "drafters": p.get("drafters"),
+            "bb10": p.get("bb10"),
+            "rtsports": p.get("rtsports"),
+        }
+        for p in adp
+    ]
+    day_payload = {
+        "date": today,
+        "source": source_url,
+        "fetchedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+        "players": compact,
+    }
+    day_path.write_text(json.dumps(day_payload, separators=(",", ":")), encoding="utf-8")
+
+    # Update the index — keep dates sorted ascending, dedupe.
+    existing_dates: list[str] = []
+    if HISTORY_INDEX_PATH.exists():
+        try:
+            existing_dates = json.loads(HISTORY_INDEX_PATH.read_text())["dates"]
+        except Exception:
+            existing_dates = []
+    dates_set = set(existing_dates)
+    dates_set.add(today)
+    dates = sorted(dates_set)
+    HISTORY_INDEX_PATH.write_text(
+        json.dumps({"dates": dates, "updatedAt": day_payload["fetchedAt"]}, indent=2),
+        encoding="utf-8",
+    )
+    return today
+
+
 def main() -> int:
     print(f"Fetching {ADP_URL}", flush=True)
     try:
@@ -218,6 +269,8 @@ def main() -> int:
 
     write_data_js(adp, existing, ADP_URL)
     print(f"Wrote {DATA_JS_PATH.relative_to(ROOT)} and {SNAPSHOT_PATH.relative_to(ROOT)}", flush=True)
+    day = write_history(adp, ADP_URL)
+    print(f"Wrote history snapshot for {day}", flush=True)
     return 0
 
 

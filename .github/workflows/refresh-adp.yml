@@ -30,10 +30,10 @@ jobs:
       - name: Commit if changed
         id: commit
         run: |
-          if [[ -n "$(git status --porcelain assets/data.js data/adp.json)" ]]; then
+          if [[ -n "$(git status --porcelain assets/data.js data/adp.json data/history)" ]]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add assets/data.js data/adp.json
+            git add assets/data.js data/adp.json data/history
             git commit -m "chore: refresh ADP $(date -u +%Y-%m-%d)"
             git push
             echo "changed=true" >> "$GITHUB_OUTPUT"
