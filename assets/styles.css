@@ -366,6 +366,17 @@ table.roster-table thead .hdr-group th.group-clv { color: var(--accent-2); }
 table.roster-table thead .hdr-group th.group-rtv { color: var(--accent); }
 table.roster-table tbody tr.row-link { cursor: pointer; }
 
+.grade-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+}
+@media (max-width: 900px) {
+  .grade-grid { grid-template-columns: 1fr; }
+}
+h2.grade-section.positive { color: var(--accent-2); }
+h2.grade-section.negative { color: var(--danger); }
+
 /* Hover tooltips on column headers and any other element with data-tooltip. */
 .tooltip-trigger {
   position: relative;

@@ -22,6 +22,7 @@
       { href: 'rosters.html', label: 'Rosters' },
       { href: 'tournaments.html', label: 'Tournaments' },
       { href: 'trends.html', label: 'Trends' },
+      { href: 'grading.html', label: 'Self Grading' },
     ];
     var theme = currentTheme();
     var themeIcon = theme === 'light' ? '☾' : '☀';

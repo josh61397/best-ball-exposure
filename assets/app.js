@@ -634,6 +634,121 @@
     return { clv: clv, rtv: rtv, historicalAdpUsed: historicalAdpUsed };
   };
 
+  // Walk every pick on every roster and aggregate CLV / RTV per player.
+  // CLV uses the historical ADP from each pick's draft date (when available),
+  // RTV uses today's ADP.
+  // Returns: array of {
+  //   player, position, team,
+  //   draftedCount,        // # of times you've drafted this player
+  //   clvTotal, clvCount, clvAvg,
+  //   rtvTotal, rtvCount, rtvAvg,
+  // }
+  BB.aggregatePlayerValue = async function (rosters) {
+    if (!window.BB_DATA) return [];
+    // Pre-fetch history for every unique draft date in parallel.
+    var uniqueDates = {};
+    rosters.forEach(function (r) {
+      if (r.draftedAt) uniqueDates[String(r.draftedAt).slice(0, 10)] = true;
+    });
+    var dates = Object.keys(uniqueDates);
+    var historyByDate = {};
+    await Promise.all(dates.map(async function (d) {
+      historyByDate[d] = await BB.fetchHistoryForDate(d);
+    }));
+
+    var byPlayer = {};
+    rosters.forEach(function (r) {
+      var date = r.draftedAt ? String(r.draftedAt).slice(0, 10) : null;
+      var hist = date && historyByDate[date];
+      r.picks.forEach(function (p) {
+        if (!p.overallPick || !p.player) return;
+        var norm = window.BB_DATA.normalizeName(p.player);
+        var refAdp = window.BB_DATA.lookupADP(p.player);
+        var rtvAdp = refAdp ? pickMarketADP(refAdp) : null;
+        var histRow = hist && hist[norm];
+        var clvAdp = histRow ? pickMarketADP(histRow) : rtvAdp;
+
+        if (!byPlayer[norm]) {
+          byPlayer[norm] = {
+            player: p.player,
+            position: p.position || (refAdp && refAdp.pos) || '',
+            team: p.team || (refAdp && refAdp.team) || '',
+            draftedCount: 0,
+            clvTotal: 0, clvCount: 0,
+            rtvTotal: 0, rtvCount: 0,
+            sumPick: 0, samplePicks: 0,
+          };
+        }
+        var e = byPlayer[norm];
+        e.draftedCount++;
+        if (p.overallPick) { e.sumPick += p.overallPick; e.samplePicks++; }
+        if (clvAdp != null) {
+          e.clvTotal += p.overallPick - clvAdp;
+          e.clvCount++;
+        }
+        if (rtvAdp != null) {
+          e.rtvTotal += p.overallPick - rtvAdp;
+          e.rtvCount++;
+        }
+        if (!e.team && p.team) e.team = p.team;
+        if (!e.position && p.position) e.position = p.position;
+      });
+    });
+
+    return Object.keys(byPlayer).map(function (k) {
+      var e = byPlayer[k];
+      return {
+        player: e.player,
+        position: e.position,
+        team: e.team,
+        draftedCount: e.draftedCount,
+        avgPick: e.samplePicks ? e.sumPick / e.samplePicks : null,
+        clvTotal: e.clvCount ? e.clvTotal : null,
+        clvAvg: e.clvCount ? e.clvTotal / e.clvCount : null,
+        clvCount: e.clvCount,
+        rtvTotal: e.rtvCount ? e.rtvTotal : null,
+        rtvAvg: e.rtvCount ? e.rtvTotal / e.rtvCount : null,
+        rtvCount: e.rtvCount,
+      };
+    });
+  };
+
+  // Roll up all rosters into a self-grading summary.
+  BB.gradeRosters = async function (rosters) {
+    var drafts = await Promise.all(rosters.map(function (r) { return BB.rosterClvRtv(r); }));
+    var clvGained = 0, clvLost = 0, clvEven = 0;
+    var rtvGained = 0, rtvLost = 0, rtvEven = 0;
+    var clvTotalSum = 0, rtvTotalSum = 0;
+    var clvDraftsCounted = 0, rtvDraftsCounted = 0;
+    drafts.forEach(function (d) {
+      var clv = d.clv && d.clv.totalADP;
+      var rtv = d.rtv && d.rtv.totalADP;
+      if (clv != null) {
+        clvTotalSum += clv;
+        clvDraftsCounted++;
+        if (clv > 0.05) clvGained++;
+        else if (clv < -0.05) clvLost++;
+        else clvEven++;
+      }
+      if (rtv != null) {
+        rtvTotalSum += rtv;
+        rtvDraftsCounted++;
+        if (rtv > 0.05) rtvGained++;
+        else if (rtv < -0.05) rtvLost++;
+        else rtvEven++;
+      }
+    });
+    return {
+      totalDrafts: rosters.length,
+      clvTotal: clvTotalSum,
+      rtvTotal: rtvTotalSum,
+      clvAvgPerDraft: clvDraftsCounted ? clvTotalSum / clvDraftsCounted : null,
+      rtvAvgPerDraft: rtvDraftsCounted ? rtvTotalSum / rtvDraftsCounted : null,
+      clvGained: clvGained, clvLost: clvLost, clvEven: clvEven,
+      rtvGained: rtvGained, rtvLost: rtvLost, rtvEven: rtvEven,
+    };
+  };
+
   // Tournament format from the reference list (e.g., "Standard", "Eliminator").
   BB.rosterFormat = function (roster) {
     if (!roster || !window.BB_DATA || !window.BB_DATA.tournaments) return null;
