@@ -321,6 +321,29 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
 .clv-pos { color: var(--accent-2); }
 .clv-neg { color: var(--danger); }
 
+.player-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.player-cell .player-name { min-width: 0; }
+.team-logo {
+  display: inline-block;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 2px;
+}
+.team-logo-empty {
+  width: 18px;
+  height: 18px;
+}
+.team-logo-hero {
+  width: 36px;
+  height: 36px;
+  vertical-align: middle;
+}
+
 .uploads {
   display: flex;
   flex-direction: column;

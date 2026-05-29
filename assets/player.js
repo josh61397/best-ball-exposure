@@ -13,6 +13,9 @@
     if (!name) return '—';
     return '<a href="player.html?name=' + encodeURIComponent(name) + '">' + escapeHtml(name) + '</a>';
   }
+  function playerCell(name, team) {
+    return name ? BB.playerCell(name, team, { linkToPlayer: true }) : '—';
+  }
   function clvClass(clv) {
     if (clv == null) return '';
     if (clv > 0.05) return 'clv-pos';
@@ -69,7 +72,11 @@
     var clv = report.clv;
     var clvCls = clvClass(clv);
 
-    return '<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px;">' +
+    var teamLogo = report.team
+      ? BB.teamLogoHTML(report.team, { size: 40, className: 'team-logo-hero' })
+      : '';
+    return '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">' +
+      teamLogo +
       '<h1 style="margin:0;">' + escapeHtml(report.player) + '</h1>' + badge + team + byeBadge +
       '</div>' +
       '<p class="lede">Drafted across ' + report.exposureCount + ' of your ' + report.totalRosters + ' rosters.</p>' +
@@ -113,7 +120,7 @@
     var body = combos.map(function (c) {
       var liftCls = c.lift == null ? '' : (c.lift >= 1.15 ? 'clv-pos' : (c.lift <= 0.85 ? 'clv-neg' : ''));
       return '<tr>' +
-        '<td>' + playerLink(c.player) + '</td>' +
+        '<td>' + playerCell(c.player, c.team) + '</td>' +
         '<td>' + (c.position ? '<span class="badge pos-' + escapeHtml(c.position) + '">' + escapeHtml(c.position) + '</span>' : '—') + '</td>' +
         '<td>' + escapeHtml(c.team || '—') + '</td>' +
         '<td class="num">' + c.coCount + '</td>' +
@@ -197,8 +204,10 @@
         renderEmpty(name + ' not found', 'No matching player in your rosters or the ADP reference.');
         return;
       }
+      var fallbackLogo = report.team ? BB.teamLogoHTML(report.team, { size: 40, className: 'team-logo-hero' }) : '';
       contentEl.innerHTML =
-        '<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px;">' +
+        '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">' +
+          fallbackLogo +
           '<h1 style="margin:0;">' + escapeHtml(report.player) + '</h1>' +
           (report.position ? '<span class="badge pos-' + escapeHtml(report.position) + '" style="font-size:13px;padding:4px 10px;">' + escapeHtml(report.position) + '</span>' : '') +
           (report.team ? '<span class="badge" style="font-size:13px;padding:4px 10px;">' + escapeHtml(report.team) + '</span>' : '') +

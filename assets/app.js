@@ -536,6 +536,38 @@
     };
   };
 
+  // ---------- team logos ----------
+  // Hotlinks ESPN's NFL logo CDN. The path uses lowercase team codes,
+  // which match our 2-3 letter codes verbatim for every team.
+  var LOGO_BASE = 'https://a.espncdn.com/i/teamlogos/nfl/500/';
+  BB.teamLogoURL = function (team) {
+    if (!team) return null;
+    return LOGO_BASE + String(team).toLowerCase() + '.png';
+  };
+  BB.teamLogoHTML = function (team, opts) {
+    if (!team) return '';
+    opts = opts || {};
+    var size = opts.size || 18;
+    var url = BB.teamLogoURL(team);
+    var cls = 'team-logo' + (opts.className ? ' ' + opts.className : '');
+    return '<img class="' + cls + '" src="' + url + '" alt="' + team + '" ' +
+      'width="' + size + '" height="' + size + '" loading="lazy" ' +
+      'onerror="this.style.visibility=\'hidden\'"/>';
+  };
+
+  // Player name with logo prefix — used in tables.
+  BB.playerCell = function (name, team, opts) {
+    opts = opts || {};
+    var safe = String(name == null ? '' : name).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+    var logo = team ? BB.teamLogoHTML(team, { size: opts.size || 18 }) : '<span class="team-logo team-logo-empty"></span>';
+    var inner = opts.linkToPlayer
+      ? '<a href="player.html?name=' + encodeURIComponent(name || '') + '">' + safe + '</a>'
+      : safe;
+    return '<span class="player-cell">' + logo + '<span class="player-name">' + inner + '</span></span>';
+  };
+
   // ---------- formatting helpers ----------
   BB.fmtPct = function (x) {
     if (x == null || isNaN(x)) return '—';

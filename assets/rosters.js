@@ -124,12 +124,13 @@
           if (p.overallPick != null && udAdp != null) clv = udAdp - p.overallPick;
           var clvCls = clv == null ? '' : clv > 0 ? 'clv-pos' : (clv < 0 ? 'clv-neg' : '');
           var clvText = clv == null ? '—' : (clv > 0 ? '+' : '') + clv.toFixed(1);
-          var nameLink = p.player ?
-            '<a href="player.html?name=' + encodeURIComponent(p.player) + '">' + escapeHtml(p.player) + '</a>' : '—';
+          var nameCell = p.player
+            ? BB.playerCell(p.player, p.team, { linkToPlayer: true })
+            : '—';
           return '<tr>' +
             '<td class="num">' + (p.round != null ? p.round : '—') + '</td>' +
             '<td class="num">' + (p.overallPick != null ? p.overallPick : '—') + '</td>' +
-            '<td>' + nameLink + '</td>' +
+            '<td>' + nameCell + '</td>' +
             '<td>' + (p.position ? '<span class="badge pos-' + escapeHtml(p.position) + '">' + escapeHtml(p.position) + '</span>' : '—') + '</td>' +
             '<td>' + escapeHtml(p.team || '—') + '</td>' +
             '<td class="num">' + BB.fmtADP(udAdp) + '</td>' +
