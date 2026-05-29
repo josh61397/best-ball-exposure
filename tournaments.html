@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Best Ball Exposure — Tournaments</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div id="nav-slot"></div>
+  <main>
+    <h1>Tournaments</h1>
+    <p class="lede">Your entries broken down by tournament, plus the reference list of major best ball tournaments for 2026.</p>
+
+    <h2>Your entries</h2>
+    <div id="your-entries"></div>
+
+    <h2>Tournament reference</h2>
+    <div class="toolbar">
+      <input type="search" id="ref-search" placeholder="Search tournament…" />
+      <select id="ref-platform"><option value="">All platforms</option></select>
+      <select id="ref-period"><option value="">All draft periods</option></select>
+    </div>
+    <div id="ref-table"></div>
+  </main>
+
+  <footer class="site">Tournament reference data from the 2026 Best Ball Exposures Tracker template.</footer>
+  <script src="assets/data.js"></script>
+  <script src="assets/app.js"></script>
+  <script src="assets/nav.js"></script>
+  <script src="assets/tournaments.js"></script>
+</body>
+</html>

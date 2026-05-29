@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Best Ball Exposure — Exposures</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div id="nav-slot"></div>
+  <main>
+    <h1>Player exposures</h1>
+    <p class="lede">How often each player appears across all your rosters, with ADP across platforms and your average pick (ADP CLV).</p>
+
+    <div class="toolbar">
+      <input type="search" id="search" placeholder="Search player…" />
+      <select id="pos-filter">
+        <option value="">All positions</option>
+        <option value="QB">QB</option>
+        <option value="RB">RB</option>
+        <option value="WR">WR</option>
+        <option value="TE">TE</option>
+      </select>
+      <select id="platform-filter">
+        <option value="">All platforms</option>
+      </select>
+      <select id="tournament-filter">
+        <option value="">All tournaments</option>
+      </select>
+      <label style="margin-left:auto;"><span id="row-count">0</span> players</label>
+    </div>
+
+    <div id="content"></div>
+  </main>
+
+  <footer class="site">All data stored locally.</footer>
+  <script src="assets/data.js"></script>
+  <script src="assets/app.js"></script>
+  <script src="assets/nav.js"></script>
+  <script src="assets/exposures.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Best Ball Exposure — Upload</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div id="nav-slot"></div>
+  <main>
+    <h1>Upload your best ball rosters</h1>
+    <p class="lede">Drop in CSV exports from Underdog, DraftKings, or Drafters. You can drop multiple files at once — Underdog gives you a separate CSV per contest type, all of them are welcome here. Everything stays in your browser.</p>
+
+    <div id="flash"></div>
+
+    <div id="dropzone" class="dropzone">
+      <div class="dropzone-icon">⬆</div>
+      <div><strong>Drag CSV files here</strong> or
+        <button type="button" class="link-button" id="browse-btn">browse</button>
+      </div>
+      <div class="hint">Underdog • DraftKings • Drafters — drop one or many at once.</div>
+      <input type="file" id="file-input" accept=".csv,text/csv" multiple hidden />
+    </div>
+
+    <div class="actions-row">
+      <button id="load-demo">Load demo data</button>
+      <button id="clear-data" class="danger">Clear everything</button>
+    </div>
+
+    <div class="cards" id="summary-cards"></div>
+
+    <h2>Recent uploads</h2>
+    <div id="uploads-list"></div>
+
+    <h2>Tournaments you've entered</h2>
+    <div id="roster-list"></div>
+
+    <h2>CSV format reference</h2>
+    <div class="card" style="font-size:12.5px;color:var(--text-dim);">
+      <p><strong>Underdog</strong> — export from your <em>Drafts</em> page; expected columns include <code>Picked At, Pick Number, First Name, Last Name, Team, Position, Draft, Draft Entry, Tournament Title</code>.</p>
+      <p><strong>DraftKings</strong> — expected columns include <code>TournamentKey, ContestName, EntryFee, LineupKey, Round, PickInRound, OverallPick, Position, Player, SiteADP</code>.</p>
+      <p><strong>Drafters</strong> — expected columns include <code>draftID, Contest Name, Team Name, Round, Pick number, Player Name, Position, Team</code>.</p>
+    </div>
+  </main>
+
+  <footer class="site">Built from your Best Ball Exposures Tracker 2026 template. All data stored locally.</footer>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/app.js"></script>
+  <script src="assets/nav.js"></script>
+  <script src="assets/upload.js"></script>
+</body>
+</html>
