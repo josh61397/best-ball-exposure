@@ -416,6 +416,126 @@
     return results;
   };
 
+  // Detail report for one player across all loaded rosters.
+  // Returns:
+  // {
+  //   player, position, team,
+  //   rostersWith,        // array of roster objects containing this player (each augmented with the pick row for the player)
+  //   totalRosters,       // count of all rosters in the input
+  //   exposureCount,
+  //   exposurePct,
+  //   fees,
+  //   feesPct,
+  //   myADP,              // average overall pick of this player across rosters
+  //   roundDistribution,  // { round -> count } for the player's pick across rosters
+  //   combos: [           // top pairings, sorted by combo% desc
+  //     { player, position, team, coCount, comboPct, theirExposurePct, lift }
+  //   ]
+  // }
+  BB.playerReport = function (rosters, playerName) {
+    var norm = (window.BB_DATA && window.BB_DATA.normalizeName)
+      ? window.BB_DATA.normalizeName(playerName)
+      : String(playerName || '').toLowerCase().trim();
+
+    var totals = { count: rosters.length, fees: 0 };
+    rosters.forEach(function (r) { totals.fees += r.entryFee || 0; });
+
+    var rostersWith = [];
+    var sumPick = 0;
+    var samplePicks = 0;
+    var roundDist = {};
+    var fees = 0;
+
+    // Per-roster pass: find player, gather metadata, and also tally combo counts
+    var coCount = {};       // normName -> count
+    var meta = {};          // normName -> { player, position, team }
+
+    // Overall exposure index across all rosters (so we can compute lift)
+    var overallSeen = {};   // normName -> count
+    rosters.forEach(function (r) {
+      var seen = {};
+      r.picks.forEach(function (p) {
+        var k = window.BB_DATA.normalizeName(p.player);
+        if (!k || seen[k]) return;
+        seen[k] = true;
+        overallSeen[k] = (overallSeen[k] || 0) + 1;
+        if (!meta[k]) meta[k] = { player: p.player, position: p.position, team: p.team };
+        else {
+          if (!meta[k].team && p.team) meta[k].team = p.team;
+          if (!meta[k].position && p.position) meta[k].position = p.position;
+        }
+      });
+    });
+
+    rosters.forEach(function (r) {
+      var hit = null;
+      for (var i = 0; i < r.picks.length; i++) {
+        if (window.BB_DATA.normalizeName(r.picks[i].player) === norm) { hit = r.picks[i]; break; }
+      }
+      if (!hit) return;
+      rostersWith.push(Object.assign({}, r, { _pick: hit }));
+      fees += r.entryFee || 0;
+      if (hit.overallPick) { sumPick += hit.overallPick; samplePicks++; }
+      if (hit.round) roundDist[hit.round] = (roundDist[hit.round] || 0) + 1;
+
+      var counted = {};
+      r.picks.forEach(function (p) {
+        var k = window.BB_DATA.normalizeName(p.player);
+        if (!k || k === norm || counted[k]) return;
+        counted[k] = true;
+        coCount[k] = (coCount[k] || 0) + 1;
+      });
+    });
+
+    var combos = Object.keys(coCount).map(function (k) {
+      var m = meta[k] || {};
+      var co = coCount[k];
+      var theirExposureCount = overallSeen[k] || 0;
+      var theirExposurePct = totals.count ? theirExposureCount / totals.count : 0;
+      var comboPct = rostersWith.length ? co / rostersWith.length : 0;
+      var lift = theirExposurePct ? comboPct / theirExposurePct : null;
+      return {
+        normName: k,
+        player: m.player,
+        position: m.position,
+        team: m.team,
+        coCount: co,
+        comboPct: comboPct,
+        theirExposureCount: theirExposureCount,
+        theirExposurePct: theirExposurePct,
+        lift: lift,
+      };
+    }).sort(function (a, b) { return b.coCount - a.coCount; });
+
+    var myADP = samplePicks ? sumPick / samplePicks : null;
+    var adp = window.BB_DATA ? window.BB_DATA.lookupADP(playerName) : null;
+    var marketADP = adp ? (adp.ud != null ? adp.ud : (adp.dk != null ? adp.dk : (adp.drafters != null ? adp.drafters : null))) : null;
+    var clv = (myADP != null && marketADP != null) ? (myADP - marketADP) : null;
+
+    // Derive position/team if no rosters contain the player yet — use the ADP reference
+    var firstHit = rostersWith[0] && rostersWith[0]._pick;
+    var position = (firstHit && firstHit.position) || (adp && adp.pos) || '';
+    var team = (firstHit && firstHit.team) || (adp && adp.team) || '';
+
+    return {
+      player: (adp && adp.name) || (firstHit && firstHit.player) || playerName,
+      position: position,
+      team: team,
+      adp: adp,
+      marketADP: marketADP,
+      myADP: myADP,
+      clv: clv,
+      rostersWith: rostersWith,
+      totalRosters: totals.count,
+      exposureCount: rostersWith.length,
+      exposurePct: totals.count ? rostersWith.length / totals.count : 0,
+      fees: fees,
+      feesPct: totals.fees ? fees / totals.fees : 0,
+      roundDistribution: roundDist,
+      combos: combos,
+    };
+  };
+
   // ---------- formatting helpers ----------
   BB.fmtPct = function (x) {
     if (x == null || isNaN(x)) return '—';

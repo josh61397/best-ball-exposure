@@ -330,12 +330,13 @@
       renderEmpty('No history available yet. The first daily snapshot will appear after the scheduled refresh runs.');
       return;
     }
-    // Default to Bijan Robinson if available, otherwise the #1 ADP player
-    var defaultPlayer = window.BB_DATA.adp[0] && window.BB_DATA.adp[0].name;
-    if (defaultPlayer) {
-      searchEl.value = defaultPlayer;
-      state.selectedPlayer = defaultPlayer;
-      state.series = await buildSeriesForPlayer(defaultPlayer);
+    // Deep link: trends.html?player=Name pre-fills the picker
+    var qsPlayer = new URLSearchParams(location.search).get('player');
+    var startingPlayer = qsPlayer || (window.BB_DATA.adp[0] && window.BB_DATA.adp[0].name);
+    if (startingPlayer) {
+      searchEl.value = startingPlayer;
+      state.selectedPlayer = startingPlayer;
+      state.series = await buildSeriesForPlayer(startingPlayer);
     }
     renderChart();
   })();

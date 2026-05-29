@@ -114,8 +114,9 @@
     var totalRosters = rows.length && rows[0].exposurePct ? Math.round(rows[0].count / rows[0].exposurePct) : 0;
     var body = '<tbody>' + rows.map(function (r) {
       var denom = (r.count && r.exposurePct) ? Math.round(r.count / r.exposurePct) : totalRosters;
+      var nameLink = '<a href="player.html?name=' + encodeURIComponent(r.player) + '">' + escapeHtml(r.player) + '</a>';
       return '<tr>' +
-        '<td>' + escapeHtml(r.player) + '</td>' +
+        '<td>' + nameLink + '</td>' +
         '<td>' + (r.position ? '<span class="badge pos-' + escapeHtml(r.position) + '">' + escapeHtml(r.position) + '</span>' : '—') + '</td>' +
         '<td>' + escapeHtml(r.team || '—') + '</td>' +
         '<td class="num"><span title="' + r.count + ' of ' + denom + ' rosters">' + r.count + '</span></td>' +
