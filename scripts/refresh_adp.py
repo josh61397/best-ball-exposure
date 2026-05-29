@@ -36,6 +36,17 @@ USER_AGENT = (
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 )
 
+# A full 12-team × 18-round best ball draft has 216 picks; anything beyond
+# that is functionally "undrafted" / pick-late noise, so we cap.
+MAX_ADP = 216
+
+
+def _cap(v):
+    """Cap ADP value at MAX_ADP. Pass through None."""
+    if v is None:
+        return None
+    return v if v <= MAX_ADP else MAX_ADP
+
 
 def fetch_html() -> str:
     resp = requests.get(ADP_URL, headers={"User-Agent": USER_AGENT}, timeout=30)
@@ -124,12 +135,12 @@ def parse_table(html: str) -> list[dict]:
             "name": name,
             "pos": pos,
             "team": team,
-            "ud": cell_num(idx_ud),
-            "dk": cell_num(idx_dk),
+            "ud": _cap(cell_num(idx_ud)),
+            "dk": _cap(cell_num(idx_dk)),
             "ffpc": None,  # FantasyPros best-ball-overall does not provide FFPC
-            "drafters": cell_num(idx_drafters),
-            "bb10": cell_num(idx_bb10),
-            "rtsports": cell_num(idx_rts),
+            "drafters": _cap(cell_num(idx_drafters)),
+            "bb10": _cap(cell_num(idx_bb10)),
+            "rtsports": _cap(cell_num(idx_rts)),
         })
     return rows
 
