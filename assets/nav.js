@@ -1,5 +1,19 @@
 (function () {
   'use strict';
+  // ---------- theme ----------
+  function currentTheme() {
+    return document.documentElement.getAttribute('data-theme') || 'dark';
+  }
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem('bb_theme', t); } catch (e) {}
+  }
+  function toggleTheme() {
+    applyTheme(currentTheme() === 'light' ? 'dark' : 'light');
+    render();
+  }
+  window.BB_toggleTheme = toggleTheme;
+
   function render() {
     var current = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
     var pages = [
@@ -9,6 +23,9 @@
       { href: 'tournaments.html', label: 'Tournaments' },
       { href: 'trends.html', label: 'Trends' },
     ];
+    var theme = currentTheme();
+    var themeIcon = theme === 'light' ? '☾' : '☀';
+    var themeLabel = theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
     var nRosters = (window.BB && BB.loadRosters().length) || 0;
     var adpInfo = '';
     if (window.BB_DATA && window.BB_DATA.lastUpdated) {
@@ -26,10 +43,15 @@
       '<nav>' + pages.map(function (p) {
         return '<a href="' + p.href + '"' + (p.href === current ? ' class="active"' : '') + '>' + p.label + '</a>';
       }).join('') + '</nav>' +
-      '<div class="meta">' + adpInfo + '<span>' + nRosters + ' roster' + (nRosters === 1 ? '' : 's') + ' loaded</span></div>' +
+      '<div class="meta">' + adpInfo +
+        '<span>' + nRosters + ' roster' + (nRosters === 1 ? '' : 's') + ' loaded</span>' +
+        '<button id="theme-toggle" class="theme-toggle" type="button" aria-label="' + themeLabel + '" title="' + themeLabel + '">' + themeIcon + '</button>' +
+      '</div>' +
       '</header>';
     var slot = document.getElementById('nav-slot') || document.getElementById('site-header');
     if (slot) slot.outerHTML = html;
+    var btn = document.getElementById('theme-toggle');
+    if (btn) btn.addEventListener('click', toggleTheme);
   }
   window.BB_renderNav = render;
   if (document.readyState === 'loading') {

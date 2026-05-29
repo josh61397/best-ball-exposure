@@ -3,10 +3,13 @@
   --bg-elev: #181b22;
   --bg-elev-2: #1f232c;
   --border: #2a2f3a;
+  --grid: #2a2f3a;
   --text: #e7e9ee;
   --text-dim: #9aa3b2;
   --text-muted: #6b7383;
   --accent: #6cf;
+  --accent-strong: #4cb6f0;
+  --accent-on: #0d1117;
   --accent-2: #5ac46d;
   --warn: #f5b452;
   --danger: #ef6a6a;
@@ -15,6 +18,32 @@
   --pos-wr: #6cf;
   --pos-te: #f5b452;
   --pos-dst: #9aa3b2;
+  --shadow: 0 0 0 transparent;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #f5f7fa;
+  --bg-elev: #ffffff;
+  --bg-elev-2: #eef1f6;
+  --border: #d9dde5;
+  --grid: #e3e6ec;
+  --text: #1a1d24;
+  --text-dim: #4a5160;
+  --text-muted: #7d8492;
+  --accent: #0a78d6;
+  --accent-strong: #0962b0;
+  --accent-on: #ffffff;
+  --accent-2: #1d8a4f;
+  --warn: #b6741a;
+  --danger: #c53030;
+  --pos-qb: #8b3fbf;
+  --pos-rb: #1d8a4f;
+  --pos-wr: #0a78d6;
+  --pos-te: #b6741a;
+  --pos-dst: #4a5160;
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -73,8 +102,26 @@ header.site .adp-stamp {
   letter-spacing: 0.02em;
   border: 1px solid var(--border);
 }
-header.site .adp-stamp.fresh { color: var(--accent-2); border-color: rgba(90,196,109,0.4); background: rgba(90,196,109,0.08); }
-header.site .adp-stamp.stale { color: var(--warn); border-color: rgba(245,180,82,0.4); background: rgba(245,180,82,0.08); }
+header.site .adp-stamp.fresh { color: var(--accent-2); border-color: color-mix(in srgb, var(--accent-2) 40%, transparent); background: color-mix(in srgb, var(--accent-2) 10%, transparent); }
+header.site .adp-stamp.stale { color: var(--warn);    border-color: color-mix(in srgb, var(--warn) 40%, transparent);    background: color-mix(in srgb, var(--warn) 10%, transparent); }
+
+.theme-toggle {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-elev-2);
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 120ms, color 120ms, border-color 120ms;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--text-muted); }
 
 main {
   max-width: 1400px;
@@ -114,14 +161,14 @@ button, .button {
   cursor: pointer;
   transition: background 120ms;
 }
-button:hover, .button:hover { background: #2a2f3a; }
-button.primary { background: var(--accent); color: #0d1117; border-color: var(--accent); font-weight: 600; }
-button.primary:hover { background: #4cb6f0; }
-button.danger { background: transparent; color: var(--danger); border-color: #4a2a2a; }
-button.danger:hover { background: #2a1818; }
+button:hover, .button:hover { background: color-mix(in srgb, var(--text) 8%, var(--bg-elev-2)); }
+button.primary { background: var(--accent); color: var(--accent-on); border-color: var(--accent); font-weight: 600; }
+button.primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+button.danger { background: transparent; color: var(--danger); border-color: color-mix(in srgb, var(--danger) 35%, var(--border)); }
+button.danger:hover { background: color-mix(in srgb, var(--danger) 12%, transparent); }
 
 .dropzone {
-  border: 2px dashed #3a4150;
+  border: 2px dashed color-mix(in srgb, var(--text-muted) 50%, transparent);
   border-radius: 10px;
   padding: 36px 24px;
   text-align: center;
@@ -138,7 +185,7 @@ button.danger:hover { background: #2a1818; }
 .dropzone:focus-visible { border-color: var(--accent); }
 .dropzone.dragging {
   border-color: var(--accent);
-  background: #1c2330;
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-elev));
 }
 .dropzone-icon { font-size: 28px; color: var(--text-dim); margin-bottom: 2px; }
 .dropzone strong { color: var(--text); }
@@ -225,10 +272,10 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
   color: var(--text-dim);
   border: 1px solid var(--border);
 }
-.badge.pos-QB { background: rgba(198,108,255,0.15); color: var(--pos-qb); border-color: rgba(198,108,255,0.3); }
-.badge.pos-RB { background: rgba(90,196,109,0.15); color: var(--pos-rb); border-color: rgba(90,196,109,0.3); }
-.badge.pos-WR { background: rgba(102,204,255,0.15); color: var(--pos-wr); border-color: rgba(102,204,255,0.3); }
-.badge.pos-TE { background: rgba(245,180,82,0.15); color: var(--pos-te); border-color: rgba(245,180,82,0.3); }
+.badge.pos-QB { background: color-mix(in srgb, var(--pos-qb) 16%, transparent); color: var(--pos-qb); border-color: color-mix(in srgb, var(--pos-qb) 35%, transparent); }
+.badge.pos-RB { background: color-mix(in srgb, var(--pos-rb) 16%, transparent); color: var(--pos-rb); border-color: color-mix(in srgb, var(--pos-rb) 35%, transparent); }
+.badge.pos-WR { background: color-mix(in srgb, var(--pos-wr) 16%, transparent); color: var(--pos-wr); border-color: color-mix(in srgb, var(--pos-wr) 35%, transparent); }
+.badge.pos-TE { background: color-mix(in srgb, var(--pos-te) 16%, transparent); color: var(--pos-te); border-color: color-mix(in srgb, var(--pos-te) 35%, transparent); }
 
 .empty-state {
   text-align: center;
@@ -245,9 +292,9 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
   font-size: 13px;
   border: 1px solid;
 }
-.flash.success { background: rgba(90,196,109,0.1); border-color: rgba(90,196,109,0.3); color: var(--accent-2); }
-.flash.error { background: rgba(239,106,106,0.1); border-color: rgba(239,106,106,0.3); color: var(--danger); }
-.flash.info { background: rgba(102,204,255,0.1); border-color: rgba(102,204,255,0.3); color: var(--accent); }
+.flash.success { background: color-mix(in srgb, var(--accent-2) 12%, transparent); border-color: color-mix(in srgb, var(--accent-2) 35%, transparent); color: var(--accent-2); }
+.flash.error   { background: color-mix(in srgb, var(--danger) 12%, transparent);   border-color: color-mix(in srgb, var(--danger) 35%, transparent);   color: var(--danger); }
+.flash.info    { background: color-mix(in srgb, var(--accent) 12%, transparent);   border-color: color-mix(in srgb, var(--accent) 35%, transparent);   color: var(--accent); }
 
 .two-col {
   display: grid;
@@ -267,7 +314,7 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
   cursor: pointer;
 }
 .two-col aside.list .item:hover { background: var(--bg-elev-2); }
-.two-col aside.list .item.active { background: #1c2330; border-left: 3px solid var(--accent); padding-left: 11px; }
+.two-col aside.list .item.active { background: color-mix(in srgb, var(--accent) 10%, var(--bg-elev)); border-left: 3px solid var(--accent); padding-left: 11px; }
 .two-col aside.list .item .title { font-weight: 600; font-size: 13px; }
 .two-col aside.list .item .sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 

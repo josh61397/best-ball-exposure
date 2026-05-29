@@ -2,12 +2,14 @@
   'use strict';
   if (!window.BB || !window.BB_DATA) return;
 
+  // Use the same CSS variables that the rest of the UI uses so each line
+  // adapts to light vs dark mode automatically.
   var SERIES = [
-    { key: 'ud',       label: 'Underdog',   color: '#6cf' },
-    { key: 'dk',       label: 'DraftKings', color: '#5ac46d' },
-    { key: 'drafters', label: 'Drafters',   color: '#c66cff' },
-    { key: 'bb10',     label: 'BB10',       color: '#f5b452' },
-    { key: 'rtsports', label: 'RTSports',   color: '#ef6a6a' },
+    { key: 'ud',       label: 'Underdog',   color: 'var(--pos-wr)' },
+    { key: 'dk',       label: 'DraftKings', color: 'var(--pos-rb)' },
+    { key: 'drafters', label: 'Drafters',   color: 'var(--pos-qb)' },
+    { key: 'bb10',     label: 'BB10',       color: 'var(--pos-te)' },
+    { key: 'rtsports', label: 'RTSports',   color: 'var(--danger)' },
   ];
 
   var state = {
@@ -207,12 +209,12 @@
     }).join('');
 
     var yGrid = yTicks.map(function (t) {
-      return '<line x1="0" x2="' + innerW + '" y1="' + t.y.toFixed(1) + '" y2="' + t.y.toFixed(1) + '" stroke="#2a2f3a" stroke-dasharray="2,3"/>' +
-        '<text x="-10" y="' + (t.y + 4).toFixed(1) + '" text-anchor="end" fill="#9aa3b2" font-size="11">' + t.label + '</text>';
+      return '<line x1="0" x2="' + innerW + '" y1="' + t.y.toFixed(1) + '" y2="' + t.y.toFixed(1) + '" stroke="var(--grid)" stroke-dasharray="2,3"/>' +
+        '<text x="-10" y="' + (t.y + 4).toFixed(1) + '" text-anchor="end" fill="var(--text-muted)" font-size="11">' + t.label + '</text>';
     }).join('');
 
     var xLabelsHtml = xLabels.map(function (l) {
-      return '<text x="' + l.x.toFixed(1) + '" y="' + (innerH + 20) + '" text-anchor="middle" fill="#9aa3b2" font-size="11">' + l.label + '</text>';
+      return '<text x="' + l.x.toFixed(1) + '" y="' + (innerH + 20) + '" text-anchor="middle" fill="var(--text-muted)" font-size="11">' + l.label + '</text>';
     }).join('');
 
     // Hover layer: invisible circles for each data point
@@ -226,7 +228,7 @@
     chartEl.innerHTML =
       '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="' + H + '" style="background:var(--bg-elev);border:1px solid var(--border);border-radius:8px;">' +
         '<g transform="translate(' + pad.left + ',' + pad.top + ')">' +
-          '<text x="-40" y="-4" fill="#9aa3b2" font-size="10" text-anchor="start">↑ better (lower ADP)</text>' +
+          '<text x="-40" y="-4" fill="var(--text-muted)" font-size="10" text-anchor="start">↑ better (lower ADP)</text>' +
           yGrid +
           xLabelsHtml +
           paths +
