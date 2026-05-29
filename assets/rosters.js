@@ -2,17 +2,7 @@
   'use strict';
   if (!window.BB) return;
 
-  var asideEl = document.getElementById('roster-aside');
-  var detailEl = document.getElementById('detail');
-  var searchEl = document.getElementById('search');
-  var platformEl = document.getElementById('platform-filter');
-  var rowCountEl = document.getElementById('row-count');
-
-  var state = { selectedId: null, search: '', platform: '' };
-
-  // Deep link: rosters.html?id=ROSTERID pre-selects a specific roster
-  var _qs = new URLSearchParams(location.search);
-  if (_qs.get('id')) state.selectedId = _qs.get('id');
+  var pageEl = document.getElementById('page-content');
 
   function escapeHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -20,19 +10,95 @@
     });
   }
 
-  function populateFilters() {
-    var rosters = BB.loadRosters();
-    var plats = {};
-    rosters.forEach(function (r) { plats[r.platform] = true; });
-    platformEl.innerHTML = '<option value="">All platforms</option>' +
-      Object.keys(plats).sort().map(function (p) { return '<option value="' + escapeHtml(p) + '">' + escapeHtml(p) + '</option>'; }).join('');
-    platformEl.value = state.platform;
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return (d.getMonth() + 1) + '/' + d.getDate() + '/' + String(d.getFullYear()).slice(-2);
   }
 
-  function visibleRosters() {
+  // ============================================================
+  // TABLE VIEW
+  // ============================================================
+  var state = {
+    sortKey: 'draftedAt',
+    sortDir: 'desc',
+    search: '',
+    platform: '',
+    // computed rows: { roster, value: { clv, rtv, historicalAdpUsed } }
+    enriched: [],
+  };
+
+  function init() {
+    var qs = new URLSearchParams(location.search);
+    if (qs.get('id')) {
+      renderDetail(qs.get('id'));
+    } else {
+      renderTable();
+    }
+  }
+
+  async function renderTable() {
     var rosters = BB.loadRosters();
+    pageEl.innerHTML = renderHeader() + renderToolbarSkeleton() +
+      '<div id="table-wrap"><div class="empty-state" style="padding:24px;">Loading…</div></div>';
+
+    if (!rosters.length) {
+      document.getElementById('table-wrap').innerHTML =
+        '<div class="empty-state"><h2>No rosters yet</h2><p>Drop a CSV on the <a href="index.html">upload</a> page.</p></div>';
+      return;
+    }
+
+    populatePlatformFilter(rosters);
+    bindToolbar();
+
+    // Compute CLV / RTV per roster — async for CLV (needs historical fetch).
+    state.enriched = await Promise.all(rosters.map(async function (r) {
+      var value = await BB.rosterClvRtv(r);
+      return { roster: r, value: value };
+    }));
+
+    redrawTable();
+  }
+
+  function renderHeader() {
+    return '<h1>Rosters</h1>' +
+      '<p class="lede">All your imported drafts in one table. Click a row to see picks and stacks. Heat-map shows value relative to the visible rows.</p>';
+  }
+
+  function renderToolbarSkeleton() {
+    return '<div class="toolbar">' +
+      '<input type="search" id="search" placeholder="Search tournament or player…" style="min-width:240px;" />' +
+      '<select id="platform-filter"><option value="">All platforms</option></select>' +
+      '<div style="margin-left:auto;color:var(--text-muted);font-size:12px;" id="row-count"></div>' +
+    '</div>';
+  }
+
+  function populatePlatformFilter(rosters) {
+    var plats = {};
+    rosters.forEach(function (r) { plats[r.platform] = true; });
+    var sel = document.getElementById('platform-filter');
+    sel.innerHTML = '<option value="">All platforms</option>' +
+      Object.keys(plats).sort().map(function (p) { return '<option value="' + escapeHtml(p) + '">' + escapeHtml(p) + '</option>'; }).join('');
+    sel.value = state.platform;
+  }
+
+  function bindToolbar() {
+    document.getElementById('search').value = state.search;
+    document.getElementById('search').addEventListener('input', function (e) {
+      state.search = e.target.value;
+      redrawTable();
+    });
+    document.getElementById('platform-filter').addEventListener('change', function (e) {
+      state.platform = e.target.value;
+      redrawTable();
+    });
+  }
+
+  function visibleRows() {
     var s = state.search.toLowerCase().trim();
-    return rosters.filter(function (r) {
+    return state.enriched.filter(function (row) {
+      var r = row.roster;
       if (state.platform && r.platform !== state.platform) return false;
       if (!s) return true;
       if ((r.tournament || '').toLowerCase().indexOf(s) !== -1) return true;
@@ -40,93 +106,205 @@
     });
   }
 
-  function renderAside() {
-    var rosters = visibleRosters();
-    rowCountEl.textContent = rosters.length.toLocaleString();
-    if (!rosters.length) {
-      asideEl.innerHTML = '<div class="empty-state" style="padding:24px;"><p>No rosters. <a href="index.html">Upload</a> a CSV.</p></div>';
-      detailEl.innerHTML = '';
-      return;
-    }
-    // sort by drafted at desc, fallback by tournament name
-    rosters.sort(function (a, b) {
-      if (a.draftedAt && b.draftedAt) return a.draftedAt < b.draftedAt ? 1 : -1;
-      if (a.draftedAt) return -1;
-      if (b.draftedAt) return 1;
-      return (a.tournament || '').localeCompare(b.tournament || '');
+  function redrawTable() {
+    var rows = visibleRows();
+    document.getElementById('row-count').textContent =
+      rows.length === state.enriched.length
+        ? rows.length + ' draft' + (rows.length === 1 ? '' : 's')
+        : rows.length + ' of ' + state.enriched.length + ' drafts';
+
+    // Sort
+    var key = state.sortKey;
+    var dir = state.sortDir === 'asc' ? 1 : -1;
+    rows.sort(function (a, b) {
+      var av = rowValue(a, key);
+      var bv = rowValue(b, key);
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      if (typeof av === 'string') {
+        return av.toLowerCase() < bv.toLowerCase() ? -1 * dir : av.toLowerCase() > bv.toLowerCase() ? 1 * dir : 0;
+      }
+      return (av - bv) * dir;
     });
-    if (!state.selectedId || !rosters.find(function (r) { return r.rosterId === state.selectedId; })) {
-      state.selectedId = rosters[0].rosterId;
+
+    // Heat-map ranges for the four value columns
+    function rangeFor(getter) {
+      var min = Infinity, max = -Infinity;
+      rows.forEach(function (r) {
+        var v = getter(r);
+        if (v == null || isNaN(v)) return;
+        if (v < min) min = v;
+        if (v > max) max = v;
+      });
+      if (!isFinite(min) || !isFinite(max) || min === max) return null;
+      return { min: min, max: max };
     }
-    asideEl.innerHTML = rosters.map(function (r) {
-      var when = r.draftedAt ? (r.draftedAt + '').slice(0, 10) : '';
-      var sub = [r.platform, when, r.entryFee ? BB.fmtMoney(r.entryFee) : ''].filter(Boolean).join(' · ');
-      return '<div class="item' + (r.rosterId === state.selectedId ? ' active' : '') + '" data-id="' + escapeHtml(r.rosterId) + '">' +
-        '<div class="title">' + escapeHtml(r.tournament || '(no tournament)') + '</div>' +
-        '<div class="sub">' + escapeHtml(sub) + '</div>' +
-        '</div>';
+    var rClvAdp = rangeFor(function (r) { return r.value.clv.avgADP; });
+    var rClvTot = rangeFor(function (r) { return r.value.clv.totalADP; });
+    var rRtvAdp = rangeFor(function (r) { return r.value.rtv.avgADP; });
+    var rRtvTot = rangeFor(function (r) { return r.value.rtv.totalADP; });
+
+    var headerCells = [
+      { key: 'tournament', label: 'Title',           group: 'Draft Info' },
+      { key: 'draftedAt',  label: 'Date',            group: 'Draft Info', num: true },
+      { key: 'format',     label: 'Type',            group: 'Draft Info' },
+      { key: 'entryFee',   label: 'Fee',             group: 'Draft Info', num: true },
+      { key: 'draftSize',  label: 'Size',            group: 'Draft Info', num: true },
+      { key: 'position',   label: 'Position',        group: 'Draft Info', num: true },
+      { key: 'clvAvg',     label: 'Avg CLV',         group: 'CLV',        num: true },
+      { key: 'clvTotal',   label: 'Draft Capital',   group: 'CLV',        num: true },
+      { key: 'rtvAvg',     label: 'Avg RTV',         group: 'RTV',        num: true },
+      { key: 'rtvTotal',   label: 'Draft Capital',   group: 'RTV',        num: true },
+    ];
+
+    // Build two-tier header (group row + label row)
+    var groups = [];
+    headerCells.forEach(function (c) {
+      var last = groups[groups.length - 1];
+      if (last && last.label === c.group) last.span++;
+      else groups.push({ label: c.group, span: 1 });
+    });
+    var groupRow = '<tr class="hdr-group">' + groups.map(function (g) {
+      return '<th colspan="' + g.span + '" class="' + (g.label === 'Draft Info' ? '' : 'group-' + g.label.toLowerCase()) + '">' + g.label + '</th>';
+    }).join('') + '</tr>';
+
+    var headerRow = '<tr>' + headerCells.map(function (c) {
+      var ind = c.key === state.sortKey ? (state.sortDir === 'asc' ? '↑' : '↓') : '';
+      return '<th class="' + (c.num ? 'num ' : '') + 'sortable" data-key="' + c.key + '">' +
+        c.label + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
+    }).join('') + '</tr>';
+
+    function fmtClvCell(v) {
+      if (v == null || isNaN(v)) return '—';
+      return (v > 0 ? '+' : '') + v.toFixed(1);
+    }
+
+    var body = rows.map(function (row) {
+      var r = row.roster;
+      var v = row.value;
+      var fmt = BB.rosterFormat(r);
+      var pos = BB.rosterDraftPosition(r);
+      var rosterHref = 'rosters.html?id=' + encodeURIComponent(r.rosterId);
+      return '<tr class="row-link" data-href="' + escapeHtml(rosterHref) + '">' +
+        '<td><a href="' + escapeHtml(rosterHref) + '">' + escapeHtml(r.tournament || '(unknown)') + '</a></td>' +
+        '<td class="num">' + fmtDate(r.draftedAt) + '</td>' +
+        '<td>' + (fmt ? '<span class="badge">' + escapeHtml(fmt) + '</span>' : '—') + '</td>' +
+        '<td class="num">' + (r.entryFee != null ? BB.fmtMoney(r.entryFee) : '—') + '</td>' +
+        '<td class="num">' + (r.draftSize != null ? r.draftSize : '—') + '</td>' +
+        '<td class="num">' + (pos != null ? pos : '—') + '</td>' +
+        '<td class="num"' + BB.heatStyle(v.clv.avgADP, rClvAdp) + '>' + fmtClvCell(v.clv.avgADP) + '</td>' +
+        '<td class="num"' + BB.heatStyle(v.clv.totalADP, rClvTot) + '>' + fmtClvCell(v.clv.totalADP) + '</td>' +
+        '<td class="num"' + BB.heatStyle(v.rtv.avgADP, rRtvAdp) + '>' + fmtClvCell(v.rtv.avgADP) + '</td>' +
+        '<td class="num"' + BB.heatStyle(v.rtv.totalADP, rRtvTot) + '>' + fmtClvCell(v.rtv.totalADP) + '</td>' +
+        '</tr>';
     }).join('');
-    asideEl.querySelectorAll('.item').forEach(function (el) {
-      el.addEventListener('click', function () {
-        state.selectedId = el.getAttribute('data-id');
-        renderAside();
-        renderDetail();
+
+    document.getElementById('table-wrap').innerHTML =
+      '<table class="data roster-table"><thead>' + groupRow + headerRow + '</thead><tbody>' + body + '</tbody></table>' +
+      '<p style="color:var(--text-muted);font-size:12px;margin-top:8px;">' +
+        'CLV uses market ADP at draft date when available; older drafts fall back to today\'s ADP (matches RTV). As daily history accumulates, CLV will reflect true closing-line value for new drafts.' +
+      '</p>';
+
+    document.querySelectorAll('.row-link').forEach(function (tr) {
+      tr.addEventListener('click', function (e) {
+        // Don't hijack clicks on the actual <a> inside
+        if (e.target.tagName === 'A') return;
+        location.href = tr.getAttribute('data-href');
       });
     });
-    renderDetail();
+    document.querySelectorAll('th.sortable').forEach(function (th) {
+      th.addEventListener('click', function () {
+        var k = th.getAttribute('data-key');
+        if (state.sortKey === k) state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+        else { state.sortKey = k; state.sortDir = (k === 'tournament' || k === 'format') ? 'asc' : 'desc'; }
+        redrawTable();
+      });
+    });
   }
 
-  function renderDetail() {
-    var rosters = BB.loadRosters();
-    var r = rosters.find(function (x) { return x.rosterId === state.selectedId; });
-    if (!r) { detailEl.innerHTML = ''; return; }
+  function rowValue(row, key) {
+    var r = row.roster, v = row.value;
+    switch (key) {
+      case 'tournament': return r.tournament || '';
+      case 'draftedAt':  return r.draftedAt || null;
+      case 'format':     return BB.rosterFormat(r) || '';
+      case 'entryFee':   return r.entryFee;
+      case 'draftSize':  return r.draftSize;
+      case 'position':   return BB.rosterDraftPosition(r);
+      case 'clvAvg':     return v.clv.avgADP;
+      case 'clvTotal':   return v.clv.totalADP;
+      case 'rtvAvg':     return v.rtv.avgADP;
+      case 'rtvTotal':   return v.rtv.totalADP;
+      default: return null;
+    }
+  }
 
-    // Stack analysis: QB → same-team WR/TE
-    var qbs = r.picks.filter(function (p) { return p.position === 'QB'; });
+  // ============================================================
+  // DETAIL VIEW (rosters.html?id=X)
+  // ============================================================
+  function renderDetail(rosterId) {
+    var roster = BB.loadRosters().find(function (r) { return r.rosterId === rosterId; });
+    if (!roster) {
+      pageEl.innerHTML = '<div class="empty-state"><h2>Roster not found</h2><p><a href="rosters.html">← Back to rosters</a></p></div>';
+      return;
+    }
+
+    var counts = {};
+    roster.picks.forEach(function (p) { counts[p.position] = (counts[p.position] || 0) + 1; });
+
+    var qbs = roster.picks.filter(function (p) { return p.position === 'QB'; });
     var stacks = qbs.map(function (qb) {
-      var mates = r.picks.filter(function (p) {
-        return p.team && qb.team && p.team === qb.team && p.player !== qb.player && (p.position === 'WR' || p.position === 'TE' || p.position === 'RB');
+      var mates = roster.picks.filter(function (p) {
+        return p.team && qb.team && p.team === qb.team && p.player !== qb.player &&
+               (p.position === 'WR' || p.position === 'TE' || p.position === 'RB');
       });
       return { qb: qb, mates: mates };
     });
 
-    // Position counts
-    var counts = {};
-    r.picks.forEach(function (p) { counts[p.position] = (counts[p.position] || 0) + 1; });
+    var fmt = BB.rosterFormat(roster);
+    var pos = BB.rosterDraftPosition(roster);
 
-    var head = '<div class="card" style="margin-bottom:16px;">' +
-      '<div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;">' +
-      '<div style="flex:1;min-width:240px;">' +
-      '<div class="stat-label">Tournament</div>' +
-      '<div style="font-size:18px;font-weight:600;">' + escapeHtml(r.tournament || '(no tournament)') + '</div>' +
-      '<div class="stat-sub">' + escapeHtml(r.platform) + (r.entryFee ? ' · entry ' + BB.fmtMoney(r.entryFee) : '') + (r.draftSize ? ' · ' + r.draftSize + '-man' : '') + '</div>' +
+    var head =
+      '<div style="margin-bottom:16px;">' +
+        '<a href="rosters.html" style="font-size:13px;color:var(--text-dim);">← Back to all rosters</a>' +
       '</div>' +
-      '<div><div class="stat-label">Roster</div><div style="font-family:ui-monospace,monospace;font-size:11px;color:var(--text-muted);">' + escapeHtml(r.rosterId) + '</div></div>' +
-      '</div>' +
-      '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">' +
-      ['QB','RB','WR','TE'].map(function (pos) {
-        return '<span class="badge pos-' + pos + '">' + pos + ' ' + (counts[pos] || 0) + '</span>';
-      }).join('') +
-      '</div>' +
+      '<div class="card" style="margin-bottom:16px;">' +
+        '<div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;">' +
+          '<div style="flex:1;min-width:240px;">' +
+            '<div class="stat-label">Tournament</div>' +
+            '<div style="font-size:18px;font-weight:600;">' + escapeHtml(roster.tournament || '(no tournament)') + '</div>' +
+            '<div class="stat-sub">' + escapeHtml(roster.platform) +
+              (roster.entryFee ? ' · entry ' + BB.fmtMoney(roster.entryFee) : '') +
+              (roster.draftSize ? ' · ' + roster.draftSize + '-man' : '') +
+              (pos != null ? ' · pick ' + pos : '') +
+              (fmt ? ' · ' + escapeHtml(fmt) : '') +
+              (roster.draftedAt ? ' · ' + fmtDate(roster.draftedAt) : '') +
+            '</div>' +
+          '</div>' +
+          '<div><div class="stat-label">Roster ID</div><div style="font-family:ui-monospace,monospace;font-size:11px;color:var(--text-muted);">' + escapeHtml(roster.rosterId) + '</div></div>' +
+        '</div>' +
+        '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">' +
+          ['QB','RB','WR','TE'].map(function (p) {
+            return '<span class="badge pos-' + p + '">' + p + ' ' + (counts[p] || 0) + '</span>';
+          }).join('') +
+        '</div>' +
       '</div>';
 
     var picksHtml = '<h2>Picks</h2>';
-    if (!r.picks.length) {
+    if (!roster.picks.length) {
       picksHtml += '<div class="empty-state">No picks on this roster.</div>';
     } else {
       picksHtml += '<table class="data"><thead><tr>' +
-        '<th class="num">Rd</th><th class="num">Pick</th><th>Player</th><th>Pos</th><th>Tm</th><th class="num">UD ADP</th><th class="num">CLV</th>' +
+        '<th class="num">Rd</th><th class="num">Pick</th><th>Player</th><th>Pos</th><th>Tm</th><th class="num">Market ADP</th><th class="num">CLV</th>' +
         '</tr></thead><tbody>' +
-        r.picks.map(function (p) {
+        roster.picks.map(function (p) {
           var refADP = window.BB_DATA ? window.BB_DATA.lookupADP(p.player) : null;
           var udAdp = refADP && refADP.ud != null ? refADP.ud : (p.siteADP != null ? p.siteADP : null);
-          var clv = null;
-          if (p.overallPick != null && udAdp != null) clv = udAdp - p.overallPick;
+          var clv = (p.overallPick != null && udAdp != null) ? udAdp - p.overallPick : null;
           var clvCls = clv == null ? '' : clv > 0 ? 'clv-pos' : (clv < 0 ? 'clv-neg' : '');
           var clvText = clv == null ? '—' : (clv > 0 ? '+' : '') + clv.toFixed(1);
-          var nameCell = p.player
-            ? BB.playerCell(p.player, p.team, { linkToPlayer: true })
-            : '—';
+          var nameCell = p.player ? BB.playerCell(p.player, p.team, { linkToPlayer: true }) : '—';
           return '<tr>' +
             '<td class="num">' + (p.round != null ? p.round : '—') + '</td>' +
             '<td class="num">' + (p.overallPick != null ? p.overallPick : '—') + '</td>' +
@@ -145,19 +323,17 @@
       stackHtml += '<div class="card" style="color:var(--text-dim);">No QB on this roster.</div>';
     } else {
       stackHtml += '<div class="pick-grid">' + stacks.map(function (s) {
-        var mateNames = s.mates.length ? s.mates.map(function (m) { return escapeHtml(m.player) + ' (' + escapeHtml(m.position) + ')'; }).join(', ') : '<span style="color:var(--text-muted);">solo</span>';
+        var mateNames = s.mates.length
+          ? s.mates.map(function (m) { return escapeHtml(m.player) + ' (' + escapeHtml(m.position) + ')'; }).join(', ')
+          : '<span style="color:var(--text-muted);">solo</span>';
         return '<div class="pick"><div class="round">' + escapeHtml(s.qb.team || '?') + ' STACK</div>' +
           '<div class="player">' + escapeHtml(s.qb.player) + '</div>' +
           '<div class="meta">' + mateNames + '</div></div>';
       }).join('') + '</div>';
     }
 
-    detailEl.innerHTML = head + picksHtml + stackHtml;
+    pageEl.innerHTML = head + picksHtml + stackHtml;
   }
 
-  searchEl.addEventListener('input', function (e) { state.search = e.target.value; renderAside(); });
-  platformEl.addEventListener('change', function (e) { state.platform = e.target.value; renderAside(); });
-
-  populateFilters();
-  renderAside();
+  init();
 })();

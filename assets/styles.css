@@ -344,6 +344,19 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
   vertical-align: middle;
 }
 
+table.roster-table thead .hdr-group th {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-align: center;
+  color: var(--text-muted);
+  background: var(--bg-elev);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 12px;
+}
+table.roster-table thead .hdr-group th.group-clv { color: var(--accent-2); }
+table.roster-table thead .hdr-group th.group-rtv { color: var(--accent); }
+table.roster-table tbody tr.row-link { cursor: pointer; }
+
 .uploads {
   display: flex;
   flex-direction: column;

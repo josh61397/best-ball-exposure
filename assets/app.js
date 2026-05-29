@@ -536,6 +536,138 @@
     };
   };
 
+  // ---------- historical ADP ----------
+  // Fetches data/history/<YYYY-MM-DD>.json and returns a Map keyed by
+  // normalized player name → { ud, dk, drafters, bb10, rtsports, pos, team }.
+  // Returns null if the date has no snapshot (older than our history).
+  // Per-page cache so repeated lookups for the same date are free.
+  var _historyCache = {};
+  BB.fetchHistoryForDate = async function (date) {
+    if (!date) return null;
+    if (_historyCache.hasOwnProperty(date)) return _historyCache[date];
+    try {
+      var resp = await fetch('data/history/' + date + '.json', { cache: 'force-cache' });
+      if (!resp.ok) { _historyCache[date] = null; return null; }
+      var json = await resp.json();
+      var map = {};
+      (json.players || []).forEach(function (p) {
+        map[window.BB_DATA.normalizeName(p.name)] = p;
+      });
+      _historyCache[date] = map;
+      return map;
+    } catch (e) {
+      _historyCache[date] = null;
+      return null;
+    }
+  };
+
+  // Pick the canonical "market ADP" from a player row (UD first, then DK, then Drafters).
+  function pickMarketADP(p) {
+    if (!p) return null;
+    if (p.ud != null) return p.ud;
+    if (p.dk != null) return p.dk;
+    if (p.drafters != null) return p.drafters;
+    if (p.bb10 != null) return p.bb10;
+    if (p.rtsports != null) return p.rtsports;
+    return null;
+  }
+
+  // Computes value metrics for a single roster.
+  //   adpSource(playerName) -> ADP number or null
+  // Returns { avgADP, totalADP, picksWithADP }.
+  //   avgADP   = average (marketADP - actualPick) per pick where ADP known
+  //   totalADP = sum of (marketADP - actualPick) per pick where ADP known
+  // Positive means you drafted players later than market = value mined.
+  BB.rosterValue = function (roster, adpSource) {
+    var picks = roster.picks || [];
+    var totalDelta = 0;
+    var n = 0;
+    var bestDelta = -Infinity, worstDelta = Infinity;
+    picks.forEach(function (p) {
+      if (!p.overallPick) return;
+      var adp = adpSource(p.player);
+      if (adp == null) return;
+      var delta = adp - p.overallPick;
+      totalDelta += delta;
+      n++;
+      if (delta > bestDelta) bestDelta = delta;
+      if (delta < worstDelta) worstDelta = delta;
+    });
+    return {
+      picksWithADP: n,
+      totalADP: n ? totalDelta : null,
+      avgADP: n ? totalDelta / n : null,
+      bestDelta: n ? bestDelta : null,
+      worstDelta: n ? worstDelta : null,
+    };
+  };
+
+  // High-level: given a roster, compute both CLV (using ADP at draft date,
+  // if we have history for that day) and RTV (using today's ADP).
+  // Async because CLV needs to fetch the history file.
+  BB.rosterClvRtv = async function (roster) {
+    // RTV = current market ADP
+    var rtv = BB.rosterValue(roster, function (name) {
+      var hit = window.BB_DATA.lookupADP(name);
+      return pickMarketADP(hit);
+    });
+
+    // CLV = ADP at draft date if available, else fall back to RTV
+    var clv = null;
+    var historicalAdpUsed = false;
+    if (roster.draftedAt) {
+      var date = String(roster.draftedAt).slice(0, 10);
+      var hist = await BB.fetchHistoryForDate(date);
+      if (hist) {
+        historicalAdpUsed = true;
+        clv = BB.rosterValue(roster, function (name) {
+          var row = hist[window.BB_DATA.normalizeName(name)];
+          return pickMarketADP(row);
+        });
+      }
+    }
+    if (!clv) {
+      // No history snapshot for this date — fall back to today's ADP
+      clv = Object.assign({}, rtv);
+    }
+    return { clv: clv, rtv: rtv, historicalAdpUsed: historicalAdpUsed };
+  };
+
+  // Tournament format from the reference list (e.g., "Standard", "Eliminator").
+  BB.rosterFormat = function (roster) {
+    if (!roster || !window.BB_DATA || !window.BB_DATA.tournaments) return null;
+    var name = roster.tournament;
+    if (!name) return null;
+    var hit = window.BB_DATA.tournaments.find(function (t) {
+      return (t.name === name) || (t.id && t.id === roster.tournamentId);
+    });
+    return hit ? hit.format : null;
+  };
+
+  // Draft slot (round 1 pick position) — derived from the lowest-numbered pick.
+  BB.rosterDraftPosition = function (roster) {
+    if (!roster || !roster.picks || !roster.picks.length) return null;
+    var minPick = null;
+    roster.picks.forEach(function (p) {
+      if (p.overallPick && (minPick == null || p.overallPick < minPick)) minPick = p.overallPick;
+    });
+    return minPick;
+  };
+
+  // Shared heat-map style helper for tables.
+  BB.heatStyle = function (v, range, opts) {
+    opts = opts || {};
+    if (range == null || v == null || isNaN(v) || range.min === range.max) return '';
+    var t = (v - range.min) / (range.max - range.min);
+    if (opts.invert) t = 1 - t;
+    if (t < 0) t = 0; else if (t > 1) t = 1;
+    var curved = t < 0.5
+      ? 0.5 * Math.pow(2 * t, 1.4)
+      : 1 - 0.5 * Math.pow(2 * (1 - t), 1.4);
+    var hue = Math.round(curved * 120);
+    return ' style="background: hsla(' + hue + ', 85%, 50%, 0.38);"';
+  };
+
   // ---------- team logos ----------
   // Hotlinks ESPN's NFL logo CDN. The path uses lowercase team codes,
   // which match our 2-3 letter codes verbatim for every team.
