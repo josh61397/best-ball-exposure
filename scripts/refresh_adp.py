@@ -183,6 +183,7 @@ def write_data_js(adp: list[dict], existing: dict, source_url: str) -> None:
         "adp": adp,
         "tournaments": existing.get("tournaments", []),
         "schedule": existing.get("schedule", {}),
+        "draftCapital": existing.get("draftCapital", {}),
         "lastUpdated": now,
         "source": source_url,
     }

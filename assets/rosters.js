@@ -140,31 +140,23 @@
       if (!isFinite(min) || !isFinite(max) || min === max) return null;
       return { min: min, max: max };
     }
-    var rClvAdp = rangeFor(function (r) { return r.value.clv.avgADP; });
-    var rClvTot = rangeFor(function (r) { return r.value.clv.totalADP; });
-    var rRtvAdp = rangeFor(function (r) { return r.value.rtv.avgADP; });
-    var rRtvTot = rangeFor(function (r) { return r.value.rtv.totalADP; });
+    var rClvAdp = rangeFor(function (r) { return r.value.clv.totalADP; });
+    var rClvDcv = rangeFor(function (r) { return r.value.dcvClv.total; });
+    var rRtvAdp = rangeFor(function (r) { return r.value.rtv.totalADP; });
+    var rRtvDcv = rangeFor(function (r) { return r.value.dcvRtv.total; });
 
     // Tooltip copy for the CLV / RTV columns.
     // Convention: positive = drafted LATER than market = value mined.
     var TT = {
-      clv: 'Closing Line Value\n\n' +
+      clv: 'Closing Line Value (CLV)\n\n' +
            'How much value you mined relative to where the market was drafting these players around the time of your draft.\n\n' +
            'Uses the market ADP snapshot from your draft date (when we have one). For drafts older than our daily ADP history, falls back to today\'s ADP — so for those rows CLV will match RTV until we re-import.',
-      rtv: 'Real-Time Value\n\n' +
+      rtv: 'Real-Time Value (RTV)\n\n' +
            'How much value those same picks hold right now, using today\'s market ADP. Positive numbers mean you got the player later than the market does today.',
-      clvAvg: 'Average CLV per pick\n\n' +
-              'Formula:\n  Σ (Your pick # − Market ADP at draft date) / # of picks where market ADP is known\n\n' +
-              'Positive = you got the player later than market expected = value. Negative = you reached.',
-      clvTotal: 'Total CLV (Draft Capital)\n\n' +
-                'Formula:\n  Σ (Your pick # − Market ADP at draft date) across every pick\n\n' +
-                'The total ADP value mined across the whole roster.',
-      rtvAvg: 'Average RTV per pick\n\n' +
-              'Formula:\n  Σ (Your pick # − Today\'s Market ADP) / # of picks where market ADP is known\n\n' +
-              'Positive = today\'s market would draft this player earlier than you did = your pick aged well.',
-      rtvTotal: 'Total RTV (Draft Capital)\n\n' +
-                'Formula:\n  Σ (Your pick # − Today\'s Market ADP) across every pick\n\n' +
-                'The total real-time ADP value across the whole roster.',
+      clvAdp: 'Total ADP CLV. Each pick\'s ADP CLV is calculated as:\n  Your pick # − Market ADP at draft date\n\nPositive = drafted later than market = value. Treats every pick as equally valuable.',
+      clvDcv: 'Total Draft Capital CLV. Each pick\'s Draft Capital CLV is calculated as:\n  The Draft Capital value at the player\'s ADP at draft date − The Draft Capital value used to select that player\n\nUses Michael Leone\'s Draft Capital weights, so a +5 ADP gain near the top of the draft is worth more than a +5 ADP gain in the middle.',
+      rtvAdp: 'Total ADP RTV. Each pick\'s ADP RTV is calculated as:\n  Your pick # − Today\'s Market ADP\n\nPositive = today\'s market would draft this player earlier than you did = your pick aged well.',
+      rtvDcv: 'Total Draft Capital RTV. Each pick\'s Draft Capital RTV is calculated as:\n  The Draft Capital value at the player\'s current ADP − The Draft Capital value used to select that player\n\nUses Michael Leone\'s Draft Capital weights to give early picks more weight than late picks.',
     };
 
     var headerCells = [
@@ -174,10 +166,10 @@
       { key: 'entryFee',   label: 'Fee',             group: 'Draft Info', num: true },
       { key: 'draftSize',  label: 'Size',            group: 'Draft Info', num: true },
       { key: 'position',   label: 'Position',        group: 'Draft Info', num: true },
-      { key: 'clvAvg',     label: 'Avg CLV',         group: 'CLV',        num: true, tooltip: TT.clvAvg },
-      { key: 'clvTotal',   label: 'Draft Capital',   group: 'CLV',        num: true, tooltip: TT.clvTotal },
-      { key: 'rtvAvg',     label: 'Avg RTV',         group: 'RTV',        num: true, tooltip: TT.rtvAvg },
-      { key: 'rtvTotal',   label: 'Draft Capital',   group: 'RTV',        num: true, tooltip: TT.rtvTotal },
+      { key: 'clvAdp',     label: 'ADP',             group: 'CLV',        num: true, tooltip: TT.clvAdp },
+      { key: 'clvDcv',     label: 'Draft Capital',   group: 'CLV',        num: true, tooltip: TT.clvDcv },
+      { key: 'rtvAdp',     label: 'ADP',             group: 'RTV',        num: true, tooltip: TT.rtvAdp },
+      { key: 'rtvDcv',     label: 'Draft Capital',   group: 'RTV',        num: true, tooltip: TT.rtvDcv },
     ];
 
     // Build two-tier header (group row + label row)
@@ -223,10 +215,10 @@
         '<td class="num">' + (r.entryFee != null ? BB.fmtMoney(r.entryFee) : '—') + '</td>' +
         '<td class="num">' + (r.draftSize != null ? r.draftSize : '—') + '</td>' +
         '<td class="num">' + (pos != null ? pos : '—') + '</td>' +
-        '<td class="num"' + BB.heatStyle(v.clv.avgADP, rClvAdp) + '>' + fmtClvCell(v.clv.avgADP) + '</td>' +
-        '<td class="num"' + BB.heatStyle(v.clv.totalADP, rClvTot) + '>' + fmtClvCell(v.clv.totalADP) + '</td>' +
-        '<td class="num"' + BB.heatStyle(v.rtv.avgADP, rRtvAdp) + '>' + fmtClvCell(v.rtv.avgADP) + '</td>' +
-        '<td class="num"' + BB.heatStyle(v.rtv.totalADP, rRtvTot) + '>' + fmtClvCell(v.rtv.totalADP) + '</td>' +
+        '<td class="num"' + BB.heatStyle(v.clv.totalADP, rClvAdp) + '>' + fmtClvCell(v.clv.totalADP) + '</td>' +
+        '<td class="num"' + BB.heatStyle(v.dcvClv.total, rClvDcv) + '>' + fmtClvCell(v.dcvClv.total) + '</td>' +
+        '<td class="num"' + BB.heatStyle(v.rtv.totalADP, rRtvAdp) + '>' + fmtClvCell(v.rtv.totalADP) + '</td>' +
+        '<td class="num"' + BB.heatStyle(v.dcvRtv.total, rRtvDcv) + '>' + fmtClvCell(v.dcvRtv.total) + '</td>' +
         '</tr>';
     }).join('');
 
@@ -262,10 +254,10 @@
       case 'entryFee':   return r.entryFee;
       case 'draftSize':  return r.draftSize;
       case 'position':   return BB.rosterDraftPosition(r);
-      case 'clvAvg':     return v.clv.avgADP;
-      case 'clvTotal':   return v.clv.totalADP;
-      case 'rtvAvg':     return v.rtv.avgADP;
-      case 'rtvTotal':   return v.rtv.totalADP;
+      case 'clvAdp':     return v.clv.totalADP;
+      case 'clvDcv':     return v.dcvClv.total;
+      case 'rtvAdp':     return v.rtv.totalADP;
+      case 'rtvDcv':     return v.dcvRtv.total;
       default: return null;
     }
   }

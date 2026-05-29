@@ -572,6 +572,46 @@
     return null;
   }
 
+  // Draft Capital value at a given pick number (Michael Leone, @2Hats1Mike).
+  // version: 'aggressive' (default) — the steeper curve weighting top picks
+  //          heavily (pick 1 = 160, pick 216 = 0).
+  //          'original' — the gentler curve (pick 1 = 128.9).
+  BB.draftCapital = function (pickNum, version) {
+    if (pickNum == null || isNaN(pickNum)) return null;
+    var data = window.BB_DATA && window.BB_DATA.draftCapital;
+    if (!data) return null;
+    var arr = data[version || 'aggressive'];
+    if (!arr) return null;
+    var p = Math.round(Number(pickNum));
+    if (p < 1) p = 1;
+    if (p > 216) p = 216;
+    var v = arr[p];
+    return v == null ? null : v;
+  };
+
+  // Roster-level Draft Capital Value = Σ (DCap(ADP) − DCap(Pick #))
+  // Weights early picks more heavily than the linear ADP delta does, so the
+  // same +5 ADP value gain at pick 15 is worth more than +5 at pick 125.
+  BB.rosterDcv = function (roster, adpSource) {
+    var picks = roster.picks || [];
+    var totalDcv = 0, n = 0;
+    picks.forEach(function (p) {
+      if (!p.overallPick) return;
+      var adp = adpSource(p.player);
+      if (adp == null) return;
+      var dcAdp = BB.draftCapital(adp);
+      var dcPick = BB.draftCapital(p.overallPick);
+      if (dcAdp == null || dcPick == null) return;
+      totalDcv += dcAdp - dcPick;
+      n++;
+    });
+    return {
+      picksCounted: n,
+      total: n ? totalDcv : null,
+      avg: n ? totalDcv / n : null,
+    };
+  };
+
   // Computes value metrics for a single roster.
   //   adpSource(playerName) -> ADP number or null
   // Returns { avgADP, totalADP, picksWithADP }.
@@ -605,33 +645,46 @@
 
   // High-level: given a roster, compute both CLV (using ADP at draft date,
   // if we have history for that day) and RTV (using today's ADP).
+  // Each side has two flavors: the plain ADP delta (linear) and the
+  // Draft Capital Value (weighted by Leone's pick value curve).
   // Async because CLV needs to fetch the history file.
   BB.rosterClvRtv = async function (roster) {
-    // RTV = current market ADP
-    var rtv = BB.rosterValue(roster, function (name) {
+    var todaySource = function (name) {
       var hit = window.BB_DATA.lookupADP(name);
       return pickMarketADP(hit);
-    });
+    };
 
-    // CLV = ADP at draft date if available, else fall back to RTV
+    // RTV variants (today's ADP)
+    var rtv = BB.rosterValue(roster, todaySource);
+    var dcvRtv = BB.rosterDcv(roster, todaySource);
+
+    // CLV variants — try historical ADP first
     var clv = null;
+    var dcvClv = null;
     var historicalAdpUsed = false;
     if (roster.draftedAt) {
       var date = String(roster.draftedAt).slice(0, 10);
       var hist = await BB.fetchHistoryForDate(date);
       if (hist) {
         historicalAdpUsed = true;
-        clv = BB.rosterValue(roster, function (name) {
+        var histSource = function (name) {
           var row = hist[window.BB_DATA.normalizeName(name)];
           return pickMarketADP(row);
-        });
+        };
+        clv = BB.rosterValue(roster, histSource);
+        dcvClv = BB.rosterDcv(roster, histSource);
       }
     }
-    if (!clv) {
-      // No history snapshot for this date — fall back to today's ADP
-      clv = Object.assign({}, rtv);
-    }
-    return { clv: clv, rtv: rtv, historicalAdpUsed: historicalAdpUsed };
+    if (!clv)    clv    = Object.assign({}, rtv);
+    if (!dcvClv) dcvClv = Object.assign({}, dcvRtv);
+
+    return {
+      clv: clv,
+      rtv: rtv,
+      dcvClv: dcvClv,
+      dcvRtv: dcvRtv,
+      historicalAdpUsed: historicalAdpUsed,
+    };
   };
 
   // Walk every pick on every roster and aggregate CLV / RTV per player.
