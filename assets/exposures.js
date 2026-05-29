@@ -22,6 +22,7 @@
     { key: 'player',      label: 'Player',     sortable: true },
     { key: 'position',    label: 'Pos',        sortable: true },
     { key: 'team',        label: 'Tm',         sortable: true },
+    { key: 'count',       label: 'Drafted',    sortable: true, num: true },
     { key: 'exposurePct', label: '% Drafted',  sortable: true, num: true },
     { key: 'fees',        label: 'Fees',       sortable: true, num: true },
     { key: 'feesPct',     label: '% of Fees',  sortable: true, num: true },
@@ -110,12 +111,15 @@
         c.label + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
     }).join('') + '</tr></thead>';
 
+    var totalRosters = rows.length && rows[0].exposurePct ? Math.round(rows[0].count / rows[0].exposurePct) : 0;
     var body = '<tbody>' + rows.map(function (r) {
+      var denom = (r.count && r.exposurePct) ? Math.round(r.count / r.exposurePct) : totalRosters;
       return '<tr>' +
         '<td>' + escapeHtml(r.player) + '</td>' +
         '<td>' + (r.position ? '<span class="badge pos-' + escapeHtml(r.position) + '">' + escapeHtml(r.position) + '</span>' : '—') + '</td>' +
         '<td>' + escapeHtml(r.team || '—') + '</td>' +
-        '<td class="num"><span title="' + r.count + ' of ' + (r.count && r.exposurePct ? Math.round(r.count / r.exposurePct) : 0) + ' rosters">' + BB.fmtPct(r.exposurePct) + '</span></td>' +
+        '<td class="num"><span title="' + r.count + ' of ' + denom + ' rosters">' + r.count + '</span></td>' +
+        '<td class="num">' + BB.fmtPct(r.exposurePct) + '</td>' +
         '<td class="num">' + BB.fmtMoney(r.fees) + '</td>' +
         '<td class="num">' + BB.fmtPct(r.feesPct) + '</td>' +
         '<td class="num">' + BB.fmtADP(r.myADP) + '</td>' +
