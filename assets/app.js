@@ -945,6 +945,11 @@
       var seen = {};
       combos.forEach(function (combo) {
         if (requirePos && !combo.some(function (p) { return p.position === requirePos; })) return;
+        // A stack in best ball is defined as players from the SAME NFL team.
+        // Drop any combo whose players aren't all on the same team.
+        var firstTeam = combo[0].team;
+        if (!firstTeam) return;
+        if (!combo.every(function (p) { return p.team === firstTeam; })) return;
         // Stable sort: QB first, then position order, then name.
         var sorted = combo.slice().sort(function (a, b) {
           var ao = posOrder[a.position] != null ? posOrder[a.position] : 9;
@@ -981,6 +986,50 @@
         count: s.count,
         pct: totalRosters ? s.count / totalRosters : 0,
         fees: s.fees,
+      };
+    });
+  };
+
+  // ---------- roster constructions ----------
+  // Distribution of position-count shapes across your rosters.
+  // For each roster, count QB / RB / WR / TE picks and form a key
+  // like "1-7-8-2". Then aggregate.
+  // Returns array of {
+  //   key, counts: { QB, RB, WR, TE }, totalPicks,
+  //   count,                // # of rosters with this shape
+  //   pct,                  // share of all rosters
+  //   fees,
+  // }
+  BB.computeRosterConstructions = function (rosters) {
+    var total = rosters.length || 0;
+    var byKey = {};
+    rosters.forEach(function (r) {
+      var counts = { QB: 0, RB: 0, WR: 0, TE: 0 };
+      (r.picks || []).forEach(function (p) {
+        if (counts[p.position] != null) counts[p.position]++;
+      });
+      var key = counts.QB + '-' + counts.RB + '-' + counts.WR + '-' + counts.TE;
+      if (!byKey[key]) {
+        byKey[key] = {
+          key: key,
+          counts: counts,
+          totalPicks: counts.QB + counts.RB + counts.WR + counts.TE,
+          count: 0,
+          fees: 0,
+        };
+      }
+      byKey[key].count++;
+      byKey[key].fees += r.entryFee || 0;
+    });
+    return Object.keys(byKey).map(function (k) {
+      var c = byKey[k];
+      return {
+        key: c.key,
+        counts: c.counts,
+        totalPicks: c.totalPicks,
+        count: c.count,
+        pct: total ? c.count / total : 0,
+        fees: c.fees,
       };
     });
   };

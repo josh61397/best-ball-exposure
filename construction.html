@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Best Ball Exposure — Team Construction</title>
+  <script>(function(){try{var t=localStorage.getItem('bb_theme');if(!t)t=window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div id="nav-slot"></div>
+  <main>
+    <h1>Team construction</h1>
+    <p class="lede">How your rosters break down by position counts. Each row is a unique shape, written as <code class="stack-combo">QB-RB-WR-TE</code> — so <code class="stack-combo">1-7-8-2</code> means 1 QB, 7 RBs, 8 WRs, 2 TEs.</p>
+
+    <div class="toolbar">
+      <input type="search" id="search" placeholder="Search a construction (e.g. 1-7-8)…" style="min-width:240px;" />
+      <select id="platform-filter">
+        <option value="">All platforms</option>
+      </select>
+      <select id="tournament-filter">
+        <option value="">All tournaments</option>
+      </select>
+      <label style="margin-left:auto;"><span id="row-count">0</span> shapes</label>
+    </div>
+
+    <div id="content"></div>
+  </main>
+
+  <footer class="site">All data stored locally.</footer>
+  <script src="assets/data.js"></script>
+  <script src="assets/app.js"></script>
+  <script src="assets/nav.js"></script>
+  <script src="assets/construction.js"></script>
+</body>
+</html>
