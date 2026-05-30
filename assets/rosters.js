@@ -74,7 +74,7 @@
       '<select id="context-filter">' +
         '<option value="">All</option>' +
         '<option value="superflex">SuperFlex only</option>' +
-        '<option value="post-draft">Post-Draft only</option>' +
+        '<option value="post-draft">Post-Draft (18-round)</option>' +
         '<option value="pre-draft">Pre-Draft only</option>' +
       '</select>' +
       '<div style="margin-left:auto;color:var(--text-muted);font-size:12px;" id="row-count"></div>' +

@@ -1150,12 +1150,20 @@
 
   // Generic context filter helper used by several pages.
   // context: '' | 'superflex' | 'pre-draft' | 'post-draft'
+  // Post-Draft is intentionally restricted to standard 18-round drafts
+  // (Underdog's "Best Ball" core format). 20-round DK best ball, the
+  // Eliminator, Weekly Winners, etc. are excluded so the bucket is
+  // apples-to-apples for analysis.
   BB.rosterMatchesContext = function (roster, context) {
     if (!context) return true;
     if (context === 'superflex') return BB.rosterIsSuperflex(roster);
     var p = BB.rosterPeriod(roster);
     if (context === 'pre-draft')  return p === 'Pre-NFL Draft';
-    if (context === 'post-draft') return p === 'Post-NFL Draft';
+    if (context === 'post-draft') {
+      if (p !== 'Post-NFL Draft') return false;
+      var rounds = roster.picks ? roster.picks.length : 0;
+      return rounds === 18;
+    }
     return true;
   };
 
