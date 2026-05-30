@@ -71,14 +71,48 @@
     tourneyEl.value = state.tournament;
   }
 
+  function renderHistograms(rosters) {
+    var histEl = document.getElementById('histograms');
+    if (!histEl) return;
+    if (!rosters.length) { histEl.innerHTML = ''; return; }
+    var hists = BB.computePositionHistograms(rosters);
+    var html = '<div class="histogram-grid">' + ['QB', 'RB', 'WR', 'TE'].map(function (pos) {
+      var h = hists[pos];
+      var max = 0;
+      h.buckets.forEach(function (b) { if (b.rosters > max) max = b.rosters; });
+      var bars = h.buckets.map(function (b) {
+        var pct = max ? (b.rosters / max) : 0;
+        var barH = Math.max(2, Math.round(pct * 90));
+        var alpha = b.rosters ? 0.85 : 0.15;
+        return '<div class="hist-col" title="' + b.rosters + ' rosters drafted ' + b.count + ' ' + pos + 's">' +
+          '<div class="hist-num">' + b.rosters + '</div>' +
+          '<div class="hist-bar" style="height:' + barH + 'px;background:var(--pos-' + pos.toLowerCase() + ');opacity:' + alpha + ';"></div>' +
+          '<div class="hist-x">' + b.count + '</div>' +
+        '</div>';
+      }).join('');
+      var meanStr = h.mean.toFixed(2).replace(/\.00$/, '');
+      return '<div class="card histogram-card">' +
+        '<div class="histogram-head">' +
+          '<span class="badge pos-' + pos + '">' + pos + '</span>' +
+          '<span class="histogram-meta">avg ' + meanStr + ' · mode ' + (h.mode != null ? h.mode : '—') + ' · ' + h.total + ' picks</span>' +
+        '</div>' +
+        '<div class="histogram-bars">' + (bars || '<span style="color:var(--text-muted);font-size:11px;">no picks</span>') + '</div>' +
+        '<div class="histogram-axis-label"># of ' + pos + 's drafted per roster</div>' +
+      '</div>';
+    }).join('') + '</div>';
+    histEl.innerHTML = html;
+  }
+
   function render() {
     var rosters = getFilteredRosters();
     if (!rosters.length) {
       contentEl.innerHTML = '<div class="empty-state"><h2>No rosters match these filters</h2><p>Try clearing filters or <a href="index.html">upload a CSV</a>.</p></div>';
       rowCountEl.textContent = '0';
+      renderHistograms([]);
       return;
     }
 
+    renderHistograms(rosters);
     var rows = BB.computeRosterConstructions(rosters);
     var s = state.search.toLowerCase().trim();
     if (s) rows = rows.filter(function (r) { return r.key.indexOf(s) !== -1; });

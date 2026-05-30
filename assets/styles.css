@@ -539,6 +539,76 @@ table.player-stacks-table tbody tr td {
   letter-spacing: 0.04em;
 }
 
+/* Position-count histograms on the Construction page. */
+.histogram-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.histogram-card {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.histogram-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.histogram-head .badge { font-size: 12px; padding: 3px 8px; }
+.histogram-meta {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.histogram-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 110px;
+  padding-top: 6px;
+}
+.hist-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  cursor: default;
+  justify-content: flex-end;
+}
+.hist-num {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+  line-height: 1;
+}
+.hist-bar {
+  width: 100%;
+  max-width: 28px;
+  min-height: 2px;
+  border-radius: 3px 3px 0 0;
+  transition: opacity 120ms;
+}
+.hist-col:hover .hist-bar { opacity: 1; }
+.hist-x {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.histogram-axis-label {
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
 /* Expandable player rows on the Exposures page. */
 .row-expandable { cursor: pointer; }
 .row-expandable.is-expanded > td:first-child {

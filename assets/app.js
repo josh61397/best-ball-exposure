@@ -990,6 +990,48 @@
     });
   };
 
+  // For each of QB / RB / WR / TE, return the distribution of how many
+  // picks-at-that-position appear per roster.
+  // Returns: {
+  //   QB: { buckets: [{count: 1, rosters: 4}, ...], total: 95, mean: 2.8, mode: 3, totalRosters: 30 },
+  //   RB: { ... }, WR: { ... }, TE: { ... }
+  // }
+  BB.computePositionHistograms = function (rosters) {
+    var positions = ['QB', 'RB', 'WR', 'TE'];
+    var out = {};
+    positions.forEach(function (pos) {
+      var perRoster = {};   // count -> # of rosters with that count
+      var totalPicks = 0;
+      rosters.forEach(function (r) {
+        var c = 0;
+        (r.picks || []).forEach(function (p) { if (p.position === pos) c++; });
+        totalPicks += c;
+        perRoster[c] = (perRoster[c] || 0) + 1;
+      });
+      var keys = Object.keys(perRoster).map(Number).sort(function (a, b) { return a - b; });
+      // Fill gaps between min and max so the chart bars stay contiguous.
+      var buckets = [];
+      if (keys.length) {
+        var minC = keys[0];
+        var maxC = keys[keys.length - 1];
+        for (var c = minC; c <= maxC; c++) {
+          buckets.push({ count: c, rosters: perRoster[c] || 0 });
+        }
+      }
+      // Mode = bucket with most rosters
+      var mode = null, modeR = -Infinity;
+      buckets.forEach(function (b) { if (b.rosters > modeR) { modeR = b.rosters; mode = b.count; } });
+      out[pos] = {
+        buckets: buckets,
+        total: totalPicks,
+        mean: rosters.length ? totalPicks / rosters.length : 0,
+        mode: mode,
+        totalRosters: rosters.length,
+      };
+    });
+    return out;
+  };
+
   // ---------- roster constructions ----------
   // Distribution of position-count shapes across your rosters.
   // For each roster, count QB / RB / WR / TE picks and form a key
