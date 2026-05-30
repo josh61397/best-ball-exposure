@@ -7,6 +7,7 @@
   var posEl = document.getElementById('pos-filter');
   var platformEl = document.getElementById('platform-filter');
   var tourneyEl = document.getElementById('tournament-filter');
+  var contextEl = document.getElementById('context-filter');
   var rowCountEl = document.getElementById('row-count');
 
   var state = {
@@ -16,6 +17,7 @@
     pos: '',
     platform: '',
     tournament: '',
+    context: '',
     // Which player rows are currently expanded (by normalized name).
     expanded: {},
   };
@@ -59,6 +61,7 @@
     return rosters.filter(function (r) {
       if (state.platform && r.platform !== state.platform) return false;
       if (state.tournament && r.tournament !== state.tournament) return false;
+      if (state.context && !BB.rosterMatchesContext(r, state.context)) return false;
       return true;
     });
   }
@@ -300,6 +303,7 @@
   posEl.addEventListener('change', function (e) { state.pos = e.target.value; render(); });
   platformEl.addEventListener('change', function (e) { state.platform = e.target.value; render(); });
   tourneyEl.addEventListener('change', function (e) { state.tournament = e.target.value; render(); });
+  if (contextEl) contextEl.addEventListener('change', function (e) { state.context = e.target.value; render(); });
 
   populateFilters();
   render();

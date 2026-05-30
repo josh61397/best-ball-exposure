@@ -1103,6 +1103,31 @@
     return fmt ? /superflex|super[\s_-]?flex/i.test(fmt) : false;
   };
 
+  // Draft period from the tournament reference (e.g., "Post-NFL Draft" / "Pre-NFL Draft").
+  BB.rosterPeriod = function (roster) {
+    if (!roster || !window.BB_DATA || !window.BB_DATA.tournaments) return null;
+    var hit = window.BB_DATA.tournaments.find(function (t) {
+      return (t.name === roster.tournament) || (t.id && t.id === roster.tournamentId);
+    });
+    if (hit && hit.period) return hit.period;
+    // Fallback: look at the tournament name for hints.
+    var n = roster.tournament || '';
+    if (/pre[-\s]?nfl\s?draft|pre[-\s]?draft/i.test(n)) return 'Pre-NFL Draft';
+    if (/post[-\s]?nfl\s?draft|post[-\s]?draft/i.test(n)) return 'Post-NFL Draft';
+    return null;
+  };
+
+  // Generic context filter helper used by several pages.
+  // context: '' | 'superflex' | 'pre-draft' | 'post-draft'
+  BB.rosterMatchesContext = function (roster, context) {
+    if (!context) return true;
+    if (context === 'superflex') return BB.rosterIsSuperflex(roster);
+    var p = BB.rosterPeriod(roster);
+    if (context === 'pre-draft')  return p === 'Pre-NFL Draft';
+    if (context === 'post-draft') return p === 'Post-NFL Draft';
+    return true;
+  };
+
   // Tournament format from the reference list (e.g., "Standard", "Eliminator").
   BB.rosterFormat = function (roster) {
     if (!roster || !window.BB_DATA || !window.BB_DATA.tournaments) return null;

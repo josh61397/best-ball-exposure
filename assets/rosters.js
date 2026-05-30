@@ -25,6 +25,7 @@
     sortDir: 'desc',
     search: '',
     platform: '',
+    context: '',
     // computed rows: { roster, value: { clv, rtv, historicalAdpUsed } }
     enriched: [],
   };
@@ -70,6 +71,12 @@
     return '<div class="toolbar">' +
       '<input type="search" id="search" placeholder="Search tournament or player…" style="min-width:240px;" />' +
       '<select id="platform-filter"><option value="">All platforms</option></select>' +
+      '<select id="context-filter">' +
+        '<option value="">All</option>' +
+        '<option value="superflex">SuperFlex only</option>' +
+        '<option value="post-draft">Post-Draft only</option>' +
+        '<option value="pre-draft">Pre-Draft only</option>' +
+      '</select>' +
       '<div style="margin-left:auto;color:var(--text-muted);font-size:12px;" id="row-count"></div>' +
     '</div>';
   }
@@ -93,6 +100,14 @@
       state.platform = e.target.value;
       redrawTable();
     });
+    var ctxEl = document.getElementById('context-filter');
+    if (ctxEl) {
+      ctxEl.value = state.context;
+      ctxEl.addEventListener('change', function (e) {
+        state.context = e.target.value;
+        redrawTable();
+      });
+    }
   }
 
   function visibleRows() {
@@ -100,6 +115,7 @@
     return state.enriched.filter(function (row) {
       var r = row.roster;
       if (state.platform && r.platform !== state.platform) return false;
+      if (state.context && !BB.rosterMatchesContext(r, state.context)) return false;
       if (!s) return true;
       if ((r.tournament || '').toLowerCase().indexOf(s) !== -1) return true;
       return r.picks.some(function (p) { return (p.player || '').toLowerCase().indexOf(s) !== -1; });
