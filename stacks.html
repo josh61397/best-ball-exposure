@@ -10,18 +10,31 @@
 <body>
   <div id="nav-slot"></div>
   <main>
-    <h1>Team stacks</h1>
-    <p class="lede">Your roster construction grouped by NFL team. A <strong>stack</strong> = a roster with 2+ players from the same team. <strong>Top Combo</strong> shows the most common position composition on your stacked rosters for that team.</p>
+    <h1>Stacks</h1>
+    <p class="lede" id="page-lede"></p>
+
+    <div class="seg-toggle" id="view-toggle" role="tablist" style="margin-bottom:16px;">
+      <button type="button" data-view="team" class="active">Team</button>
+      <button type="button" data-view="player">Player</button>
+    </div>
 
     <div class="toolbar">
-      <input type="search" id="search" placeholder="Search team or combo…" />
+      <input type="search" id="search" placeholder="Search…" />
+      <select id="size-filter" data-player-only style="display:none;">
+        <option value="2">2-player stacks</option>
+        <option value="3">3-player stacks</option>
+      </select>
+      <label class="checkbox-pill" data-player-only style="display:none;">
+        <input type="checkbox" id="all-toggle" />
+        <span>Show all stacks (any position)</span>
+      </label>
       <select id="platform-filter">
         <option value="">All platforms</option>
       </select>
       <select id="tournament-filter">
         <option value="">All tournaments</option>
       </select>
-      <label style="margin-left:auto;"><span id="row-count">0</span> teams</label>
+      <label style="margin-left:auto;"><span id="row-count">0</span> <span id="row-label">teams</span></label>
     </div>
 
     <div id="content"></div>
