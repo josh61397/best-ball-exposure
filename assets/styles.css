@@ -366,6 +366,15 @@ table.roster-table thead .hdr-group th.group-clv { color: var(--accent-2); }
 table.roster-table thead .hdr-group th.group-rtv { color: var(--accent); }
 table.roster-table tbody tr.row-link { cursor: pointer; }
 
+/* Visual divider between the CLV and RTV column groups.
+   Position group is column 6, last CLV column is 8, first RTV column is 9.
+   In the top group-header row those collapse to the 3rd th (RTV). */
+table.roster-table thead .hdr-group th.group-rtv,
+table.roster-table thead tr:nth-child(2) th:nth-child(9),
+table.roster-table tbody tr td:nth-child(9) {
+  border-left: 2px solid color-mix(in srgb, var(--text-muted) 55%, var(--border));
+}
+
 .grade-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
