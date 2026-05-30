@@ -1099,21 +1099,52 @@
   };
 
   BB.rosterIsSuperflex = function (roster) {
+    if (!roster) return false;
     var fmt = BB.rosterQbFormat(roster);
-    return fmt ? /superflex|super[\s_-]?flex/i.test(fmt) : false;
+    if (fmt && /superflex|super[\s_-]?flex/i.test(fmt)) return true;
+    // Inference fallback: in 1-QB best ball people normally draft 2-3 QBs.
+    // SuperFlex drafts usually pull 4+. Count QB picks on the roster.
+    if (roster.picks && roster.picks.length) {
+      var qbCount = 0;
+      for (var i = 0; i < roster.picks.length; i++) {
+        if (roster.picks[i].position === 'QB') qbCount++;
+      }
+      if (qbCount >= 4) return true;
+    }
+    return false;
   };
 
+  // Cutoff date used to infer Pre vs Post NFL Draft. April 25 is a safe
+  // approximation — the 2024, 2025, and 2026 NFL Drafts all ended on or
+  // before that date.
+  var NFL_DRAFT_CUTOFF_MM_DD = '04-25';
+
   // Draft period from the tournament reference (e.g., "Post-NFL Draft" / "Pre-NFL Draft").
+  // Falls back to (1) tournament name regex, then (2) the roster's draftedAt
+  // timestamp compared to the year's NFL Draft cutoff.
   BB.rosterPeriod = function (roster) {
-    if (!roster || !window.BB_DATA || !window.BB_DATA.tournaments) return null;
-    var hit = window.BB_DATA.tournaments.find(function (t) {
-      return (t.name === roster.tournament) || (t.id && t.id === roster.tournamentId);
-    });
-    if (hit && hit.period) return hit.period;
-    // Fallback: look at the tournament name for hints.
+    if (!roster) return null;
+
+    if (window.BB_DATA && window.BB_DATA.tournaments) {
+      var hit = window.BB_DATA.tournaments.find(function (t) {
+        return (t.name === roster.tournament) || (t.id && t.id === roster.tournamentId);
+      });
+      if (hit && hit.period) return hit.period;
+    }
+
     var n = roster.tournament || '';
     if (/pre[-\s]?nfl\s?draft|pre[-\s]?draft/i.test(n)) return 'Pre-NFL Draft';
     if (/post[-\s]?nfl\s?draft|post[-\s]?draft/i.test(n)) return 'Post-NFL Draft';
+
+    // Inference from draftedAt
+    if (roster.draftedAt) {
+      var d = new Date(roster.draftedAt);
+      if (!isNaN(d.getTime())) {
+        var year = d.getUTCFullYear();
+        var cutoff = new Date(year + '-' + NFL_DRAFT_CUTOFF_MM_DD + 'T00:00:00Z');
+        return d < cutoff ? 'Pre-NFL Draft' : 'Post-NFL Draft';
+      }
+    }
     return null;
   };
 
