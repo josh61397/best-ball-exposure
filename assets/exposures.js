@@ -9,7 +9,6 @@
   var tourneyEl = document.getElementById('tournament-filter');
   var rowCountEl = document.getElementById('row-count');
 
-  var posSummaryEl = document.getElementById('position-summary');
   var viewToggleEl = document.getElementById('view-toggle');
   var rowLabelEl = document.getElementById('row-label');
 
@@ -140,34 +139,8 @@
     return { min: min, max: max };
   }
 
-  function renderPositionSummary(rosters) {
-    if (!rosters.length) { posSummaryEl.innerHTML = ''; return; }
-    var summary = BB.computePositionSummary(rosters);
-    var html = '<div class="position-cards">' + summary.map(function (s) {
-      var top = s.topPlayers.length
-        ? s.topPlayers.map(function (p) {
-            var logo = p.team ? BB.teamLogoHTML(p.team, { size: 14 }) : '';
-            return '<li>' + logo + '<a href="player.html?name=' + encodeURIComponent(p.player) + '" class="pc-name">' + escapeHtml(p.player) + '</a>' +
-                   '<span class="pc-pct">' + BB.fmtPct(p.pct) + '</span></li>';
-          }).join('')
-        : '<li style="color:var(--text-muted);">No picks</li>';
-      return '<div class="card pos-card">' +
-        '<div class="pos-card-head">' +
-          '<span class="badge pos-' + s.position + '">' + s.position + '</span>' +
-          '<span class="pos-card-stats">' +
-            '<strong>' + s.count + '</strong> picks · ' + BB.fmtPct(s.pctOfTotal) +
-            (s.avgPick != null ? ' · avg pick ' + s.avgPick.toFixed(1) : '') +
-          '</span>' +
-        '</div>' +
-        '<ol class="pos-card-top">' + top + '</ol>' +
-      '</div>';
-    }).join('') + '</div>';
-    posSummaryEl.innerHTML = html;
-  }
-
   function render() {
     var rosters = getFilteredRosters();
-    renderPositionSummary(rosters);
     if (!rosters.length) {
       contentEl.innerHTML = '<div class="empty-state"><h2>No rosters match these filters</h2><p>Try clearing filters or <a href="index.html">upload a CSV</a>.</p></div>';
       rowCountEl.textContent = '0';
