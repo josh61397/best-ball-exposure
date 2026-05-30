@@ -586,6 +586,14 @@ table.player-stacks-table tbody tr td {
   color: var(--text-dim);
   line-height: 1;
 }
+.hist-pct {
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  line-height: 1;
+  margin-top: 1px;
+  letter-spacing: 0.02em;
+}
 .hist-bar {
   width: 100%;
   max-width: 28px;

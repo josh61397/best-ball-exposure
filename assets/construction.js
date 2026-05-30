@@ -84,8 +84,11 @@
         var pct = max ? (b.rosters / max) : 0;
         var barH = Math.max(2, Math.round(pct * 90));
         var alpha = b.rosters ? 0.85 : 0.15;
-        return '<div class="hist-col" title="' + b.rosters + ' rosters drafted ' + b.count + ' ' + pos + 's">' +
+        var pctOfTotal = h.totalRosters ? (b.rosters / h.totalRosters * 100) : 0;
+        var pctText = h.totalRosters ? pctOfTotal.toFixed(pctOfTotal >= 10 ? 0 : 1) + '%' : '';
+        return '<div class="hist-col" title="' + b.rosters + ' rosters drafted ' + b.count + ' ' + pos + 's (' + pctText + ' of ' + h.totalRosters + ')">' +
           '<div class="hist-num">' + b.rosters + '</div>' +
+          (pctText ? '<div class="hist-pct">' + pctText + '</div>' : '') +
           '<div class="hist-bar" style="height:' + barH + 'px;background:var(--pos-' + pos.toLowerCase() + ');opacity:' + alpha + ';"></div>' +
           '<div class="hist-x">' + b.count + '</div>' +
         '</div>';
