@@ -82,7 +82,7 @@
       h.buckets.forEach(function (b) { if (b.rosters > max) max = b.rosters; });
       var bars = h.buckets.map(function (b) {
         var pct = max ? (b.rosters / max) : 0;
-        var barH = Math.max(2, Math.round(pct * 90));
+        var barH = Math.max(2, Math.round(pct * 75));
         var alpha = b.rosters ? 0.85 : 0.15;
         var pctOfTotal = h.totalRosters ? (b.rosters / h.totalRosters * 100) : 0;
         var pctText = h.totalRosters ? pctOfTotal.toFixed(pctOfTotal >= 10 ? 0 : 1) + '%' : '';

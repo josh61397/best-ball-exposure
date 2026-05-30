@@ -567,7 +567,7 @@ table.player-stacks-table tbody tr td {
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  height: 110px;
+  min-height: 140px;
   padding-top: 6px;
 }
 .hist-col {
