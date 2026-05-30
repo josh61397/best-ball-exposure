@@ -817,6 +817,131 @@
     };
   };
 
+  // ---------- team stacks ----------
+  // For each NFL team that appears across your rosters, returns:
+  //   { team, totalPicks, rostersWithTeam, pctWithTeam,
+  //     stackedRosters, stackRate, avgPlayersWhenStacked,
+  //     topCombo, topComboCount, fees }
+  //
+  // - "Stack" = a roster with ≥2 players from the same team
+  // - "Top combo" = the most common position composition on stacked
+  //   rosters for this team (e.g., "QB+WR", "WR+WR+TE")
+  BB.computeTeamStacks = function (rosters) {
+    var total = rosters.length || 0;
+    var byTeam = {};
+
+    rosters.forEach(function (r) {
+      var teamPicks = {};
+      (r.picks || []).forEach(function (p) {
+        if (!p.team) return;
+        if (!teamPicks[p.team]) teamPicks[p.team] = [];
+        teamPicks[p.team].push(p);
+      });
+      Object.keys(teamPicks).forEach(function (team) {
+        if (!byTeam[team]) {
+          byTeam[team] = {
+            team: team,
+            totalPicks: 0,
+            rostersWithTeam: 0,
+            stackedRosters: 0,
+            sumPlayersOnStackedRosters: 0,
+            stackCombos: {},
+            fees: 0,
+          };
+        }
+        var t = byTeam[team];
+        var picks = teamPicks[team];
+        t.totalPicks += picks.length;
+        t.rostersWithTeam++;
+        t.fees += r.entryFee || 0;
+        if (picks.length >= 2) {
+          t.stackedRosters++;
+          t.sumPlayersOnStackedRosters += picks.length;
+          var posSorted = picks
+            .map(function (p) { return p.position || '?'; })
+            .sort();
+          var combo = posSorted.join('+');
+          t.stackCombos[combo] = (t.stackCombos[combo] || 0) + 1;
+        }
+      });
+    });
+
+    return Object.keys(byTeam).map(function (k) {
+      var t = byTeam[k];
+      var topCombo = null, topCount = 0;
+      Object.keys(t.stackCombos).forEach(function (combo) {
+        if (t.stackCombos[combo] > topCount) {
+          topCount = t.stackCombos[combo];
+          topCombo = combo;
+        }
+      });
+      return {
+        team: t.team,
+        totalPicks: t.totalPicks,
+        rostersWithTeam: t.rostersWithTeam,
+        pctWithTeam: total ? t.rostersWithTeam / total : 0,
+        stackedRosters: t.stackedRosters,
+        stackRate: total ? t.stackedRosters / total : 0,
+        avgPlayersWhenStacked: t.stackedRosters
+          ? t.sumPlayersOnStackedRosters / t.stackedRosters
+          : null,
+        topCombo: topCombo,
+        topComboCount: topCount,
+        fees: t.fees,
+      };
+    });
+  };
+
+  // ---------- position summary ----------
+  // Per-position rollup for the hero cards on the Exposures page.
+  // For each of QB/RB/WR/TE, returns:
+  //   { position, count, pctOfTotal, avgPick, topPlayers: [{ player, team, count, pct }, ...] }
+  BB.computePositionSummary = function (rosters) {
+    var totalRosters = rosters.length || 0;
+    var totalPicks = 0;
+    var byPos = {};
+
+    rosters.forEach(function (r) {
+      (r.picks || []).forEach(function (p) {
+        if (!p.position) return;
+        totalPicks++;
+        var b = byPos[p.position] || (byPos[p.position] = {
+          count: 0, sumPick: 0, samplePicks: 0, players: {},
+        });
+        b.count++;
+        if (p.overallPick) { b.sumPick += p.overallPick; b.samplePicks++; }
+        if (p.player) {
+          if (!b.players[p.player]) {
+            b.players[p.player] = { player: p.player, team: p.team || '', count: 0 };
+          }
+          b.players[p.player].count++;
+        }
+      });
+    });
+
+    return ['QB', 'RB', 'WR', 'TE'].map(function (pos) {
+      var b = byPos[pos] || { count: 0, sumPick: 0, samplePicks: 0, players: {} };
+      var top = Object.values(b.players)
+        .sort(function (a, c) { return c.count - a.count; })
+        .slice(0, 3)
+        .map(function (p) {
+          return {
+            player: p.player,
+            team: p.team,
+            count: p.count,
+            pct: totalRosters ? p.count / totalRosters : 0,
+          };
+        });
+      return {
+        position: pos,
+        count: b.count,
+        pctOfTotal: totalPicks ? b.count / totalPicks : 0,
+        avgPick: b.samplePicks ? b.sumPick / b.samplePicks : null,
+        topPlayers: top,
+      };
+    });
+  };
+
   // Returns the QB format ("1-QB" / "SuperFlex") for a roster's tournament.
   BB.rosterQbFormat = function (roster) {
     if (!roster || !window.BB_DATA || !window.BB_DATA.tournaments) return null;

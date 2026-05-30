@@ -9,14 +9,39 @@
   var tourneyEl = document.getElementById('tournament-filter');
   var rowCountEl = document.getElementById('row-count');
 
+  var posSummaryEl = document.getElementById('position-summary');
+  var viewToggleEl = document.getElementById('view-toggle');
+  var rowLabelEl = document.getElementById('row-label');
+
   var state = {
-    sortKey: 'exposurePct',
-    sortDir: 'desc',
+    view: (function () {
+      try { return localStorage.getItem('bb_exposures_view') || 'players'; }
+      catch (e) { return 'players'; }
+    })(),
+    // Independent sort state per view so swapping doesn't lose the user's choice.
+    playersSortKey: 'exposurePct',
+    playersSortDir: 'desc',
+    stacksSortKey: 'stackedRosters',
+    stacksSortDir: 'desc',
     search: '',
     pos: '',
     platform: '',
     tournament: '',
   };
+
+  function setView(v) {
+    state.view = v;
+    try { localStorage.setItem('bb_exposures_view', v); } catch (e) {}
+    if (viewToggleEl) {
+      viewToggleEl.querySelectorAll('button').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-view') === v);
+      });
+    }
+    if (rowLabelEl) rowLabelEl.textContent = v === 'stacks' ? 'teams' : 'players';
+    // Stacks view doesn't use the position filter.
+    if (posEl) posEl.style.display = v === 'stacks' ? 'none' : '';
+    render();
+  }
 
   var TT = {
     pctDrafted: '% of your rosters that contain this player.\n\nFormula: rosters with player / total rosters.\n\nHeat-mapped green→red relative to the currently visible rows.',
@@ -82,13 +107,70 @@
     return sign + clv.toFixed(1);
   }
 
+  // Shared heat-map style used by both views.
+  function heatStyle(v, range, opts) {
+    opts = opts || {};
+    if (range == null || v == null || isNaN(v)) return '';
+    var t = (v - range.min) / (range.max - range.min);
+    if (opts.invert) t = 1 - t;
+    if (t < 0) t = 0; else if (t > 1) t = 1;
+    var curved = t < 0.5
+      ? 0.5 * Math.pow(2 * t, 1.4)
+      : 1 - 0.5 * Math.pow(2 * (1 - t), 1.4);
+    var hue = Math.round(curved * 120);
+    return ' style="background: hsla(' + hue + ', 85%, 50%, 0.38);"';
+  }
+  function rangeFor(rows, getter) {
+    var min = Infinity, max = -Infinity;
+    rows.forEach(function (r) {
+      var v = typeof getter === 'function' ? getter(r) : r[getter];
+      if (v == null || isNaN(v)) return;
+      if (v < min) min = v;
+      if (v > max) max = v;
+    });
+    if (!isFinite(min) || !isFinite(max) || min === max) return null;
+    return { min: min, max: max };
+  }
+
+  function renderPositionSummary(rosters) {
+    if (!rosters.length) { posSummaryEl.innerHTML = ''; return; }
+    var summary = BB.computePositionSummary(rosters);
+    var html = '<div class="position-cards">' + summary.map(function (s) {
+      var top = s.topPlayers.length
+        ? s.topPlayers.map(function (p) {
+            var logo = p.team ? BB.teamLogoHTML(p.team, { size: 14 }) : '';
+            return '<li>' + logo + '<a href="player.html?name=' + encodeURIComponent(p.player) + '" class="pc-name">' + escapeHtml(p.player) + '</a>' +
+                   '<span class="pc-pct">' + BB.fmtPct(p.pct) + '</span></li>';
+          }).join('')
+        : '<li style="color:var(--text-muted);">No picks</li>';
+      return '<div class="card pos-card">' +
+        '<div class="pos-card-head">' +
+          '<span class="badge pos-' + s.position + '">' + s.position + '</span>' +
+          '<span class="pos-card-stats">' +
+            '<strong>' + s.count + '</strong> picks · ' + BB.fmtPct(s.pctOfTotal) +
+            (s.avgPick != null ? ' · avg pick ' + s.avgPick.toFixed(1) : '') +
+          '</span>' +
+        '</div>' +
+        '<ol class="pos-card-top">' + top + '</ol>' +
+      '</div>';
+    }).join('') + '</div>';
+    posSummaryEl.innerHTML = html;
+  }
+
   function render() {
     var rosters = getFilteredRosters();
+    renderPositionSummary(rosters);
     if (!rosters.length) {
       contentEl.innerHTML = '<div class="empty-state"><h2>No rosters match these filters</h2><p>Try clearing filters or <a href="index.html">upload a CSV</a>.</p></div>';
       rowCountEl.textContent = '0';
+      var sf = document.getElementById('sf-note'); if (sf) sf.textContent = '';
       return;
     }
+    if (state.view === 'stacks') return renderStacks(rosters);
+    return renderPlayers(rosters);
+  }
+
+  function renderPlayers(rosters) {
     var rows = BB.computeExposures(rosters);
     var superflexExcluded = rows.__superflexExcluded || 0;
     var search = state.search.toLowerCase().trim();
@@ -99,8 +181,8 @@
     });
     rows.__superflexExcluded = superflexExcluded;
 
-    var key = state.sortKey;
-    var dir = state.sortDir === 'asc' ? 1 : -1;
+    var key = state.playersSortKey;
+    var dir = state.playersSortDir === 'asc' ? 1 : -1;
     rows.sort(function (a, b) {
       var av, bv;
       if (key === 'player' || key === 'position' || key === 'team') {
@@ -129,7 +211,7 @@
       : '';
 
     var head = '<thead><tr>' + COLS.map(function (c) {
-      var ind = c.key === state.sortKey ? (state.sortDir === 'asc' ? '↑' : '↓') : '';
+      var ind = c.key === state.playersSortKey ? (state.playersSortDir === 'asc' ? '↑' : '↓') : '';
       var classes = (c.num ? 'num ' : '') + (c.sortable ? 'sortable' : '') + (c.tooltip ? ' tooltip-trigger' : '');
       var ttAttr = c.tooltip ? ' data-tooltip="' + c.tooltip.replace(/"/g, '&quot;') + '"' : '';
       var info = c.tooltip ? ' <span class="info-mark">ⓘ</span>' : '';
@@ -142,32 +224,8 @@
     // Heat-map ranges for % Drafted and % of Fees — relative to the
     // currently visible rows so the gradient highlights your portfolio's
     // own spread, not a fixed 0-100% scale.
-    function rangeFor(key) {
-      var min = Infinity, max = -Infinity;
-      rows.forEach(function (r) {
-        var v = r[key];
-        if (v == null || isNaN(v)) return;
-        if (v < min) min = v;
-        if (v > max) max = v;
-      });
-      if (!isFinite(min) || !isFinite(max) || min === max) return null;
-      return { min: min, max: max };
-    }
-    var rExp = rangeFor('exposurePct');
-    var rFees = rangeFor('feesPct');
-    function heatStyle(v, range) {
-      if (range == null || v == null || isNaN(v)) return '';
-      var t = (v - range.min) / (range.max - range.min);
-      if (t < 0) t = 0; else if (t > 1) t = 1;
-      // Push the midpoint away from neutral so extremes pop more.
-      // Curve maps 0→0, 0.5→0.5, 1→1 but pulls the middle out toward the ends.
-      var curved = t < 0.5
-        ? 0.5 * Math.pow(2 * t, 1.4)
-        : 1 - 0.5 * Math.pow(2 * (1 - t), 1.4);
-      var hue = Math.round(curved * 120);
-      // Bumped alpha + saturation for a more dramatic spread.
-      return ' style="background: hsla(' + hue + ', 85%, 50%, 0.38);"';
-    }
+    var rExp = rangeFor(rows, 'exposurePct');
+    var rFees = rangeFor(rows, 'feesPct');
 
     var body = '<tbody>' + rows.map(function (r) {
       var denom = (r.count && r.exposurePct) ? Math.round(r.count / r.exposurePct) : totalRosters;
@@ -191,8 +249,111 @@
     contentEl.querySelectorAll('th.sortable').forEach(function (th) {
       th.addEventListener('click', function () {
         var k = th.getAttribute('data-key');
-        if (state.sortKey === k) state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
-        else { state.sortKey = k; state.sortDir = (k === 'player' || k === 'position' || k === 'team') ? 'asc' : 'desc'; }
+        if (state.playersSortKey === k) {
+          state.playersSortDir = state.playersSortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          state.playersSortKey = k;
+          state.playersSortDir = (k === 'player' || k === 'position' || k === 'team') ? 'asc' : 'desc';
+        }
+        render();
+      });
+    });
+  }
+
+  // ============================================================
+  // STACKS VIEW
+  // ============================================================
+  var STACK_TT = {
+    picks:       'Total picks across all your rosters at this team.\n\nFormula: Σ picks where pick.team = this team.',
+    pctWithTeam: '% of your rosters that contain at least one player from this team.\n\nHeat-mapped green→red across visible teams.',
+    stacks:      'Number of your rosters that contain 2 or more players from this team.',
+    stackRate:   '% of your rosters that have ≥2 players from this team.\n\nFormula: stacked rosters / total rosters.\n\nHeat-mapped green→red across visible teams.',
+    avgSize:     'Average number of players from this team on the rosters where you have a stack (2+).',
+    topCombo:    'Most common position composition on stacked rosters for this team. \"QB+WR\" means QB and one WR; \"WR+WR+TE\" means two WRs and a TE; etc.',
+    fees:        'Total entry fees of rosters containing players from this team.',
+  };
+
+  var STACK_COLS = [
+    { key: 'team',                  label: 'Team',         sortable: true },
+    { key: 'totalPicks',            label: 'Picks',        sortable: true, num: true, tooltip: STACK_TT.picks },
+    { key: 'rostersWithTeam',       label: 'Rosters',      sortable: true, num: true },
+    { key: 'pctWithTeam',           label: '% With',       sortable: true, num: true, tooltip: STACK_TT.pctWithTeam },
+    { key: 'stackedRosters',        label: 'Stacks',       sortable: true, num: true, tooltip: STACK_TT.stacks },
+    { key: 'stackRate',             label: 'Stack %',      sortable: true, num: true, tooltip: STACK_TT.stackRate },
+    { key: 'avgPlayersWhenStacked', label: 'Avg Size',     sortable: true, num: true, tooltip: STACK_TT.avgSize },
+    { key: 'topCombo',              label: 'Top Combo',    sortable: true, tooltip: STACK_TT.topCombo },
+    { key: 'fees',                  label: 'Fees',         sortable: true, num: true, tooltip: STACK_TT.fees },
+  ];
+
+  function renderStacks(rosters) {
+    var rows = BB.computeTeamStacks(rosters);
+    var s = state.search.toLowerCase().trim();
+    if (s) {
+      rows = rows.filter(function (r) {
+        if ((r.team || '').toLowerCase().indexOf(s) !== -1) return true;
+        if ((r.topCombo || '').toLowerCase().indexOf(s) !== -1) return true;
+        return false;
+      });
+    }
+
+    var key = state.stacksSortKey;
+    var dir = state.stacksSortDir === 'asc' ? 1 : -1;
+    rows.sort(function (a, b) {
+      var av, bv;
+      if (key === 'team' || key === 'topCombo') {
+        av = (a[key] || '').toLowerCase(); bv = (b[key] || '').toLowerCase();
+        return av < bv ? -1 * dir : av > bv ? 1 * dir : 0;
+      }
+      av = a[key]; bv = b[key];
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      return (av - bv) * dir;
+    });
+
+    rowCountEl.textContent = rows.length.toLocaleString();
+    var sf = document.getElementById('sf-note'); if (sf) sf.textContent = '';
+
+    var head = '<thead><tr>' + STACK_COLS.map(function (c) {
+      var ind = c.key === state.stacksSortKey ? (state.stacksSortDir === 'asc' ? '↑' : '↓') : '';
+      var classes = (c.num ? 'num ' : '') + (c.sortable ? 'sortable' : '') + (c.tooltip ? ' tooltip-trigger' : '');
+      var ttAttr = c.tooltip ? ' data-tooltip="' + c.tooltip.replace(/"/g, '&quot;') + '"' : '';
+      var info = c.tooltip ? ' <span class="info-mark">ⓘ</span>' : '';
+      return '<th class="' + classes + '" data-key="' + c.key + '"' + ttAttr + '>' +
+        c.label + info + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
+    }).join('') + '</tr></thead>';
+
+    var rPct = rangeFor(rows, 'pctWithTeam');
+    var rStack = rangeFor(rows, 'stackRate');
+
+    var body = '<tbody>' + rows.map(function (r) {
+      var teamCell = '<span class="player-cell">' + BB.teamLogoHTML(r.team, { size: 18 }) +
+        '<strong>' + escapeHtml(r.team) + '</strong></span>';
+      return '<tr>' +
+        '<td>' + teamCell + '</td>' +
+        '<td class="num">' + r.totalPicks + '</td>' +
+        '<td class="num">' + r.rostersWithTeam + '</td>' +
+        '<td class="num"' + heatStyle(r.pctWithTeam, rPct) + '>' + BB.fmtPct(r.pctWithTeam) + '</td>' +
+        '<td class="num">' + r.stackedRosters + '</td>' +
+        '<td class="num"' + heatStyle(r.stackRate, rStack) + '>' + BB.fmtPct(r.stackRate) + '</td>' +
+        '<td class="num">' + (r.avgPlayersWhenStacked != null ? r.avgPlayersWhenStacked.toFixed(2) : '—') + '</td>' +
+        '<td>' + (r.topCombo ? '<code class="stack-combo">' + escapeHtml(r.topCombo) + '</code>' +
+                  (r.topComboCount > 1 ? ' <span style="color:var(--text-muted);font-size:11px;">×' + r.topComboCount + '</span>' : '') : '—') + '</td>' +
+        '<td class="num">' + BB.fmtMoney(r.fees) + '</td>' +
+        '</tr>';
+    }).join('') + '</tbody>';
+
+    contentEl.innerHTML = '<table class="data">' + head + body + '</table>';
+
+    contentEl.querySelectorAll('th.sortable').forEach(function (th) {
+      th.addEventListener('click', function () {
+        var k = th.getAttribute('data-key');
+        if (state.stacksSortKey === k) {
+          state.stacksSortDir = state.stacksSortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          state.stacksSortKey = k;
+          state.stacksSortDir = (k === 'team' || k === 'topCombo') ? 'asc' : 'desc';
+        }
         render();
       });
     });
@@ -203,6 +364,14 @@
   platformEl.addEventListener('change', function (e) { state.platform = e.target.value; render(); });
   tourneyEl.addEventListener('change', function (e) { state.tournament = e.target.value; render(); });
 
+  if (viewToggleEl) {
+    viewToggleEl.querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        setView(b.getAttribute('data-view'));
+      });
+    });
+  }
+
   populateFilters();
-  render();
+  setView(state.view); // applies persisted view and renders
 })();
