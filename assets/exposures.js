@@ -27,7 +27,15 @@
     pos: '',
     platform: '',
     tournament: '',
+    // Which player rows are currently expanded (by normalized name).
+    expanded: {},
   };
+
+  function togglePlayerExpand(normName) {
+    if (state.expanded[normName]) delete state.expanded[normName];
+    else state.expanded[normName] = true;
+    render();
+  }
 
   function setView(v) {
     state.view = v;
@@ -170,6 +178,52 @@
     return renderPlayers(rosters);
   }
 
+  function renderComboPanel(playerRow, rosters) {
+    var report = BB.playerReport(rosters, playerRow.player);
+    var combos = (report.combos || []).slice(0, 12);
+    var liftText = function (lift) {
+      if (lift == null || isNaN(lift)) return '—';
+      return lift.toFixed(2) + 'x';
+    };
+    if (!combos.length) {
+      return '<div class="combo-panel"><p style="color:var(--text-muted);font-size:13px;margin:0;">No combo data — player is not on any visible rosters.</p></div>';
+    }
+    var header = '<div class="combo-panel-head">' +
+      '<div>' +
+        '<strong>Combo ownership for ' + escapeHtml(playerRow.player) + '</strong>' +
+        ' <span style="color:var(--text-muted);font-size:12px;">— on ' + report.exposureCount + ' of ' + report.totalRosters + ' rosters</span>' +
+      '</div>' +
+      '<a class="combo-panel-link" href="player.html?name=' + encodeURIComponent(playerRow.player) + '">Full player page →</a>' +
+    '</div>';
+
+    var rows = combos.map(function (c) {
+      var liftCls = c.lift == null ? '' : (c.lift >= 1.15 ? 'clv-pos' : (c.lift <= 0.85 ? 'clv-neg' : ''));
+      var nameCell = c.player ? BB.playerCell(c.player, c.team, { linkToPlayer: true }) : '—';
+      return '<tr>' +
+        '<td>' + nameCell + '</td>' +
+        '<td>' + (c.position ? '<span class="badge pos-' + escapeHtml(c.position) + '">' + escapeHtml(c.position) + '</span>' : '—') + '</td>' +
+        '<td>' + escapeHtml(c.team || '—') + '</td>' +
+        '<td class="num">' + c.coCount + '</td>' +
+        '<td class="num">' + BB.fmtPct(c.comboPct) + '</td>' +
+        '<td class="num">' + BB.fmtPct(c.theirExposurePct) + '</td>' +
+        '<td class="num ' + liftCls + '">' + liftText(c.lift) + '</td>' +
+        '</tr>';
+    }).join('');
+
+    return '<div class="combo-panel">' +
+      header +
+      '<table class="data combo-table"><thead><tr>' +
+        '<th>Teammate</th><th>Pos</th><th>Tm</th>' +
+        '<th class="num">Co-Drafted</th><th class="num">Combo %</th>' +
+        '<th class="num">Their %</th><th class="num">Lift</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<p class="combo-panel-foot">' +
+        '<strong>Combo %</strong> = of rosters with ' + escapeHtml(playerRow.player) + ', what fraction also have the teammate. ' +
+        '<strong>Lift</strong> = combo % ÷ teammate\'s overall %. &gt;1 means correlated, &lt;1 anti-correlated.' +
+      '</p>' +
+    '</div>';
+  }
+
   function renderPlayers(rosters) {
     var rows = BB.computeExposures(rosters);
     var superflexExcluded = rows.__superflexExcluded || 0;
@@ -226,12 +280,23 @@
     // own spread, not a fixed 0-100% scale.
     var rExp = rangeFor(rows, 'exposurePct');
     var rFees = rangeFor(rows, 'feesPct');
+    var allRosters = rosters; // captured for the combo lookup when rows expand
+    var colSpan = COLS.length;
 
     var body = '<tbody>' + rows.map(function (r) {
       var denom = (r.count && r.exposurePct) ? Math.round(r.count / r.exposurePct) : totalRosters;
-      var cell = BB.playerCell(r.player, r.team, { linkToPlayer: true });
-      return '<tr>' +
-        '<td>' + cell + '</td>' +
+      var normName = window.BB_DATA ? window.BB_DATA.normalizeName(r.player) : r.player.toLowerCase();
+      var isExpanded = !!state.expanded[normName];
+      var chevron = '<button type="button" class="row-expand-btn" data-norm="' + escapeHtml(normName) +
+        '" aria-expanded="' + isExpanded + '" aria-label="' + (isExpanded ? 'Collapse' : 'Expand') + ' combo ownership for ' + escapeHtml(r.player) + '">' +
+        '<span class="chevron">' + (isExpanded ? '▾' : '▸') + '</span>' +
+        '</button>';
+      // Inline the chevron with the player cell.
+      var playerCell = BB.playerCell(r.player, r.team, { linkToPlayer: true });
+      var combinedCell = '<span class="player-cell-with-expand">' + chevron + playerCell + '</span>';
+      var trClass = 'row-expandable' + (isExpanded ? ' is-expanded' : '');
+      var mainTr = '<tr class="' + trClass + '" data-norm="' + escapeHtml(normName) + '">' +
+        '<td>' + combinedCell + '</td>' +
         '<td>' + (r.position ? '<span class="badge pos-' + escapeHtml(r.position) + '">' + escapeHtml(r.position) + '</span>' : '—') + '</td>' +
         '<td>' + escapeHtml(r.team || '—') + '</td>' +
         '<td class="num"><span title="' + r.count + ' of ' + denom + ' rosters">' + r.count + '</span></td>' +
@@ -242,9 +307,32 @@
         '<td class="num">' + BB.fmtADP(r.marketADP) + '</td>' +
         '<td class="num ' + clvClass(r.clv) + '">' + clvText(r.clv) + '</td>' +
         '</tr>';
+      var detailTr = isExpanded
+        ? '<tr class="row-expand-detail"><td colspan="' + colSpan + '">' + renderComboPanel(r, allRosters) + '</td></tr>'
+        : '';
+      return mainTr + detailTr;
     }).join('') + '</tbody>';
 
     contentEl.innerHTML = '<table class="data">' + head + body + '</table>';
+
+    // Wire up expand toggles. Use the chevron button as the click target so
+    // clicks on the player name link, the row background, etc. don't fight
+    // for the same event.
+    contentEl.querySelectorAll('.row-expand-btn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        togglePlayerExpand(btn.getAttribute('data-norm'));
+      });
+    });
+    // Allow clicking anywhere on the row (outside the name link / sort header)
+    // to toggle as well — better discoverability than icon-only.
+    contentEl.querySelectorAll('tr.row-expandable').forEach(function (tr) {
+      tr.addEventListener('click', function (e) {
+        if (e.target.closest('a')) return;
+        if (e.target.closest('.row-expand-btn')) return;
+        togglePlayerExpand(tr.getAttribute('data-norm'));
+      });
+    });
 
     contentEl.querySelectorAll('th.sortable').forEach(function (th) {
       th.addEventListener('click', function () {
