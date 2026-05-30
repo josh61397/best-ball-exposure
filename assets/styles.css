@@ -507,17 +507,17 @@ code.stack-combo {
   padding: 0;
 }
 .combo-panel {
-  padding: 16px 20px;
+  padding: 10px 14px 12px;
   border-top: 1px solid var(--border);
 }
 .combo-panel-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
   gap: 12px;
   flex-wrap: wrap;
-  font-size: 13px;
+  font-size: 12.5px;
 }
 .combo-panel-link {
   font-size: 12px;
@@ -528,13 +528,27 @@ table.combo-table {
 }
 table.combo-table th,
 table.combo-table td {
-  font-size: 12.5px;
+  font-size: 12px;
+  padding: 3px 10px;
+  line-height: 1.3;
+}
+table.combo-table th {
+  font-size: 10px;
+  padding: 4px 10px;
+}
+table.combo-table .team-logo {
+  width: 14px;
+  height: 14px;
+}
+table.combo-table .badge {
+  padding: 1px 5px;
+  font-size: 10px;
 }
 .combo-panel-foot {
-  margin: 10px 2px 0;
+  margin: 6px 2px 0;
   color: var(--text-muted);
-  font-size: 11.5px;
-  line-height: 1.5;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 /* Hover tooltips on column headers and any other element with data-tooltip. */

@@ -180,7 +180,7 @@
 
   function renderComboPanel(playerRow, rosters) {
     var report = BB.playerReport(rosters, playerRow.player);
-    var combos = (report.combos || []).slice(0, 12);
+    var combos = (report.combos || []).slice(0, 8);
     var liftText = function (lift) {
       if (lift == null || isNaN(lift)) return '—';
       return lift.toFixed(2) + 'x';
@@ -198,7 +198,7 @@
 
     var rows = combos.map(function (c) {
       var liftCls = c.lift == null ? '' : (c.lift >= 1.15 ? 'clv-pos' : (c.lift <= 0.85 ? 'clv-neg' : ''));
-      var nameCell = c.player ? BB.playerCell(c.player, c.team, { linkToPlayer: true }) : '—';
+      var nameCell = c.player ? BB.playerCell(c.player, c.team, { linkToPlayer: true, size: 14 }) : '—';
       return '<tr>' +
         '<td>' + nameCell + '</td>' +
         '<td>' + (c.position ? '<span class="badge pos-' + escapeHtml(c.position) + '">' + escapeHtml(c.position) + '</span>' : '—') + '</td>' +
