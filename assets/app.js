@@ -892,6 +892,99 @@
     });
   };
 
+  // ---------- player stacks ----------
+  // Generate all C(n, k) combinations of items in `arr`. Iterative for perf.
+  function _combinations(arr, k) {
+    var result = [];
+    var n = arr.length;
+    if (k > n || k <= 0) return result;
+    var indices = [];
+    for (var i = 0; i < k; i++) indices.push(i);
+    while (true) {
+      var combo = [];
+      for (var j = 0; j < k; j++) combo.push(arr[indices[j]]);
+      result.push(combo);
+      var p;
+      for (p = k - 1; p >= 0; p--) {
+        if (indices[p] !== n - k + p) break;
+      }
+      if (p < 0) break;
+      indices[p]++;
+      for (var q = p + 1; q < k; q++) indices[q] = indices[q - 1] + 1;
+    }
+    return result;
+  }
+
+  // Tally which player groupings show up together across your rosters.
+  // opts:
+  //   size: 2 (default) or 3 — players per stack
+  //   requirePos: 'QB' | null — if set, only count stacks containing that position
+  // Returns array of {
+  //   players: [{ player, position, team }, ...],   // sorted by position (QB first)
+  //   type: 'QB+WR' / 'QB+RB+WR' / etc.,
+  //   count, pct,                                    // count = # rosters with this stack
+  //   fees,                                          // sum of entry fees of those rosters
+  // }
+  BB.computePlayerStacks = function (rosters, opts) {
+    opts = opts || {};
+    var size = opts.size === 3 ? 3 : 2;
+    var requirePos = opts.requirePos || null;
+    var totalRosters = rosters.length || 0;
+    var posOrder = { QB: 0, RB: 1, WR: 2, TE: 3 };
+    var normalize = window.BB_DATA && window.BB_DATA.normalizeName
+      ? window.BB_DATA.normalizeName
+      : function (s) { return String(s || '').toLowerCase().trim(); };
+    var stacks = {};
+
+    rosters.forEach(function (roster) {
+      var picks = (roster.picks || []).filter(function (p) {
+        return p.player && p.position;
+      });
+      if (picks.length < size) return;
+      var combos = _combinations(picks, size);
+      var seen = {};
+      combos.forEach(function (combo) {
+        if (requirePos && !combo.some(function (p) { return p.position === requirePos; })) return;
+        // Stable sort: QB first, then position order, then name.
+        var sorted = combo.slice().sort(function (a, b) {
+          var ao = posOrder[a.position] != null ? posOrder[a.position] : 9;
+          var bo = posOrder[b.position] != null ? posOrder[b.position] : 9;
+          if (ao !== bo) return ao - bo;
+          return (a.player || '').localeCompare(b.player || '');
+        });
+        var key = sorted.map(function (p) { return normalize(p.player); }).join('|');
+        if (seen[key]) return;
+        seen[key] = true;
+
+        if (!stacks[key]) {
+          stacks[key] = {
+            key: key,
+            players: sorted.map(function (p) {
+              return { player: p.player, position: p.position, team: p.team || '' };
+            }),
+            type: sorted.map(function (p) { return p.position; }).join('+'),
+            count: 0,
+            fees: 0,
+          };
+        }
+        stacks[key].count++;
+        stacks[key].fees += roster.entryFee || 0;
+      });
+    });
+
+    return Object.keys(stacks).map(function (k) {
+      var s = stacks[k];
+      return {
+        key: s.key,
+        players: s.players,
+        type: s.type,
+        count: s.count,
+        pct: totalRosters ? s.count / totalRosters : 0,
+        fees: s.fees,
+      };
+    });
+  };
+
   // ---------- position summary ----------
   // Per-position rollup for the hero cards on the Exposures page.
   // For each of QB/RB/WR/TE, returns:

@@ -20,6 +20,7 @@
       { href: 'index.html', label: 'Upload' },
       { href: 'exposures.html', label: 'Exposures' },
       { href: 'stacks.html', label: 'Stacks' },
+      { href: 'player-stacks.html', label: 'Player Stacks' },
       { href: 'rosters.html', label: 'Rosters' },
       { href: 'tournaments.html', label: 'Tournaments' },
       { href: 'trends.html', label: 'Trends' },

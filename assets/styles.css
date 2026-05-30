@@ -469,6 +469,57 @@ code.stack-combo {
   color: var(--text);
 }
 
+/* Player Stacks page — checkbox-pill control + stacked player cell. */
+.checkbox-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-dim);
+  user-select: none;
+}
+.checkbox-pill:hover { background: var(--bg-elev-2); color: var(--text); }
+.checkbox-pill input[type=checkbox] {
+  accent-color: var(--accent);
+  margin: 0;
+  cursor: pointer;
+}
+.checkbox-pill input[type=checkbox]:checked + span { color: var(--text); }
+
+.stack-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.stack-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  min-width: 0;
+}
+.stack-row .team-logo { flex-shrink: 0; }
+.stack-row a {
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stack-row .stack-team {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+table.player-stacks-table tbody tr td {
+  vertical-align: middle;
+}
+
 /* Expandable player rows on the Exposures page. */
 .row-expandable { cursor: pointer; }
 .row-expandable.is-expanded > td:first-child {
