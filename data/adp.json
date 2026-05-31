@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-30T11:25:13+00:00",
+  "lastUpdated": "2026-05-31T11:42:48+00:00",
   "source": "https://www.fantasypros.com/nfl/adp/best-ball-overall.php",
   "adp": [
     {
@@ -138,7 +138,7 @@
       "name": "De'Von Achane",
       "pos": "RB",
       "team": "MIA",
-      "ud": 13.0,
+      "ud": 14.0,
       "dk": 15.0,
       "ffpc": null,
       "drafters": 13.0,
@@ -149,7 +149,7 @@
       "name": "Saquon Barkley",
       "pos": "RB",
       "team": "PHI",
-      "ud": 14.0,
+      "ud": 13.0,
       "dk": 16.0,
       "ffpc": null,
       "drafters": 14.0,
@@ -168,6 +168,17 @@
       "rtsports": 17.0
     },
     {
+      "name": "Chase Brown",
+      "pos": "RB",
+      "team": "CIN",
+      "ud": 18.0,
+      "dk": 23.0,
+      "ffpc": null,
+      "drafters": 16.0,
+      "bb10": 15.0,
+      "rtsports": 16.0
+    },
+    {
       "name": "Kenneth Walker III",
       "pos": "RB",
       "team": "KC",
@@ -179,17 +190,6 @@
       "rtsports": 21.0
     },
     {
-      "name": "Chase Brown",
-      "pos": "RB",
-      "team": "CIN",
-      "ud": 18.0,
-      "dk": 24.0,
-      "ffpc": null,
-      "drafters": 16.0,
-      "bb10": 15.0,
-      "rtsports": 16.0
-    },
-    {
       "name": "Trey McBride",
       "pos": "TE",
       "team": "ARI",
@@ -197,8 +197,19 @@
       "dk": 11.0,
       "ffpc": null,
       "drafters": 22.0,
-      "bb10": 18.0,
+      "bb10": 19.0,
       "rtsports": 15.0
+    },
+    {
+      "name": "Drake London",
+      "pos": "WR",
+      "team": "ATL",
+      "ud": 19.0,
+      "dk": 17.0,
+      "ffpc": null,
+      "drafters": 17.0,
+      "bb10": 18.0,
+      "rtsports": 22.0
     },
     {
       "name": "Brock Bowers",
@@ -212,25 +223,14 @@
       "rtsports": 18.0
     },
     {
-      "name": "Drake London",
-      "pos": "WR",
-      "team": "ATL",
-      "ud": 19.0,
-      "dk": 17.0,
-      "ffpc": null,
-      "drafters": 17.0,
-      "bb10": 19.0,
-      "rtsports": 22.0
-    },
-    {
       "name": "Derrick Henry",
       "pos": "RB",
       "team": "BAL",
       "ud": 17.0,
-      "dk": 21.0,
+      "dk": 22.0,
       "ffpc": null,
       "drafters": 20.0,
-      "bb10": 22.0,
+      "bb10": 21.0,
       "rtsports": 23.0
     },
     {
@@ -249,7 +249,7 @@
       "pos": "WR",
       "team": "HOU",
       "ud": 23.0,
-      "dk": 22.0,
+      "dk": 21.0,
       "ffpc": null,
       "drafters": 21.0,
       "bb10": 25.0,
@@ -259,10 +259,10 @@
       "name": "Josh Allen",
       "pos": "QB",
       "team": "BUF",
-      "ud": 30.0,
+      "ud": 31.0,
       "dk": 13.0,
       "ffpc": null,
-      "drafters": 34.0,
+      "drafters": 33.0,
       "bb10": 27.0,
       "rtsports": 19.0
     },
@@ -271,7 +271,7 @@
       "pos": "WR",
       "team": "DAL",
       "ud": 22.0,
-      "dk": 23.0,
+      "dk": 24.0,
       "ffpc": null,
       "drafters": 25.0,
       "bb10": 26.0,
@@ -284,20 +284,9 @@
       "ud": 24.0,
       "dk": 29.0,
       "ffpc": null,
-      "drafters": 31.0,
+      "drafters": 32.0,
       "bb10": 24.0,
       "rtsports": 24.0
-    },
-    {
-      "name": "Rashee Rice",
-      "pos": "WR",
-      "team": "KC",
-      "ud": 29.0,
-      "dk": 30.0,
-      "ffpc": null,
-      "drafters": 28.0,
-      "bb10": 21.0,
-      "rtsports": 31.0
     },
     {
       "name": "A.J. Brown",
@@ -307,19 +296,41 @@
       "dk": 28.0,
       "ffpc": null,
       "drafters": 24.0,
-      "bb10": 31.0,
+      "bb10": 30.0,
       "rtsports": 32.0
+    },
+    {
+      "name": "Rashee Rice",
+      "pos": "WR",
+      "team": "KC",
+      "ud": 29.0,
+      "dk": 30.0,
+      "ffpc": null,
+      "drafters": 29.0,
+      "bb10": 22.0,
+      "rtsports": 31.0
     },
     {
       "name": "Chris Olave",
       "pos": "WR",
       "team": "NO",
-      "ud": 31.0,
+      "ud": 30.0,
       "dk": 25.0,
       "ffpc": null,
       "drafters": 26.0,
-      "bb10": 30.0,
+      "bb10": 31.0,
       "rtsports": 30.0
+    },
+    {
+      "name": "Breece Hall",
+      "pos": "RB",
+      "team": "NYJ",
+      "ud": 27.0,
+      "dk": 40.0,
+      "ffpc": null,
+      "drafters": 27.0,
+      "bb10": 32.0,
+      "rtsports": 28.0
     },
     {
       "name": "Kyren Williams",
@@ -328,31 +339,9 @@
       "ud": 33.0,
       "dk": 32.0,
       "ffpc": null,
-      "drafters": 33.0,
+      "drafters": 31.0,
       "bb10": 29.0,
-      "rtsports": 28.0
-    },
-    {
-      "name": "Breece Hall",
-      "pos": "RB",
-      "team": "NYJ",
-      "ud": 27.0,
-      "dk": 41.0,
-      "ffpc": null,
-      "drafters": 27.0,
-      "bb10": 32.0,
       "rtsports": 29.0
-    },
-    {
-      "name": "Josh Jacobs",
-      "pos": "RB",
-      "team": "GB",
-      "ud": 34.0,
-      "dk": 44.0,
-      "ffpc": null,
-      "drafters": 32.0,
-      "bb10": 28.0,
-      "rtsports": 25.0
     },
     {
       "name": "Travis Etienne Jr.",
@@ -361,15 +350,26 @@
       "ud": 28.0,
       "dk": 42.0,
       "ffpc": null,
-      "drafters": 30.0,
+      "drafters": 28.0,
       "bb10": 34.0,
       "rtsports": 34.0
+    },
+    {
+      "name": "Josh Jacobs",
+      "pos": "RB",
+      "team": "GB",
+      "ud": 37.0,
+      "dk": 47.0,
+      "ffpc": null,
+      "drafters": 36.0,
+      "bb10": 28.0,
+      "rtsports": 25.0
     },
     {
       "name": "Javonte Williams",
       "pos": "RB",
       "team": "DAL",
-      "ud": 36.0,
+      "ud": 35.0,
       "dk": 38.0,
       "ffpc": null,
       "drafters": 39.0,
@@ -383,7 +383,7 @@
       "ud": 32.0,
       "dk": 35.0,
       "ffpc": null,
-      "drafters": 29.0,
+      "drafters": 30.0,
       "bb10": 39.0,
       "rtsports": 48.0
     },
@@ -391,32 +391,21 @@
       "name": "Tee Higgins",
       "pos": "WR",
       "team": "CIN",
-      "ud": 35.0,
+      "ud": 34.0,
       "dk": 34.0,
       "ffpc": null,
-      "drafters": 37.0,
+      "drafters": 38.0,
       "bb10": 36.0,
       "rtsports": 43.0
-    },
-    {
-      "name": "Tetairoa McMillan",
-      "pos": "WR",
-      "team": "CAR",
-      "ud": 38.0,
-      "dk": 40.0,
-      "ffpc": null,
-      "drafters": 40.0,
-      "bb10": 35.0,
-      "rtsports": 41.0
     },
     {
       "name": "Zay Flowers",
       "pos": "WR",
       "team": "BAL",
-      "ud": 37.0,
+      "ud": 36.0,
       "dk": 39.0,
       "ffpc": null,
-      "drafters": 35.0,
+      "drafters": 34.0,
       "bb10": 37.0,
       "rtsports": 47.0
     },
@@ -432,13 +421,24 @@
       "rtsports": 37.0
     },
     {
+      "name": "Tetairoa McMillan",
+      "pos": "WR",
+      "team": "CAR",
+      "ud": 38.0,
+      "dk": 41.0,
+      "ffpc": null,
+      "drafters": 41.0,
+      "bb10": 35.0,
+      "rtsports": 41.0
+    },
+    {
       "name": "Garrett Wilson",
       "pos": "WR",
       "team": "NYJ",
       "ud": 39.0,
-      "dk": 45.0,
+      "dk": 44.0,
       "ffpc": null,
-      "drafters": 36.0,
+      "drafters": 35.0,
       "bb10": 38.0,
       "rtsports": 46.0
     },
@@ -449,19 +449,19 @@
       "ud": 40.0,
       "dk": 37.0,
       "ffpc": null,
-      "drafters": 41.0,
-      "bb10": 44.0,
+      "drafters": 40.0,
+      "bb10": 43.0,
       "rtsports": 42.0
     },
     {
       "name": "Cam Skattebo",
       "pos": "RB",
       "team": "NYG",
-      "ud": 42.0,
+      "ud": 43.0,
       "dk": 48.0,
       "ffpc": null,
       "drafters": 44.0,
-      "bb10": 41.0,
+      "bb10": 40.0,
       "rtsports": 36.0
     },
     {
@@ -471,9 +471,9 @@
       "ud": 41.0,
       "dk": 49.0,
       "ffpc": null,
-      "drafters": 38.0,
-      "bb10": 43.0,
-      "rtsports": 50.0
+      "drafters": 37.0,
+      "bb10": 42.0,
+      "rtsports": 51.0
     },
     {
       "name": "Lamar Jackson",
@@ -482,86 +482,97 @@
       "ud": 56.0,
       "dk": 31.0,
       "ffpc": null,
-      "drafters": 55.0,
-      "bb10": 47.0,
+      "drafters": 56.0,
+      "bb10": 48.0,
       "rtsports": 40.0
-    },
-    {
-      "name": "Bucky Irving",
-      "pos": "RB",
-      "team": "TB",
-      "ud": 47.0,
-      "dk": 65.0,
-      "ffpc": null,
-      "drafters": 52.0,
-      "bb10": 40.0,
-      "rtsports": 35.0
     },
     {
       "name": "DJ Moore",
       "pos": "WR",
       "team": "BUF",
       "ud": 54.0,
-      "dk": 47.0,
+      "dk": 46.0,
       "ffpc": null,
       "drafters": 43.0,
       "bb10": 61.0,
-      "rtsports": 38.0
+      "rtsports": 39.0
     },
     {
       "name": "Luther Burden III",
       "pos": "WR",
       "team": "CHI",
-      "ud": 43.0,
+      "ud": 42.0,
       "dk": 57.0,
       "ffpc": null,
-      "drafters": 47.0,
+      "drafters": 46.0,
       "bb10": 45.0,
       "rtsports": 53.0
+    },
+    {
+      "name": "Bucky Irving",
+      "pos": "RB",
+      "team": "TB",
+      "ud": 50.0,
+      "dk": 66.0,
+      "ffpc": null,
+      "drafters": 54.0,
+      "bb10": 41.0,
+      "rtsports": 35.0
     },
     {
       "name": "David Montgomery",
       "pos": "RB",
       "team": "HOU",
       "ud": 49.0,
-      "dk": 52.0,
+      "dk": 53.0,
       "ffpc": null,
       "drafters": 51.0,
-      "bb10": 48.0,
+      "bb10": 47.0,
       "rtsports": 49.0
-    },
-    {
-      "name": "Davante Adams",
-      "pos": "WR",
-      "team": "LAR",
-      "ud": 52.0,
-      "dk": 46.0,
-      "ffpc": null,
-      "drafters": 46.0,
-      "bb10": 49.0,
-      "rtsports": 59.0
     },
     {
       "name": "Quinshon Judkins",
       "pos": "RB",
       "team": "CLE",
       "ud": 55.0,
-      "dk": 53.0,
+      "dk": 52.0,
       "ffpc": null,
       "drafters": 58.0,
       "bb10": 50.0,
-      "rtsports": 39.0
+      "rtsports": 38.0
+    },
+    {
+      "name": "Davante Adams",
+      "pos": "WR",
+      "team": "LAR",
+      "ud": 52.0,
+      "dk": 45.0,
+      "ffpc": null,
+      "drafters": 47.0,
+      "bb10": 49.0,
+      "rtsports": 60.0
     },
     {
       "name": "TreVeyon Henderson",
       "pos": "RB",
       "team": "NE",
       "ud": 48.0,
-      "dk": 64.0,
+      "dk": 63.0,
       "ffpc": null,
       "drafters": 57.0,
-      "bb10": 42.0,
+      "bb10": 44.0,
       "rtsports": 44.0
+    },
+    {
+      "name": "Terry McLaurin",
+      "pos": "WR",
+      "team": "WAS",
+      "ud": 47.0,
+      "dk": 56.0,
+      "ffpc": null,
+      "drafters": 45.0,
+      "bb10": 54.0,
+      "rtsports": 59.0
     },
     {
       "name": "Joe Burrow",
@@ -570,31 +581,20 @@
       "ud": 63.0,
       "dk": 33.0,
       "ffpc": null,
-      "drafters": 64.0,
+      "drafters": 65.0,
       "bb10": 53.0,
-      "rtsports": 51.0
-    },
-    {
-      "name": "Terry McLaurin",
-      "pos": "WR",
-      "team": "WAS",
-      "ud": 50.0,
-      "dk": 56.0,
-      "ffpc": null,
-      "drafters": 45.0,
-      "bb10": 56.0,
-      "rtsports": 61.0
+      "rtsports": 50.0
     },
     {
       "name": "Jameson Williams",
       "pos": "WR",
       "team": "DET",
       "ud": 46.0,
-      "dk": 61.0,
+      "dk": 62.0,
       "ffpc": null,
       "drafters": 50.0,
       "bb10": 51.0,
-      "rtsports": 60.0
+      "rtsports": 61.0
     },
     {
       "name": "Jaylen Waddle",
@@ -603,9 +603,9 @@
       "ud": 51.0,
       "dk": 55.0,
       "ffpc": null,
-      "drafters": 48.0,
+      "drafters": 49.0,
       "bb10": 52.0,
-      "rtsports": 62.0
+      "rtsports": 63.0
     },
     {
       "name": "Mike Evans",
@@ -614,26 +614,26 @@
       "ud": 44.0,
       "dk": 51.0,
       "ffpc": null,
-      "drafters": 54.0,
+      "drafters": 53.0,
       "bb10": 57.0,
-      "rtsports": 65.0
+      "rtsports": 66.0
     },
     {
       "name": "D'Andre Swift",
       "pos": "RB",
       "team": "CHI",
       "ud": 53.0,
-      "dk": 66.0,
+      "dk": 65.0,
       "ffpc": null,
-      "drafters": 49.0,
-      "bb10": 54.0,
+      "drafters": 48.0,
+      "bb10": 55.0,
       "rtsports": 54.0
     },
     {
       "name": "Tyler Warren",
       "pos": "TE",
       "team": "IND",
-      "ud": 66.0,
+      "ud": 65.0,
       "dk": 36.0,
       "ffpc": null,
       "drafters": 67.0,
@@ -645,7 +645,7 @@
       "pos": "RB",
       "team": "SEA",
       "ud": 58.0,
-      "dk": 62.0,
+      "dk": 61.0,
       "ffpc": null,
       "drafters": 59.0,
       "bb10": 64.0,
@@ -659,18 +659,18 @@
       "dk": 43.0,
       "ffpc": null,
       "drafters": 71.0,
-      "bb10": 55.0,
+      "bb10": 56.0,
       "rtsports": 55.0
     },
     {
       "name": "Jayden Daniels",
       "pos": "QB",
       "team": "WAS",
-      "ud": 65.0,
+      "ud": 66.0,
       "dk": 50.0,
       "ffpc": null,
       "drafters": 66.0,
-      "bb10": 62.0,
+      "bb10": 63.0,
       "rtsports": 57.0
     },
     {
@@ -680,8 +680,8 @@
       "ud": 57.0,
       "dk": 67.0,
       "ffpc": null,
-      "drafters": 56.0,
-      "bb10": 58.0,
+      "drafters": 55.0,
+      "bb10": 59.0,
       "rtsports": 64.0
     },
     {
@@ -689,10 +689,10 @@
       "pos": "RB",
       "team": "JAC",
       "ud": 61.0,
-      "dk": 74.0,
+      "dk": 72.0,
       "ffpc": null,
-      "drafters": 60.0,
-      "bb10": 63.0,
+      "drafters": 61.0,
+      "bb10": 62.0,
       "rtsports": 58.0
     },
     {
@@ -702,8 +702,8 @@
       "ud": 59.0,
       "dk": 69.0,
       "ffpc": null,
-      "drafters": 53.0,
-      "bb10": 59.0,
+      "drafters": 52.0,
+      "bb10": 58.0,
       "rtsports": 84.0
     },
     {
@@ -711,53 +711,53 @@
       "pos": "QB",
       "team": "CHI",
       "ud": 70.0,
-      "dk": 59.0,
+      "dk": 58.0,
       "ffpc": null,
       "drafters": 70.0,
-      "bb10": 66.0,
-      "rtsports": 71.0
-    },
-    {
-      "name": "Jalen Hurts",
-      "pos": "QB",
-      "team": "PHI",
-      "ud": 69.0,
-      "dk": 63.0,
-      "ffpc": null,
-      "drafters": 74.0,
-      "bb10": 69.0,
-      "rtsports": 67.0
+      "bb10": 67.0,
+      "rtsports": 70.0
     },
     {
       "name": "Carnell Tate",
       "pos": "WR",
       "team": "TEN",
       "ud": 60.0,
-      "dk": 78.0,
+      "dk": 77.0,
       "ffpc": null,
-      "drafters": 61.0,
-      "bb10": 67.0,
+      "drafters": 60.0,
+      "bb10": 66.0,
       "rtsports": 78.0
+    },
+    {
+      "name": "Jalen Hurts",
+      "pos": "QB",
+      "team": "PHI",
+      "ud": 69.0,
+      "dk": 64.0,
+      "ffpc": null,
+      "drafters": 74.0,
+      "bb10": 69.0,
+      "rtsports": 67.0
     },
     {
       "name": "Marvin Harrison Jr.",
       "pos": "WR",
       "team": "ARI",
       "ud": 67.0,
-      "dk": 73.0,
+      "dk": 75.0,
       "ffpc": null,
-      "drafters": 63.0,
-      "bb10": 72.0,
-      "rtsports": 73.0
+      "drafters": 64.0,
+      "bb10": 70.0,
+      "rtsports": 72.0
     },
     {
       "name": "Chuba Hubbard",
       "pos": "RB",
       "team": "CAR",
       "ud": 68.0,
-      "dk": 80.0,
+      "dk": 79.0,
       "ffpc": null,
-      "drafters": 68.0,
+      "drafters": 69.0,
       "bb10": 65.0,
       "rtsports": 68.0
     },
@@ -766,11 +766,11 @@
       "pos": "WR",
       "team": "JAC",
       "ud": 64.0,
-      "dk": 85.0,
+      "dk": 84.0,
       "ffpc": null,
-      "drafters": 69.0,
-      "bb10": 81.0,
-      "rtsports": 66.0
+      "drafters": 68.0,
+      "bb10": 80.0,
+      "rtsports": 65.0
     },
     {
       "name": "Dak Prescott",
@@ -780,7 +780,7 @@
       "dk": 60.0,
       "ffpc": null,
       "drafters": 79.0,
-      "bb10": 79.0,
+      "bb10": 78.0,
       "rtsports": 74.0
     },
     {
@@ -788,7 +788,7 @@
       "pos": "WR",
       "team": "NO",
       "ud": 62.0,
-      "dk": 83.0,
+      "dk": 85.0,
       "ffpc": null,
       "drafters": 62.0,
       "bb10": 82.0,
@@ -798,8 +798,8 @@
       "name": "Harold Fannin Jr.",
       "pos": "TE",
       "team": "CLE",
-      "ud": 94.0,
-      "dk": 58.0,
+      "ud": 95.0,
+      "dk": 59.0,
       "ffpc": null,
       "drafters": 92.0,
       "bb10": 77.0,
@@ -810,33 +810,33 @@
       "pos": "RB",
       "team": "NE",
       "ud": 75.0,
-      "dk": 84.0,
+      "dk": 82.0,
       "ffpc": null,
       "drafters": 72.0,
-      "bb10": 80.0,
-      "rtsports": 72.0
-    },
-    {
-      "name": "Tucker Kraft",
-      "pos": "TE",
-      "team": "GB",
-      "ud": 80.0,
-      "dk": 54.0,
-      "ffpc": null,
-      "drafters": 87.0,
-      "bb10": 84.0,
-      "rtsports": 80.0
+      "bb10": 81.0,
+      "rtsports": 73.0
     },
     {
       "name": "Alec Pierce",
       "pos": "WR",
       "team": "IND",
       "ud": 72.0,
-      "dk": 82.0,
+      "dk": 81.0,
       "ffpc": null,
       "drafters": 75.0,
       "bb10": 76.0,
-      "rtsports": 83.0
+      "rtsports": 82.0
+    },
+    {
+      "name": "Tucker Kraft",
+      "pos": "TE",
+      "team": "GB",
+      "ud": 81.0,
+      "dk": 54.0,
+      "ffpc": null,
+      "drafters": 87.0,
+      "bb10": 85.0,
+      "rtsports": 81.0
     },
     {
       "name": "RJ Harvey",
@@ -847,29 +847,29 @@
       "ffpc": null,
       "drafters": 85.0,
       "bb10": 71.0,
-      "rtsports": 63.0
+      "rtsports": 62.0
+    },
+    {
+      "name": "Parker Washington",
+      "pos": "WR",
+      "team": "JAC",
+      "ud": 73.0,
+      "dk": 74.0,
+      "ffpc": null,
+      "drafters": 63.0,
+      "bb10": 84.0,
+      "rtsports": 95.0
     },
     {
       "name": "Jaylen Warren",
       "pos": "RB",
       "team": "PIT",
       "ud": 78.0,
-      "dk": 94.0,
+      "dk": 93.0,
       "ffpc": null,
       "drafters": 77.0,
       "bb10": 68.0,
-      "rtsports": 75.0
-    },
-    {
-      "name": "Parker Washington",
-      "pos": "WR",
-      "team": "JAC",
-      "ud": 74.0,
-      "dk": 75.0,
-      "ffpc": null,
-      "drafters": 65.0,
-      "bb10": 85.0,
-      "rtsports": 95.0
+      "rtsports": 76.0
     },
     {
       "name": "DK Metcalf",
@@ -879,18 +879,18 @@
       "dk": 86.0,
       "ffpc": null,
       "drafters": 73.0,
-      "bb10": 74.0,
-      "rtsports": 92.0
+      "bb10": 73.0,
+      "rtsports": 90.0
     },
     {
       "name": "Justin Herbert",
       "pos": "QB",
       "team": "LAC",
       "ud": 83.0,
-      "dk": 77.0,
+      "dk": 78.0,
       "ffpc": null,
       "drafters": 81.0,
-      "bb10": 75.0,
+      "bb10": 74.0,
       "rtsports": 85.0
     },
     {
@@ -901,52 +901,52 @@
       "dk": 76.0,
       "ffpc": null,
       "drafters": 83.0,
-      "bb10": 78.0,
-      "rtsports": 81.0
+      "bb10": 79.0,
+      "rtsports": 83.0
     },
     {
       "name": "Courtland Sutton",
       "pos": "WR",
       "team": "DEN",
-      "ud": 81.0,
-      "dk": 95.0,
+      "ud": 80.0,
+      "dk": 94.0,
       "ffpc": null,
       "drafters": 84.0,
-      "bb10": 73.0,
-      "rtsports": 82.0
-    },
-    {
-      "name": "Jaxson Dart",
-      "pos": "QB",
-      "team": "NYG",
-      "ud": 93.0,
-      "dk": 81.0,
-      "ffpc": null,
-      "drafters": 93.0,
-      "bb10": 70.0,
-      "rtsports": 79.0
+      "bb10": 75.0,
+      "rtsports": 80.0
     },
     {
       "name": "Tony Pollard",
       "pos": "RB",
       "team": "TEN",
       "ud": 77.0,
-      "dk": 93.0,
+      "dk": 92.0,
       "ffpc": null,
       "drafters": 76.0,
       "bb10": 83.0,
-      "rtsports": 88.0
+      "rtsports": 87.0
+    },
+    {
+      "name": "Jaxson Dart",
+      "pos": "QB",
+      "team": "NYG",
+      "ud": 93.0,
+      "dk": 83.0,
+      "ffpc": null,
+      "drafters": 95.0,
+      "bb10": 72.0,
+      "rtsports": 79.0
     },
     {
       "name": "Sam LaPorta",
       "pos": "TE",
       "team": "DET",
       "ud": 96.0,
-      "dk": 72.0,
+      "dk": 73.0,
       "ffpc": null,
       "drafters": 94.0,
       "bb10": 96.0,
-      "rtsports": 70.0
+      "rtsports": 71.0
     },
     {
       "name": "Kyle Pitts Sr.",
@@ -955,7 +955,7 @@
       "ud": 104.0,
       "dk": 68.0,
       "ffpc": null,
-      "drafters": 105.0,
+      "drafters": 104.0,
       "bb10": 86.0,
       "rtsports": 69.0
     },
@@ -967,15 +967,15 @@
       "dk": 97.0,
       "ffpc": null,
       "drafters": 86.0,
-      "bb10": 90.0,
-      "rtsports": 77.0
+      "bb10": 89.0,
+      "rtsports": 75.0
     },
     {
       "name": "Makai Lemon",
       "pos": "WR",
       "team": "PHI",
-      "ud": 73.0,
-      "dk": 96.0,
+      "ud": 74.0,
+      "dk": 95.0,
       "ffpc": null,
       "drafters": 78.0,
       "bb10": 91.0,
@@ -986,31 +986,31 @@
       "pos": "WR",
       "team": "ARI",
       "ud": 89.0,
-      "dk": 92.0,
+      "dk": 91.0,
       "ffpc": null,
       "drafters": 89.0,
-      "bb10": 89.0,
+      "bb10": 90.0,
       "rtsports": 89.0
     },
     {
       "name": "Kyle Monangai",
       "pos": "RB",
       "team": "CHI",
-      "ud": 90.0,
+      "ud": 91.0,
       "dk": 100.0,
       "ffpc": null,
       "drafters": 98.0,
       "bb10": 87.0,
-      "rtsports": 76.0
+      "rtsports": 77.0
     },
     {
       "name": "Patrick Mahomes II",
       "pos": "QB",
       "team": "KC",
-      "ud": 91.0,
-      "dk": 79.0,
+      "ud": 90.0,
+      "dk": 80.0,
       "ffpc": null,
-      "drafters": 90.0,
+      "drafters": 91.0,
       "bb10": 95.0,
       "rtsports": 97.0
     },
@@ -1022,29 +1022,29 @@
       "dk": 99.0,
       "ffpc": null,
       "drafters": 80.0,
-      "bb10": 104.0,
-      "rtsports": 87.0
+      "bb10": 102.0,
+      "rtsports": 88.0
     },
     {
       "name": "Matthew Stafford",
       "pos": "QB",
       "team": "LAR",
       "ud": 105.0,
-      "dk": 70.0,
+      "dk": 71.0,
       "ffpc": null,
       "drafters": 101.0,
       "bb10": 88.0,
-      "rtsports": 99.0
+      "rtsports": 100.0
     },
     {
       "name": "Brock Purdy",
       "pos": "QB",
       "team": "SF",
       "ud": 98.0,
-      "dk": 90.0,
+      "dk": 88.0,
       "ffpc": null,
       "drafters": 97.0,
-      "bb10": 93.0,
+      "bb10": 92.0,
       "rtsports": 102.0
     },
     {
@@ -1052,66 +1052,77 @@
       "pos": "WR",
       "team": "GB",
       "ud": 82.0,
-      "dk": 107.0,
+      "dk": 106.0,
       "ffpc": null,
       "drafters": 82.0,
       "bb10": 111.0,
       "rtsports": 115.0
     },
     {
+      "name": "Blake Corum",
+      "pos": "RB",
+      "team": "LAR",
+      "ud": 94.0,
+      "dk": 101.0,
+      "ffpc": null,
+      "drafters": 102.0,
+      "bb10": 100.0,
+      "rtsports": 101.0
+    },
+    {
       "name": "Bo Nix",
       "pos": "QB",
       "team": "DEN",
       "ud": 102.0,
-      "dk": 105.0,
+      "dk": 107.0,
       "ffpc": null,
-      "drafters": 106.0,
+      "drafters": 107.0,
       "bb10": 97.0,
-      "rtsports": 90.0
-    },
-    {
-      "name": "Blake Corum",
-      "pos": "RB",
-      "team": "LAR",
-      "ud": 95.0,
-      "dk": 103.0,
-      "ffpc": null,
-      "drafters": 102.0,
-      "bb10": 101.0,
-      "rtsports": 100.0
+      "rtsports": 91.0
     },
     {
       "name": "Jakobi Meyers",
       "pos": "WR",
       "team": "JAC",
       "ud": 97.0,
-      "dk": 110.0,
+      "dk": 109.0,
       "ffpc": null,
       "drafters": 99.0,
       "bb10": 94.0,
-      "rtsports": 108.0
+      "rtsports": 107.0
     },
     {
       "name": "Jared Goff",
       "pos": "QB",
       "team": "DET",
-      "ud": 106.0,
+      "ud": 107.0,
       "dk": 98.0,
       "ffpc": null,
-      "drafters": 107.0,
+      "drafters": 106.0,
       "bb10": 98.0,
-      "rtsports": 101.0
+      "rtsports": 99.0
     },
     {
       "name": "Jordan Addison",
       "pos": "WR",
       "team": "MIN",
       "ud": 85.0,
-      "dk": 113.0,
+      "dk": 112.0,
       "ffpc": null,
-      "drafters": 91.0,
-      "bb10": 109.0,
+      "drafters": 90.0,
+      "bb10": 108.0,
       "rtsports": 114.0
+    },
+    {
+      "name": "Kenneth Gainwell",
+      "pos": "RB",
+      "team": "TB",
+      "ud": 109.0,
+      "dk": 105.0,
+      "ffpc": null,
+      "drafters": 93.0,
+      "bb10": 101.0,
+      "rtsports": 106.0
     },
     {
       "name": "J.K. Dobbins",
@@ -1121,125 +1132,114 @@
       "dk": 108.0,
       "ffpc": null,
       "drafters": 110.0,
-      "bb10": 102.0,
+      "bb10": 105.0,
       "rtsports": 94.0
-    },
-    {
-      "name": "Kenneth Gainwell",
-      "pos": "RB",
-      "team": "TB",
-      "ud": 111.0,
-      "dk": 104.0,
-      "ffpc": null,
-      "drafters": 95.0,
-      "bb10": 103.0,
-      "rtsports": 106.0
-    },
-    {
-      "name": "George Kittle",
-      "pos": "TE",
-      "team": "SF",
-      "ud": 120.0,
-      "dk": 71.0,
-      "ffpc": null,
-      "drafters": 120.0,
-      "bb10": 117.0,
-      "rtsports": 98.0
     },
     {
       "name": "Quentin Johnston",
       "pos": "WR",
       "team": "LAC",
       "ud": 92.0,
-      "dk": 116.0,
+      "dk": 115.0,
       "ffpc": null,
       "drafters": 88.0,
-      "bb10": 105.0,
-      "rtsports": 125.0
+      "bb10": 104.0,
+      "rtsports": 124.0
+    },
+    {
+      "name": "Michael Pittman Jr.",
+      "pos": "WR",
+      "team": "PIT",
+      "ud": 106.0,
+      "dk": 103.0,
+      "ffpc": null,
+      "drafters": 100.0,
+      "bb10": 99.0,
+      "rtsports": 117.0
+    },
+    {
+      "name": "George Kittle",
+      "pos": "TE",
+      "team": "SF",
+      "ud": 120.0,
+      "dk": 70.0,
+      "ffpc": null,
+      "drafters": 121.0,
+      "bb10": 118.0,
+      "rtsports": 98.0
     },
     {
       "name": "Ricky Pearsall",
       "pos": "WR",
       "team": "SF",
       "ud": 100.0,
-      "dk": 114.0,
+      "dk": 113.0,
       "ffpc": null,
       "drafters": 103.0,
-      "bb10": 92.0,
+      "bb10": 93.0,
       "rtsports": 118.0
-    },
-    {
-      "name": "Michael Pittman Jr.",
-      "pos": "WR",
-      "team": "PIT",
-      "ud": 107.0,
-      "dk": 106.0,
-      "ffpc": null,
-      "drafters": 100.0,
-      "bb10": 100.0,
-      "rtsports": 117.0
     },
     {
       "name": "Kyler Murray",
       "pos": "QB",
       "team": "MIN",
       "ud": 108.0,
-      "dk": 102.0,
+      "dk": 104.0,
       "ffpc": null,
       "drafters": 109.0,
-      "bb10": 106.0,
+      "bb10": 107.0,
       "rtsports": 112.0
+    },
+    {
+      "name": "Wan'Dale Robinson",
+      "pos": "WR",
+      "team": "TEN",
+      "ud": 118.0,
+      "dk": 110.0,
+      "ffpc": null,
+      "drafters": 112.0,
+      "bb10": 109.0,
+      "rtsports": 96.0
     },
     {
       "name": "Travis Kelce",
       "pos": "TE",
       "team": "KC",
       "ud": 122.0,
-      "dk": 91.0,
+      "dk": 96.0,
       "ffpc": null,
       "drafters": 118.0,
       "bb10": 121.0,
-      "rtsports": 91.0
-    },
-    {
-      "name": "Wan'Dale Robinson",
-      "pos": "WR",
-      "team": "TEN",
-      "ud": 119.0,
-      "dk": 109.0,
-      "ffpc": null,
-      "drafters": 112.0,
-      "bb10": 108.0,
-      "rtsports": 96.0
+      "rtsports": 92.0
     },
     {
       "name": "Josh Downs",
       "pos": "WR",
       "team": "IND",
       "ud": 99.0,
-      "dk": 117.0,
+      "dk": 118.0,
       "ffpc": null,
       "drafters": 96.0,
       "bb10": 114.0,
-      "rtsports": 124.0
+      "rtsports": 123.0
     },
     {
       "name": "Tyler Shough",
       "pos": "QB",
       "team": "NO",
       "ud": 113.0,
-      "dk": 111.0,
+      "dk": 114.0,
       "ffpc": null,
-      "drafters": 114.0,
-      "bb10": 99.0,
+      "drafters": 115.0,
+      "bb10": 103.0,
       "rtsports": 113.0
     },
     {
       "name": "Jordan Love",
       "pos": "QB",
       "team": "GB",
-      "ud": 110.0,
-      "dk": 112.0,
+      "ud": 111.0,
+      "dk": 111.0,
       "ffpc": null,
       "drafters": 108.0,
       "bb10": 110.0,
@@ -1249,33 +1249,33 @@
       "name": "Baker Mayfield",
       "pos": "QB",
       "team": "TB",
-      "ud": 115.0,
-      "dk": 121.0,
+      "ud": 116.0,
+      "dk": 122.0,
       "ffpc": null,
       "drafters": 117.0,
-      "bb10": 107.0,
-      "rtsports": 110.0
+      "bb10": 106.0,
+      "rtsports": 109.0
     },
     {
       "name": "Jake Ferguson",
       "pos": "TE",
       "team": "DAL",
       "ud": 126.0,
-      "dk": 101.0,
+      "dk": 102.0,
       "ffpc": null,
-      "drafters": 131.0,
+      "drafters": 132.0,
       "bb10": 112.0,
-      "rtsports": 104.0
+      "rtsports": 105.0
     },
     {
       "name": "Dalton Kincaid",
       "pos": "TE",
       "team": "BUF",
       "ud": 129.0,
-      "dk": 88.0,
+      "dk": 89.0,
       "ffpc": null,
       "drafters": 125.0,
-      "bb10": 127.0,
+      "bb10": 124.0,
       "rtsports": 111.0
     },
     {
@@ -1285,8 +1285,8 @@
       "ud": 101.0,
       "dk": 127.0,
       "ffpc": null,
-      "drafters": 104.0,
-      "bb10": 125.0,
+      "drafters": 105.0,
+      "bb10": 123.0,
       "rtsports": 128.0
     },
     {
@@ -1294,11 +1294,11 @@
       "pos": "WR",
       "team": "NE",
       "ud": 114.0,
-      "dk": 125.0,
+      "dk": 124.0,
       "ffpc": null,
       "drafters": 116.0,
       "bb10": 115.0,
-      "rtsports": 127.0
+      "rtsports": 126.0
     },
     {
       "name": "Jordan Mason",
@@ -1307,64 +1307,64 @@
       "ud": 124.0,
       "dk": 123.0,
       "ffpc": null,
-      "drafters": 132.0,
+      "drafters": 131.0,
       "bb10": 116.0,
-      "rtsports": 105.0
-    },
-    {
-      "name": "Matthew Golden",
-      "pos": "WR",
-      "team": "GB",
-      "ud": 109.0,
-      "dk": 122.0,
-      "ffpc": null,
-      "drafters": 111.0,
-      "bb10": 126.0,
-      "rtsports": 133.0
+      "rtsports": 104.0
     },
     {
       "name": "Rachaad White",
       "pos": "RB",
       "team": "WAS",
       "ud": 123.0,
-      "dk": 129.0,
+      "dk": 128.0,
       "ffpc": null,
       "drafters": 122.0,
-      "bb10": 122.0,
-      "rtsports": 107.0
+      "bb10": 119.0,
+      "rtsports": 108.0
+    },
+    {
+      "name": "Matthew Golden",
+      "pos": "WR",
+      "team": "GB",
+      "ud": 110.0,
+      "dk": 120.0,
+      "ffpc": null,
+      "drafters": 111.0,
+      "bb10": 125.0,
+      "rtsports": 135.0
     },
     {
       "name": "Isaiah Likely",
       "pos": "TE",
       "team": "NYG",
       "ud": 132.0,
-      "dk": 115.0,
+      "dk": 117.0,
       "ffpc": null,
       "drafters": 130.0,
-      "bb10": 134.0,
+      "bb10": 133.0,
       "rtsports": 93.0
-    },
-    {
-      "name": "Jacory Croskey-Merritt",
-      "pos": "RB",
-      "team": "WAS",
-      "ud": 118.0,
-      "dk": 135.0,
-      "ffpc": null,
-      "drafters": 126.0,
-      "bb10": 118.0,
-      "rtsports": 116.0
     },
     {
       "name": "Jonathon Brooks",
       "pos": "RB",
       "team": "CAR",
-      "ud": 116.0,
-      "dk": 118.0,
+      "ud": 115.0,
+      "dk": 116.0,
       "ffpc": null,
-      "drafters": 115.0,
-      "bb10": 133.0,
+      "drafters": 113.0,
+      "bb10": 132.0,
       "rtsports": 134.0
+    },
+    {
+      "name": "Jacory Croskey-Merritt",
+      "pos": "RB",
+      "team": "WAS",
+      "ud": 119.0,
+      "dk": 134.0,
+      "ffpc": null,
+      "drafters": 127.0,
+      "bb10": 117.0,
+      "rtsports": 116.0
     },
     {
       "name": "KC Concepcion",
@@ -1373,41 +1373,41 @@
       "ud": 117.0,
       "dk": 119.0,
       "ffpc": null,
-      "drafters": 121.0,
-      "bb10": 129.0,
-      "rtsports": 130.0
-    },
-    {
-      "name": "Dallas Goedert",
-      "pos": "TE",
-      "team": "PHI",
-      "ud": 135.0,
-      "dk": 89.0,
-      "ffpc": null,
-      "drafters": 128.0,
-      "bb10": 135.0,
-      "rtsports": 131.0
+      "drafters": 120.0,
+      "bb10": 128.0,
+      "rtsports": 129.0
     },
     {
       "name": "Aaron Jones Sr.",
       "pos": "RB",
       "team": "MIN",
       "ud": 121.0,
-      "dk": 126.0,
+      "dk": 125.0,
       "ffpc": null,
       "drafters": 119.0,
-      "bb10": 132.0,
-      "rtsports": 120.0
+      "bb10": 130.0,
+      "rtsports": 121.0
+    },
+    {
+      "name": "Dallas Goedert",
+      "pos": "TE",
+      "team": "PHI",
+      "ud": 135.0,
+      "dk": 90.0,
+      "ffpc": null,
+      "drafters": 128.0,
+      "bb10": 135.0,
+      "rtsports": 131.0
     },
     {
       "name": "Chris Rodriguez Jr.",
       "pos": "RB",
       "team": "JAC",
       "ud": 112.0,
-      "dk": 128.0,
+      "dk": 129.0,
       "ffpc": null,
-      "drafters": 113.0,
-      "bb10": 130.0,
+      "drafters": 114.0,
+      "bb10": 131.0,
       "rtsports": 136.0
     },
     {
@@ -1415,32 +1415,32 @@
       "pos": "TE",
       "team": "BAL",
       "ud": 127.0,
-      "dk": 120.0,
+      "dk": 121.0,
       "ffpc": null,
       "drafters": 135.0,
       "bb10": 140.0,
-      "rtsports": 109.0
+      "rtsports": 110.0
     },
     {
       "name": "Khalil Shakir",
       "pos": "WR",
       "team": "BUF",
       "ud": 128.0,
-      "dk": 131.0,
+      "dk": 130.0,
       "ffpc": null,
       "drafters": 123.0,
-      "bb10": 119.0,
-      "rtsports": 141.0
+      "bb10": 120.0,
+      "rtsports": 142.0
     },
     {
       "name": "Malik Willis",
       "pos": "QB",
       "team": "MIA",
       "ud": 131.0,
-      "dk": 130.0,
+      "dk": 131.0,
       "ffpc": null,
       "drafters": 124.0,
-      "bb10": 124.0,
+      "bb10": 126.0,
       "rtsports": 137.0
     },
     {
@@ -1448,18 +1448,18 @@
       "pos": "RB",
       "team": "NYG",
       "ud": 130.0,
-      "dk": 138.0,
+      "dk": 136.0,
       "ffpc": null,
-      "drafters": 127.0,
+      "drafters": 126.0,
       "bb10": 138.0,
-      "rtsports": 126.0
+      "rtsports": 122.0
     },
     {
       "name": "Jayden Higgins",
       "pos": "WR",
       "team": "HOU",
       "ud": 125.0,
-      "dk": 139.0,
+      "dk": 137.0,
       "ffpc": null,
       "drafters": 133.0,
       "bb10": 113.0,
@@ -1469,67 +1469,67 @@
       "name": "Oronde Gadsden II",
       "pos": "TE",
       "team": "LAC",
-      "ud": 142.0,
+      "ud": 143.0,
       "dk": 132.0,
       "ffpc": null,
       "drafters": 153.0,
-      "bb10": 120.0,
-      "rtsports": 122.0
+      "bb10": 122.0,
+      "rtsports": 127.0
     },
     {
       "name": "Sam Darnold",
       "pos": "QB",
       "team": "SEA",
       "ud": 139.0,
-      "dk": 137.0,
+      "dk": 138.0,
       "ffpc": null,
       "drafters": 138.0,
-      "bb10": 123.0,
+      "bb10": 127.0,
       "rtsports": 138.0
-    },
-    {
-      "name": "Jalen Coker",
-      "pos": "WR",
-      "team": "CAR",
-      "ud": 133.0,
-      "dk": 140.0,
-      "ffpc": null,
-      "drafters": 129.0,
-      "bb10": 128.0,
-      "rtsports": 152.0
     },
     {
       "name": "C.J. Stroud",
       "pos": "QB",
       "team": "HOU",
       "ud": 141.0,
-      "dk": 134.0,
+      "dk": 135.0,
       "ffpc": null,
       "drafters": 137.0,
-      "bb10": 131.0,
-      "rtsports": 142.0
+      "bb10": 129.0,
+      "rtsports": 141.0
+    },
+    {
+      "name": "Jalen Coker",
+      "pos": "WR",
+      "team": "CAR",
+      "ud": 134.0,
+      "dk": 140.0,
+      "ffpc": null,
+      "drafters": 129.0,
+      "bb10": 134.0,
+      "rtsports": 152.0
     },
     {
       "name": "Cam Ward",
       "pos": "QB",
       "team": "TEN",
       "ud": 136.0,
-      "dk": 141.0,
+      "dk": 145.0,
       "ffpc": null,
       "drafters": 134.0,
-      "bb10": 136.0,
-      "rtsports": 148.0
+      "bb10": 137.0,
+      "rtsports": 146.0
     },
     {
       "name": "Kenyon Sadiq",
       "pos": "TE",
       "team": "NYJ",
-      "ud": 151.0,
-      "dk": 124.0,
+      "ud": 152.0,
+      "dk": 126.0,
       "ffpc": null,
-      "drafters": 155.0,
-      "bb10": 148.0,
-      "rtsports": 123.0
+      "drafters": 156.0,
+      "bb10": 146.0,
+      "rtsports": 125.0
     },
     {
       "name": "Woody Marks",
@@ -1538,53 +1538,53 @@
       "ud": 146.0,
       "dk": 144.0,
       "ffpc": null,
-      "drafters": 144.0,
-      "bb10": 143.0,
-      "rtsports": 135.0
+      "drafters": 143.0,
+      "bb10": 142.0,
+      "rtsports": 133.0
     },
     {
       "name": "Juwan Johnson",
       "pos": "TE",
       "team": "NO",
       "ud": 156.0,
-      "dk": 136.0,
+      "dk": 139.0,
       "ffpc": null,
-      "drafters": 151.0,
+      "drafters": 150.0,
       "bb10": 144.0,
-      "rtsports": 129.0
-    },
-    {
-      "name": "Daniel Jones",
-      "pos": "QB",
-      "team": "IND",
-      "ud": 145.0,
-      "dk": 142.0,
-      "ffpc": null,
-      "drafters": 140.0,
-      "bb10": 139.0,
-      "rtsports": 153.0
+      "rtsports": 130.0
     },
     {
       "name": "Stefon Diggs",
       "pos": "WR",
       "team": "",
-      "ud": 134.0,
-      "dk": 151.0,
+      "ud": 133.0,
+      "dk": 147.0,
       "ffpc": null,
       "drafters": 136.0,
-      "bb10": 146.0,
+      "bb10": 145.0,
       "rtsports": 158.0
     },
     {
-      "name": "Bryce Young",
+      "name": "Daniel Jones",
       "pos": "QB",
-      "team": "CAR",
-      "ud": 153.0,
-      "dk": 146.0,
+      "team": "IND",
+      "ud": 144.0,
+      "dk": 142.0,
       "ffpc": null,
-      "drafters": 143.0,
-      "bb10": 141.0,
+      "drafters": 140.0,
+      "bb10": 139.0,
       "rtsports": 154.0
+    },
+    {
+      "name": "Chig Okonkwo",
+      "pos": "TE",
+      "team": "WAS",
+      "ud": 151.0,
+      "dk": 141.0,
+      "ffpc": null,
+      "drafters": 146.0,
+      "bb10": 160.0,
+      "rtsports": 139.0
     },
     {
       "name": "Isiah Pacheco",
@@ -1594,30 +1594,30 @@
       "dk": 150.0,
       "ffpc": null,
       "drafters": 139.0,
-      "bb10": 163.0,
+      "bb10": 162.0,
       "rtsports": 140.0
-    },
-    {
-      "name": "Chig Okonkwo",
-      "pos": "TE",
-      "team": "WAS",
-      "ud": 152.0,
-      "dk": 143.0,
-      "ffpc": null,
-      "drafters": 145.0,
-      "bb10": 161.0,
-      "rtsports": 139.0
     },
     {
       "name": "Rashid Shaheed",
       "pos": "WR",
       "team": "SEA",
       "ud": 138.0,
-      "dk": 153.0,
+      "dk": 152.0,
       "ffpc": null,
       "drafters": 148.0,
       "bb10": 149.0,
-      "rtsports": 157.0
+      "rtsports": 156.0
+    },
+    {
+      "name": "Bryce Young",
+      "pos": "QB",
+      "team": "CAR",
+      "ud": 154.0,
+      "dk": 148.0,
+      "ffpc": null,
+      "drafters": 145.0,
+      "bb10": 143.0,
+      "rtsports": 153.0
     },
     {
       "name": "Tyler Allgeier",
@@ -1627,95 +1627,95 @@
       "dk": 149.0,
       "ffpc": null,
       "drafters": 158.0,
-      "bb10": 137.0,
-      "rtsports": 144.0
-    },
-    {
-      "name": "Hunter Henry",
-      "pos": "TE",
-      "team": "NE",
-      "ud": 150.0,
-      "dk": 147.0,
-      "ffpc": null,
-      "drafters": 160.0,
-      "bb10": 150.0,
-      "rtsports": 145.0
+      "bb10": 136.0,
+      "rtsports": 143.0
     },
     {
       "name": "Brenton Strange",
       "pos": "TE",
       "team": "JAC",
       "ud": 155.0,
-      "dk": 145.0,
+      "dk": 143.0,
       "ffpc": null,
-      "drafters": 156.0,
+      "drafters": 155.0,
       "bb10": 151.0,
       "rtsports": 149.0
+    },
+    {
+      "name": "Hunter Henry",
+      "pos": "TE",
+      "team": "NE",
+      "ud": 149.0,
+      "dk": 151.0,
+      "ffpc": null,
+      "drafters": 161.0,
+      "bb10": 150.0,
+      "rtsports": 145.0
     },
     {
       "name": "Jauan Jennings",
       "pos": "WR",
       "team": "MIN",
       "ud": 147.0,
-      "dk": 157.0,
+      "dk": 156.0,
       "ffpc": null,
       "drafters": 147.0,
-      "bb10": 145.0,
+      "bb10": 148.0,
       "rtsports": 161.0
     },
     {
       "name": "Jonah Coleman",
       "pos": "RB",
       "team": "DEN",
-      "ud": 144.0,
-      "dk": 160.0,
+      "ud": 145.0,
+      "dk": 159.0,
       "ffpc": null,
-      "drafters": 165.0,
+      "drafters": 167.0,
       "bb10": 147.0,
-      "rtsports": 143.0
+      "rtsports": 144.0
     },
     {
       "name": "T.J. Hockenson",
       "pos": "TE",
       "team": "MIN",
-      "ud": 163.0,
-      "dk": 152.0,
+      "ud": 162.0,
+      "dk": 153.0,
       "ffpc": null,
-      "drafters": 163.0,
-      "bb10": 167.0,
+      "drafters": 162.0,
+      "bb10": 166.0,
       "rtsports": 132.0
     },
     {
       "name": "Zach Charbonnet",
       "pos": "RB",
       "team": "SEA",
-      "ud": 162.0,
+      "ud": 163.0,
       "dk": 133.0,
       "ffpc": null,
-      "drafters": 182.0,
-      "bb10": 154.0,
-      "rtsports": 146.0
+      "drafters": 184.0,
+      "bb10": 155.0,
+      "rtsports": 147.0
     },
     {
       "name": "Jalen McMillan",
       "pos": "WR",
       "team": "TB",
-      "ud": 149.0,
-      "dk": 154.0,
+      "ud": 150.0,
+      "dk": 155.0,
       "ffpc": null,
       "drafters": 142.0,
-      "bb10": 158.0,
-      "rtsports": 175.0
+      "bb10": 159.0,
+      "rtsports": 176.0
     },
     {
       "name": "Tyjae Spears",
       "pos": "RB",
       "team": "TEN",
       "ud": 161.0,
-      "dk": 158.0,
+      "dk": 157.0,
       "ffpc": null,
       "drafters": 149.0,
-      "bb10": 159.0,
+      "bb10": 158.0,
       "rtsports": 160.0
     },
     {
@@ -1723,62 +1723,73 @@
       "pos": "WR",
       "team": "NYJ",
       "ud": 140.0,
-      "dk": 155.0,
+      "dk": 154.0,
       "ffpc": null,
       "drafters": 152.0,
       "bb10": 165.0,
-      "rtsports": 176.0
+      "rtsports": 175.0
     },
     {
       "name": "Keaton Mitchell",
       "pos": "RB",
       "team": "LAC",
-      "ud": 143.0,
-      "dk": 164.0,
+      "ud": 142.0,
+      "dk": 163.0,
       "ffpc": null,
       "drafters": 141.0,
-      "bb10": 173.0,
-      "rtsports": 177.0
+      "bb10": 171.0,
+      "rtsports": 174.0
     },
     {
       "name": "Jalen Nailor",
       "pos": "WR",
       "team": "LV",
-      "ud": 154.0,
-      "dk": 163.0,
+      "ud": 153.0,
+      "dk": 162.0,
       "ffpc": null,
       "drafters": 159.0,
       "bb10": 164.0,
-      "rtsports": 174.0
+      "rtsports": 172.0
     },
     {
       "name": "Dylan Sampson",
       "pos": "RB",
       "team": "CLE",
       "ud": 168.0,
-      "dk": 175.0,
+      "dk": 173.0,
       "ffpc": null,
       "drafters": 154.0,
-      "bb10": 155.0,
-      "rtsports": 168.0
+      "bb10": 154.0,
+      "rtsports": 167.0
     },
     {
       "name": "Alvin Kamara",
       "pos": "RB",
       "team": "NO",
       "ud": 188.0,
-      "dk": 174.0,
+      "dk": 177.0,
       "ffpc": null,
-      "drafters": 173.0,
-      "bb10": 180.0,
-      "rtsports": 121.0
+      "drafters": 175.0,
+      "bb10": 181.0,
+      "rtsports": 120.0
+    },
+    {
+      "name": "Brian Robinson Jr.",
+      "pos": "RB",
+      "team": "ATL",
+      "ud": 166.0,
+      "dk": 172.0,
+      "ffpc": null,
+      "drafters": 164.0,
+      "bb10": 179.0,
+      "rtsports": 166.0
     },
     {
       "name": "Jacoby Brissett",
       "pos": "QB",
       "team": "ARI",
-      "ud": 191.0,
-      "dk": 156.0,
+      "ud": 192.0,
+      "dk": 158.0,
       "ffpc": null,
       "drafters": 179.0,
       "bb10": 157.0,
@@ -1789,44 +1800,11 @@
       "pos": "QB",
       "team": "LV",
       "ud": 167.0,
-      "dk": 162.0,
+      "dk": 164.0,
       "ffpc": null,
-      "drafters": 162.0,
-      "bb10": 175.0,
-      "rtsports": 180.0
-    },
-    {
-      "name": "Brian Robinson Jr.",
-      "pos": "RB",
-      "team": "ATL",
-      "ud": 165.0,
-      "dk": 171.0,
-      "ffpc": null,
-      "drafters": 164.0,
-      "bb10": 182.0,
-      "rtsports": 165.0
-    },
-    {
-      "name": "Denzel Boston",
-      "pos": "WR",
-      "team": "CLE",
-      "ud": 160.0,
-      "dk": 165.0,
-      "ffpc": null,
-      "drafters": 167.0,
-      "bb10": 170.0,
-      "rtsports": 187.0
-    },
-    {
-      "name": "Dalton Schultz",
-      "pos": "TE",
-      "team": "HOU",
-      "ud": 171.0,
-      "dk": 167.0,
-      "ffpc": null,
-      "drafters": 171.0,
-      "bb10": 171.0,
-      "rtsports": 169.0
+      "drafters": 163.0,
+      "bb10": 176.0,
+      "rtsports": 179.0
     },
     {
       "name": "Aaron Rodgers",
@@ -1836,74 +1814,96 @@
       "dk": 161.0,
       "ffpc": null,
       "drafters": 157.0,
-      "bb10": 176.0,
-      "rtsports": 189.0
+      "bb10": 175.0,
+      "rtsports": 188.0
+    },
+    {
+      "name": "Denzel Boston",
+      "pos": "WR",
+      "team": "CLE",
+      "ud": 160.0,
+      "dk": 165.0,
+      "ffpc": null,
+      "drafters": 166.0,
+      "bb10": 170.0,
+      "rtsports": 191.0
     },
     {
       "name": "Tre Tucker",
       "pos": "WR",
       "team": "LV",
       "ud": 157.0,
+      "dk": 166.0,
+      "ffpc": null,
+      "drafters": 151.0,
+      "bb10": 163.0,
+      "rtsports": 216
+    },
+    {
+      "name": "Dalton Schultz",
+      "pos": "TE",
+      "team": "HOU",
+      "ud": 171.0,
       "dk": 170.0,
       "ffpc": null,
-      "drafters": 150.0,
-      "bb10": 162.0,
-      "rtsports": 216
+      "drafters": 172.0,
+      "bb10": 172.0,
+      "rtsports": 169.0
     },
     {
       "name": "Deebo Samuel Sr.",
       "pos": "WR",
       "team": "",
-      "ud": 166.0,
-      "dk": 187.0,
+      "ud": 165.0,
+      "dk": 186.0,
       "ffpc": null,
-      "drafters": 166.0,
-      "bb10": 160.0,
-      "rtsports": 181.0
+      "drafters": 165.0,
+      "bb10": 161.0,
+      "rtsports": 180.0
     },
     {
       "name": "Emmett Johnson",
       "pos": "RB",
       "team": "KC",
       "ud": 181.0,
-      "dk": 183.0,
+      "dk": 181.0,
       "ffpc": null,
-      "drafters": 185.0,
-      "bb10": 153.0,
-      "rtsports": 167.0
+      "drafters": 187.0,
+      "bb10": 152.0,
+      "rtsports": 168.0
+    },
+    {
+      "name": "Geno Smith",
+      "pos": "QB",
+      "team": "NYJ",
+      "ud": 179.0,
+      "dk": 167.0,
+      "ffpc": null,
+      "drafters": 170.0,
+      "bb10": 173.0,
+      "rtsports": 186.0
+    },
+    {
+      "name": "Emanuel Wilson",
+      "pos": "RB",
+      "team": "SEA",
+      "ud": 191.0,
+      "dk": 168.0,
+      "ffpc": null,
+      "drafters": 171.0,
+      "bb10": 168.0,
+      "rtsports": 177.0
     },
     {
       "name": "Brandon Aiyuk",
       "pos": "WR",
       "team": "SF",
       "ud": 176.0,
-      "dk": 177.0,
+      "dk": 185.0,
       "ffpc": null,
-      "drafters": 189.0,
-      "bb10": 168.0,
-      "rtsports": 159.0
-    },
-    {
-      "name": "Geno Smith",
-      "pos": "QB",
-      "team": "NYJ",
-      "ud": 177.0,
-      "dk": 168.0,
-      "ffpc": null,
-      "drafters": 170.0,
-      "bb10": 172.0,
-      "rtsports": 185.0
-    },
-    {
-      "name": "Emanuel Wilson",
-      "pos": "RB",
-      "team": "SEA",
-      "ud": 192.0,
-      "dk": 169.0,
-      "ffpc": null,
-      "drafters": 172.0,
+      "drafters": 191.0,
       "bb10": 169.0,
-      "rtsports": 178.0
+      "rtsports": 159.0
     },
     {
       "name": "Antonio Williams",
@@ -1917,44 +1917,44 @@
       "rtsports": 192.0
     },
     {
-      "name": "AJ Barner",
-      "pos": "TE",
-      "team": "SEA",
-      "ud": 172.0,
-      "dk": 172.0,
-      "ffpc": null,
-      "drafters": 178.0,
-      "bb10": 177.0,
-      "rtsports": 195.0
-    },
-    {
       "name": "Jerry Jeudy",
       "pos": "WR",
       "team": "CLE",
-      "ud": 185.0,
-      "dk": 173.0,
+      "ud": 186.0,
+      "dk": 171.0,
       "ffpc": null,
       "drafters": 181.0,
-      "bb10": 178.0,
-      "rtsports": 179.0
+      "bb10": 177.0,
+      "rtsports": 178.0
     },
     {
       "name": "Nicholas Singleton",
       "pos": "RB",
       "team": "TEN",
       "ud": 175.0,
-      "dk": 178.0,
+      "dk": 179.0,
       "ffpc": null,
       "drafters": 200.0,
-      "bb10": 190.0,
-      "rtsports": 156.0
+      "bb10": 186.0,
+      "rtsports": 157.0
+    },
+    {
+      "name": "AJ Barner",
+      "pos": "TE",
+      "team": "SEA",
+      "ud": 172.0,
+      "dk": 174.0,
+      "ffpc": null,
+      "drafters": 178.0,
+      "bb10": 178.0,
+      "rtsports": 198.0
     },
     {
       "name": "Mike Washington Jr.",
       "pos": "RB",
       "team": "LV",
       "ud": 190.0,
-      "dk": 166.0,
+      "dk": 169.0,
       "ffpc": null,
       "drafters": 208.0,
       "bb10": 174.0,
@@ -1965,242 +1965,253 @@
       "pos": "RB",
       "team": "PHI",
       "ud": 173.0,
-      "dk": 182.0,
+      "dk": 183.0,
       "ffpc": null,
-      "drafters": 175.0,
-      "bb10": 195.0,
-      "rtsports": 188.0
+      "drafters": 173.0,
+      "bb10": 194.0,
+      "rtsports": 189.0
     },
     {
       "name": "Tyreek Hill",
       "pos": "WR",
       "team": "",
-      "ud": 209.0,
-      "dk": 148.0,
+      "ud": 210.0,
+      "dk": 146.0,
       "ffpc": null,
-      "drafters": 215.0,
-      "bb10": 203.0,
-      "rtsports": 147.0
+      "drafters": 216,
+      "bb10": 201.0,
+      "rtsports": 148.0
     },
     {
       "name": "Gunnar Helm",
       "pos": "TE",
       "team": "TEN",
-      "ud": 178.0,
-      "dk": 191.0,
+      "ud": 177.0,
+      "dk": 190.0,
       "ffpc": null,
       "drafters": 180.0,
       "bb10": 196.0,
-      "rtsports": 184.0
-    },
-    {
-      "name": "David Njoku",
-      "pos": "TE",
-      "team": "LAC",
-      "ud": 195.0,
-      "dk": 186.0,
-      "ffpc": null,
-      "drafters": 192.0,
-      "bb10": 206.0,
-      "rtsports": 155.0
+      "rtsports": 182.0
     },
     {
       "name": "Isaac TeSlaa",
       "pos": "WR",
       "team": "DET",
       "ud": 170.0,
-      "dk": 181.0,
+      "dk": 175.0,
       "ffpc": null,
       "drafters": 168.0,
-      "bb10": 194.0,
+      "bb10": 195.0,
       "rtsports": 216
     },
     {
-      "name": "Calvin Ridley",
-      "pos": "WR",
-      "team": "TEN",
-      "ud": 182.0,
-      "dk": 190.0,
+      "name": "David Njoku",
+      "pos": "TE",
+      "team": "LAC",
+      "ud": 196.0,
+      "dk": 182.0,
       "ffpc": null,
-      "drafters": 187.0,
-      "bb10": 216,
-      "rtsports": 172.0
+      "drafters": 193.0,
+      "bb10": 206.0,
+      "rtsports": 155.0
     },
     {
       "name": "Kaytron Allen",
       "pos": "RB",
       "team": "WAS",
-      "ud": 196.0,
-      "dk": 201.0,
+      "ud": 195.0,
+      "dk": 200.0,
       "ffpc": null,
-      "drafters": 176.0,
-      "bb10": 192.0,
-      "rtsports": 193.0
+      "drafters": 177.0,
+      "bb10": 188.0,
+      "rtsports": 195.0
+    },
+    {
+      "name": "Calvin Ridley",
+      "pos": "WR",
+      "team": "TEN",
+      "ud": 185.0,
+      "dk": 192.0,
+      "ffpc": null,
+      "drafters": 186.0,
+      "bb10": 216,
+      "rtsports": 171.0
     },
     {
       "name": "Cade Otton",
       "pos": "TE",
       "team": "TB",
-      "ud": 183.0,
-      "dk": 184.0,
+      "ud": 184.0,
+      "dk": 188.0,
       "ffpc": null,
-      "drafters": 186.0,
-      "bb10": 210.0,
-      "rtsports": 198.0
+      "drafters": 185.0,
+      "bb10": 212.0,
+      "rtsports": 200.0
+    },
+    {
+      "name": "Tre' Harris",
+      "pos": "WR",
+      "team": "LAC",
+      "ud": 182.0,
+      "dk": 196.0,
+      "ffpc": null,
+      "drafters": 183.0,
+      "bb10": 183.0,
+      "rtsports": 216
     },
     {
       "name": "James Conner",
       "pos": "RB",
       "team": "ARI",
       "ud": 216,
-      "dk": 189.0,
+      "dk": 191.0,
       "ffpc": null,
       "drafters": 212.0,
-      "bb10": 183.0,
-      "rtsports": 173.0
-    },
-    {
-      "name": "Pat Freiermuth",
-      "pos": "TE",
-      "team": "PIT",
-      "ud": 187.0,
-      "dk": 199.0,
-      "ffpc": null,
-      "drafters": 188.0,
-      "bb10": 209.0,
-      "rtsports": 202.0
-    },
-    {
-      "name": "Tre' Harris",
-      "pos": "WR",
-      "team": "LAC",
-      "ud": 184.0,
-      "dk": 200.0,
-      "ffpc": null,
-      "drafters": 184.0,
       "bb10": 184.0,
-      "rtsports": 216
+      "rtsports": 170.0
     },
     {
       "name": "Ryan Flournoy",
       "pos": "WR",
       "team": "DAL",
       "ud": 174.0,
-      "dk": 195.0,
+      "dk": 193.0,
       "ffpc": null,
-      "drafters": 161.0,
-      "bb10": 205.0,
+      "drafters": 160.0,
+      "bb10": 204.0,
       "rtsports": 216
     },
     {
       "name": "Tua Tagovailoa",
       "pos": "QB",
       "team": "ATL",
-      "ud": 207.0,
-      "dk": 185.0,
+      "ud": 206.0,
+      "dk": 184.0,
       "ffpc": null,
       "drafters": 203.0,
       "bb10": 197.0,
-      "rtsports": 197.0
+      "rtsports": 199.0
     },
     {
       "name": "Malik Washington",
       "pos": "WR",
       "team": "MIA",
-      "ud": 200.0,
-      "dk": 180.0,
+      "ud": 199.0,
+      "dk": 178.0,
       "ffpc": null,
-      "drafters": 191.0,
-      "bb10": 204.0,
+      "drafters": 190.0,
+      "bb10": 205.0,
       "rtsports": 216
     },
     {
-      "name": "De'Zhaun Stribling",
-      "pos": "WR",
-      "team": "SF",
-      "ud": 164.0,
-      "dk": 204.0,
-      "ffpc": null,
-      "drafters": 174.0,
-      "bb10": 216,
-      "rtsports": 216
-    },
-    {
-      "name": "Eli Stowers",
+      "name": "Pat Freiermuth",
       "pos": "TE",
-      "team": "PHI",
-      "ud": 198.0,
-      "dk": 179.0,
+      "team": "PIT",
+      "ud": 187.0,
+      "dk": 202.0,
       "ffpc": null,
-      "drafters": 214.0,
-      "bb10": 216,
-      "rtsports": 171.0
-    },
-    {
-      "name": "Kayshon Boutte",
-      "pos": "WR",
-      "team": "NE",
-      "ud": 205.0,
-      "dk": 188.0,
-      "ffpc": null,
-      "drafters": 211.0,
-      "bb10": 199.0,
-      "rtsports": 205.0
+      "drafters": 188.0,
+      "bb10": 210.0,
+      "rtsports": 203.0
     },
     {
       "name": "Sean Tucker",
       "pos": "RB",
       "team": "TB",
-      "ud": 186.0,
-      "dk": 194.0,
+      "ud": 183.0,
+      "dk": 189.0,
       "ffpc": null,
-      "drafters": 183.0,
-      "bb10": 215.0,
+      "drafters": 182.0,
+      "bb10": 209.0,
       "rtsports": 216
     },
     {
       "name": "Braelon Allen",
       "pos": "RB",
       "team": "NYJ",
-      "ud": 202.0,
-      "dk": 197.0,
+      "ud": 204.0,
+      "dk": 195.0,
       "ffpc": null,
-      "drafters": 194.0,
-      "bb10": 211.0,
-      "rtsports": 206.0
+      "drafters": 195.0,
+      "bb10": 207.0,
+      "rtsports": 205.0
+    },
+    {
+      "name": "Eli Stowers",
+      "pos": "TE",
+      "team": "PHI",
+      "ud": 198.0,
+      "dk": 180.0,
+      "ffpc": null,
+      "drafters": 216.0,
+      "bb10": 216,
+      "rtsports": 173.0
+    },
+    {
+      "name": "De'Zhaun Stribling",
+      "pos": "WR",
+      "team": "SF",
+      "ud": 164.0,
+      "dk": 205.0,
+      "ffpc": null,
+      "drafters": 174.0,
+      "bb10": 216,
+      "rtsports": 216
+    },
+    {
+      "name": "Kayshon Boutte",
+      "pos": "WR",
+      "team": "NE",
+      "ud": 205.0,
+      "dk": 187.0,
+      "ffpc": null,
+      "drafters": 213.0,
+      "bb10": 200.0,
+      "rtsports": 207.0
     },
     {
       "name": "Kimani Vidal",
       "pos": "RB",
       "team": "LAC",
       "ud": 216,
-      "dk": 192.0,
+      "dk": 197.0,
       "ffpc": null,
       "drafters": 204.0,
-      "bb10": 187.0,
-      "rtsports": 213.0
+      "bb10": 192.0,
+      "rtsports": 215.0
+    },
+    {
+      "name": "Germie Bernard",
+      "pos": "WR",
+      "team": "PIT",
+      "ud": 178.0,
+      "dk": 201.0,
+      "ffpc": null,
+      "drafters": 176.0,
+      "bb10": 216,
+      "rtsports": 210.0
+    },
+    {
+      "name": "Chris Bell",
+      "pos": "WR",
+      "team": "MIA",
+      "ud": 194.0,
+      "dk": 207.0,
+      "ffpc": null,
+      "drafters": 206.0,
+      "bb10": 216,
+      "rtsports": 196.0
     },
     {
       "name": "Cooper Kupp",
       "pos": "WR",
       "team": "SEA",
       "ud": 208.0,
-      "dk": 202.0,
+      "dk": 204.0,
       "ffpc": null,
-      "drafters": 195.0,
+      "drafters": 194.0,
       "bb10": 216,
       "rtsports": 190.0
-    },
-    {
-      "name": "Chris Bell",
-      "pos": "WR",
-      "team": "MIA",
-      "ud": 193.0,
-      "dk": 209.0,
-      "ffpc": null,
-      "drafters": 206.0,
-      "bb10": 216,
-      "rtsports": 196.0
     },
     {
       "name": "Malachi Fields",
@@ -2209,40 +2220,40 @@
       "ud": 203.0,
       "dk": 216,
       "ffpc": null,
-      "drafters": 216,
-      "bb10": 214.0,
-      "rtsports": 194.0
+      "drafters": 215.0,
+      "bb10": 215.0,
+      "rtsports": 193.0
     },
     {
       "name": "Darnell Mooney",
       "pos": "WR",
       "team": "NYG",
       "ud": 189.0,
-      "dk": 215.0,
+      "dk": 216.0,
       "ffpc": null,
-      "drafters": 190.0,
+      "drafters": 189.0,
       "bb10": 216,
       "rtsports": 216
-    },
-    {
-      "name": "Germie Bernard",
-      "pos": "WR",
-      "team": "PIT",
-      "ud": 179.0,
-      "dk": 203.0,
-      "ffpc": null,
-      "drafters": 177.0,
-      "bb10": 216,
-      "rtsports": 214.0
     },
     {
       "name": "Ray Davis",
       "pos": "RB",
       "team": "BUF",
-      "ud": 199.0,
-      "dk": 208.0,
+      "ud": 200.0,
+      "dk": 210.0,
       "ffpc": null,
-      "drafters": 193.0,
+      "drafters": 192.0,
+      "bb10": 216.0,
+      "rtsports": 216
+    },
+    {
+      "name": "Zachariah Branch",
+      "pos": "WR",
+      "team": "ATL",
+      "ud": 193.0,
+      "dk": 216,
+      "ffpc": null,
+      "drafters": 197.0,
       "bb10": 216,
       "rtsports": 216
     },
@@ -2251,7 +2262,7 @@
       "pos": "QB",
       "team": "CLE",
       "ud": 213.0,
-      "dk": 207.0,
+      "dk": 206.0,
       "ffpc": null,
       "drafters": 205.0,
       "bb10": 216,
@@ -2262,43 +2273,21 @@
       "pos": "WR",
       "team": "JAC",
       "ud": null,
-      "dk": 159.0,
+      "dk": 160.0,
       "ffpc": null,
-      "drafters": 146.0,
+      "drafters": 144.0,
       "bb10": 193.0,
-      "rtsports": 191.0
-    },
-    {
-      "name": "Zachariah Branch",
-      "pos": "WR",
-      "team": "ATL",
-      "ud": 194.0,
-      "dk": 216.0,
-      "ffpc": null,
-      "drafters": 197.0,
-      "bb10": 216,
-      "rtsports": 216
+      "rtsports": 194.0
     },
     {
       "name": "Tank Dell",
       "pos": "WR",
       "team": "HOU",
       "ud": 197.0,
-      "dk": 196.0,
+      "dk": 199.0,
       "ffpc": null,
       "drafters": 207.0,
       "bb10": 216,
-      "rtsports": 216
-    },
-    {
-      "name": "Troy Franklin",
-      "pos": "WR",
-      "team": "DEN",
-      "ud": 216,
-      "dk": 216,
-      "ffpc": null,
-      "drafters": 216,
-      "bb10": 202.0,
       "rtsports": 216
     },
     {
@@ -2306,10 +2295,10 @@
       "pos": "TE",
       "team": "LAR",
       "ud": 216,
-      "dk": 193.0,
+      "dk": 194.0,
       "ffpc": null,
       "drafters": 216,
-      "bb10": 207.0,
+      "bb10": 211.0,
       "rtsports": 216
     },
     {
@@ -2317,9 +2306,9 @@
       "pos": "WR",
       "team": "NYJ",
       "ud": 215.0,
-      "dk": 211.0,
+      "dk": 212.0,
       "ffpc": null,
-      "drafters": 199.0,
+      "drafters": 198.0,
       "bb10": 216,
       "rtsports": 216
     },
@@ -2328,31 +2317,9 @@
       "pos": "TE",
       "team": "SF",
       "ud": 216,
-      "dk": 216,
-      "ffpc": null,
-      "drafters": 216,
-      "bb10": 216,
-      "rtsports": 216
-    },
-    {
-      "name": "Michael Penix Jr.",
-      "pos": "QB",
-      "team": "ATL",
-      "ud": 216,
       "dk": 214.0,
       "ffpc": null,
       "drafters": 216,
-      "bb10": 216,
-      "rtsports": 209.0
-    },
-    {
-      "name": "Greg Dulcich",
-      "pos": "TE",
-      "team": "MIA",
-      "ud": 210.0,
-      "dk": 210.0,
-      "ffpc": null,
-      "drafters": 198.0,
       "bb10": 216,
       "rtsports": 216
     },
@@ -2361,11 +2328,33 @@
       "pos": "RB",
       "team": "SF",
       "ud": 212.0,
-      "dk": 213.0,
+      "dk": 215.0,
       "ffpc": null,
-      "drafters": 213.0,
+      "drafters": 211.0,
       "bb10": 216,
       "rtsports": 216
+    },
+    {
+      "name": "Greg Dulcich",
+      "pos": "TE",
+      "team": "MIA",
+      "ud": 209.0,
+      "dk": 208.0,
+      "ffpc": null,
+      "drafters": 199.0,
+      "bb10": 216,
+      "rtsports": 216
+    },
+    {
+      "name": "Michael Penix Jr.",
+      "pos": "QB",
+      "team": "ATL",
+      "ud": 216,
+      "dk": 216,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": 211.0
     },
     {
       "name": "Terrance Ferguson",
@@ -2379,6 +2368,28 @@
       "rtsports": 216
     },
     {
+      "name": "Kirk Cousins",
+      "pos": "QB",
+      "team": "LV",
+      "ud": 216,
+      "dk": 211.0,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": 213.0
+    },
+    {
+      "name": "Kaelon Black",
+      "pos": "RB",
+      "team": "SF",
+      "ud": 216,
+      "dk": 216,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": 208.0
+    },
+    {
       "name": "Christian Kirk",
       "pos": "WR",
       "team": "SF",
@@ -2390,33 +2401,22 @@
       "rtsports": 216
     },
     {
-      "name": "Kaelon Black",
+      "name": "Chris Brooks",
       "pos": "RB",
-      "team": "SF",
+      "team": "GB",
       "ud": 216,
-      "dk": 216,
+      "dk": 203.0,
       "ffpc": null,
-      "drafters": 216,
+      "drafters": 209.0,
       "bb10": 216,
-      "rtsports": 210.0
-    },
-    {
-      "name": "Kirk Cousins",
-      "pos": "QB",
-      "team": "LV",
-      "ud": 216,
-      "dk": 212.0,
-      "ffpc": null,
-      "drafters": 216,
-      "bb10": 216,
-      "rtsports": 215.0
+      "rtsports": 181.0
     },
     {
       "name": "Shedeur Sanders",
       "pos": "QB",
       "team": "CLE",
       "ud": 216,
-      "dk": 206.0,
+      "dk": 209.0,
       "ffpc": null,
       "drafters": 216,
       "bb10": 216,
@@ -2434,46 +2434,13 @@
       "rtsports": 204.0
     },
     {
-      "name": "Chris Brooks",
-      "pos": "RB",
-      "team": "GB",
-      "ud": 216.0,
-      "dk": 205.0,
-      "ffpc": null,
-      "drafters": 210.0,
-      "bb10": 216,
-      "rtsports": 201.0
-    },
-    {
-      "name": "Ted Hurst III",
-      "pos": "WR",
-      "team": "TB",
-      "ud": 180.0,
-      "dk": 216,
-      "ffpc": null,
-      "drafters": 196.0,
-      "bb10": 216,
-      "rtsports": 216
-    },
-    {
       "name": "Mike Gesicki",
       "pos": "TE",
       "team": "CIN",
-      "ud": 206.0,
+      "ud": 207.0,
       "dk": 216,
       "ffpc": null,
-      "drafters": 209.0,
-      "bb10": 216,
-      "rtsports": 216
-    },
-    {
-      "name": "Dontayvion Wicks",
-      "pos": "WR",
-      "team": "PHI",
-      "ud": 211.0,
-      "dk": 216,
-      "ffpc": null,
-      "drafters": 216.0,
+      "drafters": 210.0,
       "bb10": 216,
       "rtsports": 216
     },
@@ -2489,6 +2456,39 @@
       "rtsports": 216
     },
     {
+      "name": "MarShawn Lloyd",
+      "pos": "RB",
+      "team": "GB",
+      "ud": 202.0,
+      "dk": 213.0,
+      "ffpc": null,
+      "drafters": 214.0,
+      "bb10": 216,
+      "rtsports": 216
+    },
+    {
+      "name": "Dontayvion Wicks",
+      "pos": "WR",
+      "team": "PHI",
+      "ud": 211.0,
+      "dk": 216,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": 216
+    },
+    {
+      "name": "Ted Hurst III",
+      "pos": "WR",
+      "team": "TB",
+      "ud": 180.0,
+      "dk": 216,
+      "ffpc": null,
+      "drafters": 196.0,
+      "bb10": 216,
+      "rtsports": 216
+    },
+    {
       "name": "Jaylen Wright",
       "pos": "RB",
       "team": "MIA",
@@ -2497,7 +2497,7 @@
       "ffpc": null,
       "drafters": 216,
       "bb10": 216,
-      "rtsports": 211.0
+      "rtsports": 212.0
     },
     {
       "name": "Evan Engram",
@@ -2508,13 +2508,24 @@
       "ffpc": null,
       "drafters": 216,
       "bb10": 216,
-      "rtsports": 199.0
+      "rtsports": 201.0
     },
     {
-      "name": "MarShawn Lloyd",
-      "pos": "RB",
-      "team": "GB",
-      "ud": 204.0,
+      "name": "Troy Franklin",
+      "pos": "WR",
+      "team": "DEN",
+      "ud": 216.0,
+      "dk": 216,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 202.0,
+      "rtsports": null
+    },
+    {
+      "name": "Chris Brazzell II",
+      "pos": "WR",
+      "team": "CAR",
+      "ud": 216,
       "dk": 216,
       "ffpc": null,
       "drafters": 216,
@@ -2533,15 +2544,15 @@
       "rtsports": 216
     },
     {
-      "name": "Chris Brazzell II",
-      "pos": "WR",
-      "team": "CAR",
+      "name": "Justin Fields",
+      "pos": "QB",
+      "team": "KC",
       "ud": 216,
       "dk": 216,
       "ffpc": null,
       "drafters": 216,
       "bb10": 216,
-      "rtsports": 216
+      "rtsports": 187.0
     },
     {
       "name": "Ollie Gordon II",
@@ -2552,18 +2563,7 @@
       "ffpc": null,
       "drafters": 216,
       "bb10": 216,
-      "rtsports": 170.0
-    },
-    {
-      "name": "Justin Fields",
-      "pos": "QB",
-      "team": "KC",
-      "ud": 216,
-      "dk": 216,
-      "ffpc": null,
-      "drafters": 216,
-      "bb10": 216,
-      "rtsports": 183.0
+      "rtsports": 184.0
     },
     {
       "name": "Jaydon Blue",
@@ -2588,17 +2588,6 @@
       "rtsports": 216
     },
     {
-      "name": "Najee Harris",
-      "pos": "RB",
-      "team": "LAC",
-      "ud": 216,
-      "dk": 216,
-      "ffpc": null,
-      "drafters": 216,
-      "bb10": 216,
-      "rtsports": 200.0
-    },
-    {
       "name": "Tyquan Thornton",
       "pos": "WR",
       "team": "KC",
@@ -2610,9 +2599,20 @@
       "rtsports": 216
     },
     {
-      "name": "Rashod Bateman",
-      "pos": "WR",
-      "team": "BAL",
+      "name": "Najee Harris",
+      "pos": "RB",
+      "team": "LAC",
+      "ud": 216,
+      "dk": 216,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": 202.0
+    },
+    {
+      "name": "Samaje Perine",
+      "pos": "RB",
+      "team": "CIN",
       "ud": 216,
       "dk": 216,
       "ffpc": null,
@@ -2632,10 +2632,21 @@
       "rtsports": 216
     },
     {
-      "name": "Elijah Sarratt",
+      "name": "Rashod Bateman",
       "pos": "WR",
       "team": "BAL",
-      "ud": 214.0,
+      "ud": 216,
+      "dk": 216,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": 216
+    },
+    {
+      "name": "Ty Johnson",
+      "pos": "RB",
+      "team": "BUF",
+      "ud": 216,
       "dk": 216,
       "ffpc": null,
       "drafters": 216,
@@ -2646,17 +2657,6 @@
       "name": "Theo Johnson",
       "pos": "TE",
       "team": "NYG",
-      "ud": 216,
-      "dk": 216,
-      "ffpc": null,
-      "drafters": 216,
-      "bb10": 216,
-      "rtsports": 216
-    },
-    {
-      "name": "Samaje Perine",
-      "pos": "RB",
-      "team": "CIN",
       "ud": 216,
       "dk": 216,
       "ffpc": null,
@@ -2676,15 +2676,15 @@
       "rtsports": 216
     },
     {
-      "name": "J.J. McCarthy",
-      "pos": "QB",
-      "team": "MIN",
-      "ud": 216,
+      "name": "Elijah Sarratt",
+      "pos": "WR",
+      "team": "BAL",
+      "ud": 214.0,
       "dk": 216,
       "ffpc": null,
       "drafters": 216,
       "bb10": 216,
-      "rtsports": 203.0
+      "rtsports": 216
     },
     {
       "name": "Jack Bech",
@@ -2696,17 +2696,6 @@
       "drafters": 216,
       "bb10": 216,
       "rtsports": 216
-    },
-    {
-      "name": "Chimere Dike",
-      "pos": "WR",
-      "team": "TEN",
-      "ud": 216,
-      "dk": 216,
-      "ffpc": null,
-      "drafters": 216,
-      "bb10": 216,
-      "rtsports": null
     },
     {
       "name": "Mason Taylor",
@@ -2731,6 +2720,17 @@
       "rtsports": 216
     },
     {
+      "name": "Chimere Dike",
+      "pos": "WR",
+      "team": "TEN",
+      "ud": 216,
+      "dk": 216,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
       "name": "Tory Horton",
       "pos": "WR",
       "team": "SEA",
@@ -2753,20 +2753,20 @@
       "rtsports": 216
     },
     {
-      "name": "Skyler Bell",
-      "pos": "WR",
-      "team": "BUF",
+      "name": "J.J. McCarthy",
+      "pos": "QB",
+      "team": "MIN",
       "ud": 216,
-      "dk": null,
+      "dk": 216,
       "ffpc": null,
-      "drafters": 216,
+      "drafters": null,
       "bb10": 216,
-      "rtsports": 216
+      "rtsports": 185.0
     },
     {
-      "name": "Ty Johnson",
-      "pos": "RB",
-      "team": "BUF",
+      "name": "Caleb Douglas",
+      "pos": "WR",
+      "team": "MIA",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -2783,34 +2783,12 @@
       "ffpc": null,
       "drafters": 216,
       "bb10": 216,
-      "rtsports": 212.0
-    },
-    {
-      "name": "Oscar Delp",
-      "pos": "TE",
-      "team": "NO",
-      "ud": 216,
-      "dk": 216,
-      "ffpc": null,
-      "drafters": 216,
-      "bb10": 216,
-      "rtsports": null
+      "rtsports": 209.0
     },
     {
       "name": "Adam Randall",
       "pos": "RB",
       "team": "BAL",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": 216,
-      "bb10": 216,
-      "rtsports": 216
-    },
-    {
-      "name": "Caleb Douglas",
-      "pos": "WR",
-      "team": "MIA",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -2830,6 +2808,17 @@
       "rtsports": 216
     },
     {
+      "name": "Oscar Delp",
+      "pos": "TE",
+      "team": "NO",
+      "ud": 216,
+      "dk": 216,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
       "name": "Brenen Thompson",
       "pos": "WR",
       "team": "LAC",
@@ -2841,15 +2830,26 @@
       "rtsports": 216
     },
     {
-      "name": "LeQuint Allen Jr.",
-      "pos": "RB",
-      "team": "JAC",
+      "name": "Skyler Bell",
+      "pos": "WR",
+      "team": "BUF",
       "ud": 216,
       "dk": null,
       "ffpc": null,
       "drafters": 216,
       "bb10": 216,
       "rtsports": 216
+    },
+    {
+      "name": "Trey Benson",
+      "pos": "RB",
+      "team": "ARI",
+      "ud": 216,
+      "dk": 216,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": null
     },
     {
       "name": "Dawson Knox",
@@ -2874,9 +2874,9 @@
       "rtsports": 216
     },
     {
-      "name": "Elijah Arroyo",
-      "pos": "TE",
-      "team": "SEA",
+      "name": "LeQuint Allen Jr.",
+      "pos": "RB",
+      "team": "JAC",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -2893,7 +2893,7 @@
       "ffpc": null,
       "drafters": null,
       "bb10": 216,
-      "rtsports": 186.0
+      "rtsports": 197.0
     },
     {
       "name": "Jahan Dotson",
@@ -2907,7 +2907,18 @@
       "rtsports": 216
     },
     {
-      "name": "Joe Mixon",
+      "name": "Elijah Arroyo",
+      "pos": "TE",
+      "team": "SEA",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": 216
+    },
+    {
+      "name": "Austin Ekeler",
       "pos": "RB",
       "team": "",
       "ud": 216,
@@ -2915,78 +2926,12 @@
       "ffpc": null,
       "drafters": null,
       "bb10": 216,
-      "rtsports": 150.0
-    },
-    {
-      "name": "Kaleb Johnson",
-      "pos": "RB",
-      "team": "PIT",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": 166.0
-    },
-    {
-      "name": "Ja'Tavion Sanders",
-      "pos": "TE",
-      "team": "CAR",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": 216,
-      "bb10": 216,
-      "rtsports": null
+      "rtsports": 206.0
     },
     {
       "name": "Malik Davis",
       "pos": "RB",
       "team": "DAL",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": 216,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "DJ Giddens",
-      "pos": "RB",
-      "team": "IND",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": 216,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Carson Beck",
-      "pos": "QB",
-      "team": "ARI",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": 216,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Trey Benson",
-      "pos": "RB",
-      "team": "ARI",
-      "ud": 216,
-      "dk": 216,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Bryce Lance",
-      "pos": "WR",
-      "team": "NO",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3006,9 +2951,9 @@
       "rtsports": null
     },
     {
-      "name": "DeMario Douglas",
-      "pos": "WR",
-      "team": "NE",
+      "name": "Ja'Tavion Sanders",
+      "pos": "TE",
+      "team": "CAR",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3025,7 +2970,62 @@
       "ffpc": null,
       "drafters": null,
       "bb10": 216,
-      "rtsports": 182.0
+      "rtsports": 183.0
+    },
+    {
+      "name": "Kaleb Johnson",
+      "pos": "RB",
+      "team": "PIT",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": 165.0
+    },
+    {
+      "name": "Carson Beck",
+      "pos": "QB",
+      "team": "ARI",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Nick Westbrook-Ikhine",
+      "pos": "WR",
+      "team": "IND",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Joe Mixon",
+      "pos": "RB",
+      "team": "",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": 150.0
+    },
+    {
+      "name": "DJ Giddens",
+      "pos": "RB",
+      "team": "IND",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": null
     },
     {
       "name": "Hollywood Brown",
@@ -3039,9 +3039,20 @@
       "rtsports": null
     },
     {
-      "name": "Treylon Burks",
+      "name": "Bryce Lance",
       "pos": "WR",
-      "team": "WAS",
+      "team": "NO",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "DeMario Douglas",
+      "pos": "WR",
+      "team": "NE",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3072,17 +3083,6 @@
       "rtsports": null
     },
     {
-      "name": "Mack Hollins",
-      "pos": "WR",
-      "team": "NE",
-      "ud": 216,
-      "dk": 216,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
       "name": "Andrei Iosivas",
       "pos": "WR",
       "team": "CIN",
@@ -3105,15 +3105,37 @@
       "rtsports": 216
     },
     {
-      "name": "Devin Singletary",
-      "pos": "RB",
-      "team": "NYG",
+      "name": "Treylon Burks",
+      "pos": "WR",
+      "team": "WAS",
       "ud": 216,
       "dk": null,
       "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Mack Hollins",
+      "pos": "WR",
+      "team": "NE",
+      "ud": 216,
+      "dk": 216,
+      "ffpc": null,
       "drafters": null,
       "bb10": 216,
-      "rtsports": 207.0
+      "rtsports": null
+    },
+    {
+      "name": "Malik Benson",
+      "pos": "WR",
+      "team": "LV",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": 216,
+      "bb10": 216,
+      "rtsports": null
     },
     {
       "name": "Joe Flacco",
@@ -3127,6 +3149,17 @@
       "rtsports": 216
     },
     {
+      "name": "Jonnu Smith",
+      "pos": "TE",
+      "team": "",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": 164.0
+    },
+    {
       "name": "Darnell Washington",
       "pos": "TE",
       "team": "PIT",
@@ -3138,26 +3171,48 @@
       "rtsports": null
     },
     {
-      "name": "Jonnu Smith",
+      "name": "Zach Ertz",
       "pos": "TE",
-      "team": "",
-      "ud": null,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": 164.0
-    },
-    {
-      "name": "Austin Ekeler",
-      "pos": "RB",
       "team": "",
       "ud": 216,
       "dk": null,
       "ffpc": null,
       "drafters": null,
-      "bb10": null,
-      "rtsports": 208.0
+      "bb10": 216,
+      "rtsports": 216
+    },
+    {
+      "name": "Devin Singletary",
+      "pos": "RB",
+      "team": "NYG",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": 214.0
+    },
+    {
+      "name": "Savion Williams",
+      "pos": "WR",
+      "team": "GB",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Houston Texans DST",
+      "pos": "DST",
+      "team": "",
+      "ud": null,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 141.0,
+      "rtsports": null
     },
     {
       "name": "Devin Neal",
@@ -3169,17 +3224,6 @@
       "drafters": null,
       "bb10": 216,
       "rtsports": 216
-    },
-    {
-      "name": "Houston Texans DST",
-      "pos": "DST",
-      "team": "",
-      "ud": null,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 142.0,
-      "rtsports": null
     },
     {
       "name": "Max Klare",
@@ -3200,18 +3244,7 @@
       "dk": null,
       "ffpc": null,
       "drafters": null,
-      "bb10": 152.0,
-      "rtsports": null
-    },
-    {
-      "name": "KaVontae Turpin",
-      "pos": "WR",
-      "team": "DAL",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
+      "bb10": 153.0,
       "rtsports": null
     },
     {
@@ -3237,9 +3270,9 @@
       "rtsports": null
     },
     {
-      "name": "Devontez Walker",
+      "name": "Kalif Raymond",
       "pos": "WR",
-      "team": "BAL",
+      "team": "CHI",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3248,14 +3281,14 @@
       "rtsports": null
     },
     {
-      "name": "Los Angeles Rams DST",
-      "pos": "DST",
-      "team": "",
-      "ud": null,
+      "name": "Eli Raridon",
+      "pos": "TE",
+      "team": "NE",
+      "ud": 216,
       "dk": null,
       "ffpc": null,
       "drafters": null,
-      "bb10": 166.0,
+      "bb10": 216,
       "rtsports": null
     },
     {
@@ -3270,31 +3303,20 @@
       "rtsports": 216
     },
     {
-      "name": "Eli Raridon",
-      "pos": "TE",
-      "team": "NE",
-      "ud": 216,
+      "name": "Los Angeles Rams DST",
+      "pos": "DST",
+      "team": "",
+      "ud": null,
       "dk": null,
       "ffpc": null,
       "drafters": null,
-      "bb10": 216,
+      "bb10": 167.0,
       "rtsports": null
     },
     {
-      "name": "Zach Ertz",
-      "pos": "TE",
+      "name": "Nick Chubb",
+      "pos": "RB",
       "team": "",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": 216
-    },
-    {
-      "name": "Jalen Royals",
-      "pos": "WR",
-      "team": "KC",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3310,13 +3332,24 @@
       "dk": null,
       "ffpc": null,
       "drafters": null,
-      "bb10": 179.0,
+      "bb10": 180.0,
       "rtsports": null
     },
     {
-      "name": "Nick Chubb",
-      "pos": "RB",
-      "team": "",
+      "name": "Jordan Whittington",
+      "pos": "WR",
+      "team": "LAR",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Devontez Walker",
+      "pos": "WR",
+      "team": "BAL",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3332,7 +3365,18 @@
       "dk": null,
       "ffpc": null,
       "drafters": null,
-      "bb10": 181.0,
+      "bb10": 182.0,
+      "rtsports": null
+    },
+    {
+      "name": "Jalen Royals",
+      "pos": "WR",
+      "team": "KC",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
       "rtsports": null
     },
     {
@@ -3354,7 +3398,7 @@
       "dk": null,
       "ffpc": null,
       "drafters": null,
-      "bb10": 186.0,
+      "bb10": 187.0,
       "rtsports": null
     },
     {
@@ -3365,7 +3409,7 @@
       "dk": null,
       "ffpc": null,
       "drafters": null,
-      "bb10": 188.0,
+      "bb10": 189.0,
       "rtsports": null
     },
     {
@@ -3376,7 +3420,7 @@
       "dk": null,
       "ffpc": null,
       "drafters": null,
-      "bb10": 189.0,
+      "bb10": 190.0,
       "rtsports": null
     },
     {
@@ -3391,9 +3435,9 @@
       "rtsports": null
     },
     {
-      "name": "Tahj Brooks",
-      "pos": "RB",
-      "team": "CIN",
+      "name": "Calvin Austin III",
+      "pos": "WR",
+      "team": "NYG",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3413,17 +3457,6 @@
       "rtsports": null
     },
     {
-      "name": "Jordan Whittington",
-      "pos": "WR",
-      "team": "LAR",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
       "name": "Los Angeles Chargers DST",
       "pos": "DST",
       "team": "",
@@ -3435,9 +3468,9 @@
       "rtsports": null
     },
     {
-      "name": "Konata Mumpfield",
+      "name": "Kevin Coleman Jr.",
       "pos": "WR",
-      "team": "LAR",
+      "team": "MIA",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3446,9 +3479,9 @@
       "rtsports": null
     },
     {
-      "name": "Kevin Coleman Jr.",
-      "pos": "WR",
-      "team": "MIA",
+      "name": "Tahj Brooks",
+      "pos": "RB",
+      "team": "CIN",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3464,13 +3497,24 @@
       "dk": null,
       "ffpc": null,
       "drafters": null,
-      "bb10": 200.0,
+      "bb10": 199.0,
       "rtsports": null
     },
     {
-      "name": "Calvin Austin III",
+      "name": "Joshua Palmer",
       "pos": "WR",
-      "team": "NYG",
+      "team": "BUF",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Konata Mumpfield",
+      "pos": "WR",
+      "team": "LAR",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3486,7 +3530,18 @@
       "dk": null,
       "ffpc": null,
       "drafters": null,
-      "bb10": 201.0,
+      "bb10": 203.0,
+      "rtsports": null
+    },
+    {
+      "name": "Mac Jones",
+      "pos": "QB",
+      "team": "SF",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
       "rtsports": null
     },
     {
@@ -3501,40 +3556,7 @@
       "rtsports": null
     },
     {
-      "name": "Colbie Young",
-      "pos": "WR",
-      "team": "CIN",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
       "name": "Buffalo Bills DST",
-      "pos": "DST",
-      "team": "",
-      "ud": null,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 212.0,
-      "rtsports": null
-    },
-    {
-      "name": "Joshua Palmer",
-      "pos": "WR",
-      "team": "BUF",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Atlanta Falcons DST",
       "pos": "DST",
       "team": "",
       "ud": null,
@@ -3545,14 +3567,36 @@
       "rtsports": null
     },
     {
-      "name": "Malik Benson",
-      "pos": "WR",
-      "team": "LV",
+      "name": "Atlanta Falcons DST",
+      "pos": "DST",
+      "team": "",
+      "ud": null,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 214.0,
+      "rtsports": null
+    },
+    {
+      "name": "Ben Sinnott",
+      "pos": "TE",
+      "team": "WAS",
       "ud": 216,
       "dk": null,
       "ffpc": null,
-      "drafters": 216,
-      "bb10": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Luke McCaffrey",
+      "pos": "WR",
+      "team": "WAS",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
       "rtsports": null
     },
     {
@@ -3563,11 +3607,22 @@
       "dk": null,
       "ffpc": null,
       "drafters": null,
-      "bb10": 216.0,
+      "bb10": 216,
       "rtsports": null
     },
     {
       "name": "Detroit Lions DST",
+      "pos": "DST",
+      "team": "",
+      "ud": null,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Kansas City Chiefs DST",
       "pos": "DST",
       "team": "",
       "ud": null,
@@ -3600,7 +3655,18 @@
       "rtsports": null
     },
     {
-      "name": "Kansas City Chiefs DST",
+      "name": "Colbie Young",
+      "pos": "WR",
+      "team": "CIN",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "San Francisco 49ers DST",
       "pos": "DST",
       "team": "",
       "ud": null,
@@ -3622,73 +3688,7 @@
       "rtsports": null
     },
     {
-      "name": "Nick Westbrook-Ikhine",
-      "pos": "WR",
-      "team": "IND",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": 216,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "San Francisco 49ers DST",
-      "pos": "DST",
-      "team": "",
-      "ud": null,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Mac Jones",
-      "pos": "QB",
-      "team": "SF",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
       "name": "Indianapolis Colts DST",
-      "pos": "DST",
-      "team": "",
-      "ud": null,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Carolina Panthers DST",
-      "pos": "DST",
-      "team": "",
-      "ud": null,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Anthony Richardson Sr.",
-      "pos": "QB",
-      "team": "IND",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Dallas Cowboys DST",
       "pos": "DST",
       "team": "",
       "ud": null,
@@ -3710,9 +3710,31 @@
       "rtsports": null
     },
     {
-      "name": "Luke McCaffrey",
+      "name": "Carolina Panthers DST",
+      "pos": "DST",
+      "team": "",
+      "ud": null,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Dallas Cowboys DST",
+      "pos": "DST",
+      "team": "",
+      "ud": null,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "John Metchie III",
       "pos": "WR",
-      "team": "WAS",
+      "team": "CAR",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3721,9 +3743,20 @@
       "rtsports": null
     },
     {
-      "name": "Jameis Winston",
+      "name": "Anthony Richardson Sr.",
       "pos": "QB",
-      "team": "NYG",
+      "team": "IND",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Isaiah Bond",
+      "pos": "WR",
+      "team": "CLE",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3743,51 +3776,7 @@
       "rtsports": null
     },
     {
-      "name": "Greg Dortch",
-      "pos": "WR",
-      "team": "DET",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Tennessee Titans DST",
-      "pos": "DST",
-      "team": "",
-      "ud": null,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Isaiah Bond",
-      "pos": "WR",
-      "team": "CLE",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
       "name": "Kyle Williams",
-      "pos": "WR",
-      "team": "NE",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Efton Chism III",
       "pos": "WR",
       "team": "NE",
       "ud": 216,
@@ -3809,9 +3798,42 @@
       "rtsports": null
     },
     {
-      "name": "Robert Henry Jr.",
+      "name": "Tennessee Titans DST",
+      "pos": "DST",
+      "team": "",
+      "ud": null,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Jameis Winston",
+      "pos": "QB",
+      "team": "NYG",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Greg Dortch",
+      "pos": "WR",
+      "team": "DET",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Audric Estime",
       "pos": "RB",
-      "team": "WAS",
+      "team": "NO",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3831,17 +3853,6 @@
       "rtsports": null
     },
     {
-      "name": "Ben Sinnott",
-      "pos": "TE",
-      "team": "WAS",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
       "name": "Cincinnati Bengals DST",
       "pos": "DST",
       "team": "",
@@ -3853,9 +3864,20 @@
       "rtsports": null
     },
     {
-      "name": "Audric Estime",
+      "name": "Will Shipley",
       "pos": "RB",
-      "team": "NO",
+      "team": "PHI",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Robert Henry Jr.",
+      "pos": "RB",
+      "team": "WAS",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3875,20 +3897,9 @@
       "rtsports": null
     },
     {
-      "name": "Trevor Etienne",
+      "name": "Isaac Guerendo",
       "pos": "RB",
-      "team": "CAR",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Will Shipley",
-      "pos": "RB",
-      "team": "PHI",
+      "team": "SF",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3919,28 +3930,6 @@
       "rtsports": null
     },
     {
-      "name": "Trey Lance",
-      "pos": "QB",
-      "team": "LAC",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Isaac Guerendo",
-      "pos": "RB",
-      "team": "SF",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
       "name": "Jake Browning",
       "pos": "QB",
       "team": "TB",
@@ -3952,20 +3941,9 @@
       "rtsports": null
     },
     {
-      "name": "Mason Rudolph",
-      "pos": "QB",
-      "team": "PIT",
-      "ud": null,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Cedric Tillman",
+      "name": "Tutu Atwell",
       "pos": "WR",
-      "team": "CLE",
+      "team": "MIA",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -3985,42 +3963,31 @@
       "rtsports": null
     },
     {
-      "name": "Tyler Huntley",
-      "pos": "QB",
-      "team": "BAL",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Demarcus Robinson",
-      "pos": "WR",
-      "team": "SF",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Savion Williams",
-      "pos": "WR",
-      "team": "GB",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
       "name": "George Holani",
       "pos": "RB",
       "team": "SEA",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Xavier Legette",
+      "pos": "WR",
+      "team": "CAR",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Trevor Etienne",
+      "pos": "RB",
+      "team": "CAR",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4040,9 +4007,20 @@
       "rtsports": null
     },
     {
-      "name": "Marcus Mariota",
-      "pos": "QB",
-      "team": "WAS",
+      "name": "Efton Chism III",
+      "pos": "WR",
+      "team": "NE",
+      "ud": null,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Seth McGowan",
+      "pos": "RB",
+      "team": "IND",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4062,39 +4040,6 @@
       "rtsports": null
     },
     {
-      "name": "Xavier Legette",
-      "pos": "WR",
-      "team": "CAR",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Kenny Pickett",
-      "pos": "QB",
-      "team": "CAR",
-      "ud": null,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "New York Jets DST",
-      "pos": "DST",
-      "team": "",
-      "ud": null,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
       "name": "Olamide Zaccheaus",
       "pos": "WR",
       "team": "ATL",
@@ -4106,42 +4051,9 @@
       "rtsports": null
     },
     {
-      "name": "Isaiah Davis",
-      "pos": "RB",
-      "team": "NYJ",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Tutu Atwell",
-      "pos": "WR",
-      "team": "MIA",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Will Howard",
+      "name": "Spencer Rattler",
       "pos": "QB",
-      "team": "PIT",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Kyle Allen",
-      "pos": "QB",
-      "team": "BUF",
+      "team": "NO",
       "ud": null,
       "dk": null,
       "ffpc": null,
@@ -4150,9 +4062,9 @@
       "rtsports": null
     },
     {
-      "name": "Ty Simpson",
+      "name": "Trey Lance",
       "pos": "QB",
-      "team": "LAR",
+      "team": "LAC",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4172,6 +4084,72 @@
       "rtsports": null
     },
     {
+      "name": "Will Howard",
+      "pos": "QB",
+      "team": "PIT",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Jarquez Hunter",
+      "pos": "RB",
+      "team": "LAR",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "KaVontae Turpin",
+      "pos": "WR",
+      "team": "DAL",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
+      "name": "Isaiah Davis",
+      "pos": "RB",
+      "team": "NYJ",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Kyle Allen",
+      "pos": "QB",
+      "team": "BUF",
+      "ud": null,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Brashard Smith",
+      "pos": "RB",
+      "team": "KC",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
       "name": "Marvin Mims Jr.",
       "pos": "WR",
       "team": "DEN",
@@ -4183,18 +4161,18 @@
       "rtsports": null
     },
     {
-      "name": "Jarrett Stidham",
-      "pos": "QB",
-      "team": "DEN",
+      "name": "Jimmy Horn Jr.",
+      "pos": "WR",
+      "team": "CAR",
       "ud": 216,
       "dk": null,
       "ffpc": null,
       "drafters": null,
-      "bb10": 216,
+      "bb10": null,
       "rtsports": null
     },
     {
-      "name": "Arizona Cardinals DST",
+      "name": "New York Jets DST",
       "pos": "DST",
       "team": "",
       "ud": null,
@@ -4205,31 +4183,9 @@
       "rtsports": null
     },
     {
-      "name": "Kalif Raymond",
-      "pos": "WR",
-      "team": "CHI",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Seth McGowan",
-      "pos": "RB",
-      "team": "IND",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Emari Demercado",
-      "pos": "RB",
-      "team": "KC",
+      "name": "Tyler Huntley",
+      "pos": "QB",
+      "team": "BAL",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4249,10 +4205,21 @@
       "rtsports": null
     },
     {
-      "name": "Brashard Smith",
-      "pos": "RB",
-      "team": "KC",
+      "name": "Marcus Mariota",
+      "pos": "QB",
+      "team": "WAS",
       "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Jarrett Stidham",
+      "pos": "QB",
+      "team": "DEN",
+      "ud": null,
       "dk": null,
       "ffpc": null,
       "drafters": null,
@@ -4271,64 +4238,31 @@
       "rtsports": null
     },
     {
+      "name": "Emari Demercado",
+      "pos": "RB",
+      "team": "KC",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Arizona Cardinals DST",
+      "pos": "DST",
+      "team": "",
+      "ud": null,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
       "name": "Jaylin Lane",
       "pos": "WR",
       "team": "WAS",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Jarquez Hunter",
-      "pos": "RB",
-      "team": "LAR",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Cade Klubnik",
-      "pos": "QB",
-      "team": "NYJ",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Tyson Bagent",
-      "pos": "QB",
-      "team": "CHI",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": 216,
-      "rtsports": null
-    },
-    {
-      "name": "Damien Martinez",
-      "pos": "RB",
-      "team": "GB",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Emory Jones",
-      "pos": "QB",
-      "team": "",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4348,53 +4282,42 @@
       "rtsports": null
     },
     {
-      "name": "Frank Gore Jr.",
-      "pos": "RB",
-      "team": "BUF",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Michael Trigg",
-      "pos": "TE",
-      "team": "DAL",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Josh Oliver",
-      "pos": "TE",
-      "team": "MIN",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Jimmy Horn Jr.",
-      "pos": "WR",
-      "team": "CAR",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
       "name": "Noah Gray",
       "pos": "TE",
       "team": "KC",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Tyson Bagent",
+      "pos": "QB",
+      "team": "CHI",
+      "ud": null,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": 216,
+      "rtsports": null
+    },
+    {
+      "name": "Cade Klubnik",
+      "pos": "QB",
+      "team": "NYJ",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
+      "name": "Ty Simpson",
+      "pos": "QB",
+      "team": "LAR",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4414,6 +4337,39 @@
       "rtsports": null
     },
     {
+      "name": "CJ Daniels",
+      "pos": "WR",
+      "team": "LAR",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
+      "name": "Drew Allar",
+      "pos": "QB",
+      "team": "PIT",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
+      "name": "Cedric Tillman",
+      "pos": "WR",
+      "team": "CLE",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
       "name": "Kaden Wetjen",
       "pos": "WR",
       "team": "PIT",
@@ -4425,20 +4381,9 @@
       "rtsports": null
     },
     {
-      "name": "D'Onta Foreman",
+      "name": "Frank Gore Jr.",
       "pos": "RB",
-      "team": "",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Kendall Milton",
-      "pos": "RB",
-      "team": "CIN",
+      "team": "BUF",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4458,31 +4403,9 @@
       "rtsports": null
     },
     {
-      "name": "CJ Daniels",
-      "pos": "WR",
-      "team": "LAR",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
       "name": "Xavier Hutchinson",
       "pos": "WR",
       "team": "HOU",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Daniel Bellinger",
-      "pos": "TE",
-      "team": "TEN",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4502,9 +4425,9 @@
       "rtsports": null
     },
     {
-      "name": "Gardner Minshew II",
-      "pos": "QB",
-      "team": "ARI",
+      "name": "Michael Trigg",
+      "pos": "TE",
+      "team": "DAL",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4538,6 +4461,17 @@
       "name": "Matt Hibner",
       "pos": "TE",
       "team": "BAL",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
+      "name": "Josh Oliver",
+      "pos": "TE",
+      "team": "MIN",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4590,6 +4524,17 @@
       "rtsports": null
     },
     {
+      "name": "Xavier Smith",
+      "pos": "WR",
+      "team": "LAR",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
       "name": "Jam Miller",
       "pos": "RB",
       "team": "NE",
@@ -4612,6 +4557,28 @@
       "rtsports": null
     },
     {
+      "name": "Tanner McKee",
+      "pos": "QB",
+      "team": "PHI",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
+      "name": "Luke Farrell",
+      "pos": "TE",
+      "team": "SF",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
       "name": "Foster Moreau",
       "pos": "TE",
       "team": "HOU",
@@ -4623,31 +4590,9 @@
       "rtsports": null
     },
     {
-      "name": "Ronnie Bell",
-      "pos": "WR",
-      "team": "NO",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Jerjuan Newton",
-      "pos": "WR",
-      "team": "",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Ja'Quinden Jackson",
+      "name": "Phil Mafah",
       "pos": "RB",
-      "team": "",
+      "team": "DAL",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4656,9 +4601,42 @@
       "rtsports": null
     },
     {
-      "name": "Jeff Caldwell",
+      "name": "Sione Vaki",
+      "pos": "RB",
+      "team": "DET",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
+      "name": "Damien Martinez",
+      "pos": "RB",
+      "team": "GB",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
+      "name": "Jacob Cowing",
       "pos": "WR",
-      "team": "KC",
+      "team": "SF",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
+      "name": "Caleb Lohner",
+      "pos": "TE",
+      "team": "DEN",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4678,9 +4656,9 @@
       "rtsports": null
     },
     {
-      "name": "Jack Endries",
-      "pos": "TE",
-      "team": "CIN",
+      "name": "Rasheen Ali",
+      "pos": "RB",
+      "team": "BAL",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4689,9 +4667,9 @@
       "rtsports": null
     },
     {
-      "name": "Rasheen Ali",
-      "pos": "RB",
-      "team": "BAL",
+      "name": "Daniel Bellinger",
+      "pos": "TE",
+      "team": "TEN",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4722,6 +4700,28 @@
       "rtsports": null
     },
     {
+      "name": "Gardner Minshew II",
+      "pos": "QB",
+      "team": "ARI",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
+      "name": "Demarcus Robinson",
+      "pos": "WR",
+      "team": "SF",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
       "name": "Mitchell Evans",
       "pos": "TE",
       "team": "CAR",
@@ -4736,17 +4736,6 @@
       "name": "Luke Schoonmaker",
       "pos": "TE",
       "team": "DAL",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Tai Felton",
-      "pos": "WR",
-      "team": "MIN",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4777,31 +4766,9 @@
       "rtsports": null
     },
     {
-      "name": "Xavier Smith",
-      "pos": "WR",
-      "team": "LAR",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
       "name": "Tyrod Taylor",
       "pos": "QB",
       "team": "GB",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Tanner McKee",
-      "pos": "QB",
-      "team": "PHI",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4843,9 +4810,9 @@
       "rtsports": null
     },
     {
-      "name": "Tim Patrick",
-      "pos": "WR",
-      "team": "NYJ",
+      "name": "Zavier Scott",
+      "pos": "RB",
+      "team": "MIN",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4854,9 +4821,20 @@
       "rtsports": null
     },
     {
-      "name": "Phil Mafah",
+      "name": "Kendre Miller",
       "pos": "RB",
-      "team": "DAL",
+      "team": "NO",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
+      "name": "Kendrick Law",
+      "pos": "WR",
+      "team": "DET",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4876,9 +4854,9 @@
       "rtsports": null
     },
     {
-      "name": "Jacob Cowing",
+      "name": "Jeff Caldwell",
       "pos": "WR",
-      "team": "SF",
+      "team": "KC",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4887,42 +4865,9 @@
       "rtsports": null
     },
     {
-      "name": "Caleb Lohner",
-      "pos": "TE",
-      "team": "DEN",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Mitch Tinsley",
-      "pos": "WR",
-      "team": "CIN",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Malik Rutherford",
-      "pos": "WR",
-      "team": "",
-      "ud": 216,
-      "dk": null,
-      "ffpc": null,
-      "drafters": null,
-      "bb10": null,
-      "rtsports": null
-    },
-    {
-      "name": "Pierre Strong Jr.",
-      "pos": "RB",
-      "team": "GB",
+      "name": "Riley Leonard",
+      "pos": "QB",
+      "team": "IND",
       "ud": 216,
       "dk": null,
       "ffpc": null,
@@ -4934,6 +4879,28 @@
       "name": "Israel Abanikanda",
       "pos": "RB",
       "team": "DAL",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
+      "name": "J. Michael Sturdivant",
+      "pos": "WR",
+      "team": "GB",
+      "ud": 216,
+      "dk": null,
+      "ffpc": null,
+      "drafters": null,
+      "bb10": null,
+      "rtsports": null
+    },
+    {
+      "name": "Pierre Strong Jr.",
+      "pos": "RB",
+      "team": "GB",
       "ud": 216,
       "dk": null,
       "ffpc": null,
