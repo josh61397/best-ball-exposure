@@ -189,8 +189,10 @@
     var rStack = rangeFor(rows, 'stackRate');
 
     var body = '<tbody>' + rows.map(function (r) {
-      var teamCell = '<span class="player-cell">' + BB.teamLogoHTML(r.team, { size: 18 }) +
-        '<strong>' + escapeHtml(r.team) + '</strong></span>';
+      var teamHref = 'team.html?code=' + encodeURIComponent(r.team);
+      var teamCell = '<a class="team-cell-link" href="' + teamHref + '">' +
+        '<span class="player-cell">' + BB.teamLogoHTML(r.team, { size: 18 }) +
+        '<strong>' + escapeHtml(r.team) + '</strong></span></a>';
       return '<tr>' +
         '<td>' + teamCell + '</td>' +
         '<td class="num">' + r.totalPicks + '</td>' +
