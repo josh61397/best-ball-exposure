@@ -6,12 +6,29 @@ on:
     - cron: "0 10 * * *"
   workflow_dispatch: {}
 
+# Need pages + id-token to deploy to GitHub Pages directly from this
+# workflow. Going cross-workflow via `gh workflow run` was failing with
+# 403 because GITHUB_TOKEN doesn't have actions:write by default.
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+# Share the same Pages concurrency group as pages.yml so the two
+# workflows can't step on each other if a human pushes and the cron
+# fires close together.
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    # Required for actions/deploy-pages — the URL fills in once the
+    # deploy actually runs (it's skipped when no ADP changes).
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,10 +59,17 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # Auto-commits by GITHUB_TOKEN don't trigger downstream workflows,
-      # so explicitly kick off the Pages deploy.
-      - name: Trigger Pages deploy
+      - name: Configure Pages
         if: steps.commit.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run pages.yml --ref main
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        if: steps.commit.outputs.changed == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        if: steps.commit.outputs.changed == 'true'
+        id: deployment
+        uses: actions/deploy-pages@v4
