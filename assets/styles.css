@@ -524,6 +524,20 @@ a.team-cell-link {
 a.team-cell-link:hover { text-decoration: underline; color: var(--accent); }
 a.team-cell-link:hover .team-logo { opacity: 0.85; }
 
+.platform-logo {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  border-radius: 3px;
+}
+.title-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.title-cell a { min-width: 0; }
+
 .schedule-strip {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));

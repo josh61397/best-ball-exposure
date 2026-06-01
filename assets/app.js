@@ -1244,6 +1244,33 @@
     return ' style="background: hsla(' + hue + ', 85%, 50%, 0.38);"';
   };
 
+  // ---------- platform logos ----------
+  // Hotlinks Google's favicon service for the major best-ball platforms.
+  // It returns a 64px PNG and the browser caches aggressively, so 18-30px
+  // inline use is essentially free after the first paint.
+  var PLATFORM_DOMAINS = {
+    underdog:   'underdogfantasy.com',
+    draftkings: 'draftkings.com',
+    drafters:   'drafters.com',
+    ffpc:       'myffpc.com',
+  };
+  BB.platformLogoURL = function (platform) {
+    if (!platform) return null;
+    var domain = PLATFORM_DOMAINS[String(platform).toLowerCase()];
+    if (!domain) return null;
+    return 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=64';
+  };
+  BB.platformLogoHTML = function (platform, opts) {
+    if (!platform) return '';
+    opts = opts || {};
+    var size = opts.size || 16;
+    var url = BB.platformLogoURL(platform);
+    if (!url) return '';
+    return '<img class="platform-logo" src="' + url + '" alt="' + platform + '" ' +
+      'width="' + size + '" height="' + size + '" loading="lazy" ' +
+      'onerror="this.style.visibility=\'hidden\'" title="' + platform + '"/>';
+  };
+
   // ---------- team logos ----------
   // Hotlinks ESPN's NFL logo CDN. The path uses lowercase team codes,
   // which match our 2-3 letter codes verbatim for every team.

@@ -236,8 +236,10 @@
       }
       var sfTip = isSf ? ' title="Superflex roster — Superflex ADP not tracked, value disabled"' : '';
       var dashCell = '<td class="num"' + sfTip + '>—</td>';
+      var titleCell = '<span class="title-cell">' + BB.platformLogoHTML(r.platform, { size: 16 }) +
+        '<a href="' + escapeHtml(rosterHref) + '">' + escapeHtml(r.tournament || '(unknown)') + '</a></span>';
       return '<tr class="row-link' + (isSf ? ' superflex' : '') + '" data-href="' + escapeHtml(rosterHref) + '">' +
-        '<td><a href="' + escapeHtml(rosterHref) + '">' + escapeHtml(r.tournament || '(unknown)') + '</a></td>' +
+        '<td>' + titleCell + '</td>' +
         '<td class="num">' + fmtDate(r.draftedAt) + '</td>' +
         '<td>' + typeBadge + '</td>' +
         '<td class="num">' + (r.entryFee != null ? BB.fmtMoney(r.entryFee) : '—') + '</td>' +
@@ -332,7 +334,10 @@
         '<div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;">' +
           '<div style="flex:1;min-width:240px;">' +
             '<div class="stat-label">Tournament</div>' +
-            '<div style="font-size:18px;font-weight:600;">' + escapeHtml(roster.tournament || '(no tournament)') + '</div>' +
+            '<div style="font-size:18px;font-weight:600;display:inline-flex;align-items:center;gap:8px;">' +
+              BB.platformLogoHTML(roster.platform, { size: 20 }) +
+              '<span>' + escapeHtml(roster.tournament || '(no tournament)') + '</span>' +
+            '</div>' +
             '<div class="stat-sub">' + escapeHtml(roster.platform) +
               (roster.entryFee ? ' · entry ' + BB.fmtMoney(roster.entryFee) : '') +
               (roster.draftSize ? ' · ' + roster.draftSize + '-man' : '') +
