@@ -71,6 +71,29 @@
     tourneyEl.value = state.tournament;
   }
 
+  function renderRosterTypes(rosters) {
+    var el = document.getElementById('roster-types');
+    if (!el) return;
+    if (!rosters.length) { el.innerHTML = ''; return; }
+    var types = BB.computeRosterTypes(rosters);
+    var max = types.reduce(function (m, t) { return Math.max(m, t.count); }, 0);
+    var html = '<div class="roster-types-grid">' + types.map(function (t) {
+      var barPct = max ? (t.count / max * 100) : 0;
+      var label = t.count === 0 ? 'none' : t.count.toString();
+      var pctText = t.count ? BB.fmtPct(t.pct) : '—';
+      return '<div class="card roster-type-card' + (t.count === 0 ? ' is-empty' : '') + '" title="' + escapeHtml(t.description) + '">' +
+        '<div class="rt-head">' +
+          '<span class="rt-label">' + escapeHtml(t.label) + '</span>' +
+          '<span class="rt-pct">' + pctText + '</span>' +
+        '</div>' +
+        '<div class="rt-count">' + label + ' <span class="rt-suffix">' + (t.count === 1 ? 'roster' : 'rosters') + '</span></div>' +
+        '<div class="rt-bar"><div class="rt-bar-fill" style="width:' + barPct.toFixed(1) + '%"></div></div>' +
+        '<div class="rt-desc">' + escapeHtml(t.description) + '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+    el.innerHTML = html;
+  }
+
   function renderHistograms(rosters) {
     var histEl = document.getElementById('histograms');
     if (!histEl) return;
@@ -111,10 +134,12 @@
     if (!rosters.length) {
       contentEl.innerHTML = '<div class="empty-state"><h2>No rosters match these filters</h2><p>Try clearing filters or <a href="index.html">upload a CSV</a>.</p></div>';
       rowCountEl.textContent = '0';
+      renderRosterTypes([]);
       renderHistograms([]);
       return;
     }
 
+    renderRosterTypes(rosters);
     renderHistograms(rosters);
     var rows = BB.computeRosterConstructions(rosters);
     var s = state.search.toLowerCase().trim();

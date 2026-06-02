@@ -1032,6 +1032,89 @@
     return out;
   };
 
+  // ---------- roster archetypes ----------
+  // For each roster, identify which strategic archetypes it matches.
+  // A roster can match multiple archetypes (e.g., Zero RB + Late QB +
+  // Elite TE all at once). Returns an array of archetype label strings.
+  BB.classifyRoster = function (roster) {
+    var picks = (roster && roster.picks) ? roster.picks : [];
+    if (!picks.length) return [];
+
+    function countInRounds(pos, maxRound) {
+      var n = 0;
+      for (var i = 0; i < picks.length; i++) {
+        var p = picks[i];
+        if (p.position === pos && p.round != null && p.round <= maxRound) n++;
+      }
+      return n;
+    }
+    function countAll(pos) {
+      var n = 0;
+      for (var i = 0; i < picks.length; i++) {
+        if (picks[i].position === pos) n++;
+      }
+      return n;
+    }
+
+    var types = [];
+    var rbsFirst2 = countInRounds('RB', 2);
+    var rbsFirst4 = countInRounds('RB', 4);
+    var rbsFirst5 = countInRounds('RB', 5);
+    var rbsFirst6 = countInRounds('RB', 6);
+    var totalRBs  = countAll('RB');
+    var qbsFirst6  = countInRounds('QB', 6);
+    var qbsFirst10 = countInRounds('QB', 10);
+    var tesFirst4 = countInRounds('TE', 4);
+
+    if (rbsFirst6 === 0) types.push('Zero RB');
+    if (rbsFirst2 === 1 && rbsFirst5 === 1) types.push('Hero RB');
+    if (rbsFirst4 >= 3) types.push('RB Heavy');
+    if (qbsFirst6 >= 1) types.push('Elite QB');
+    if (tesFirst4 >= 1) types.push('Elite TE');
+    if (qbsFirst10 === 0) types.push('Late QB');
+    if (totalRBs === 4) types.push('Hyper Fragile');
+
+    return types;
+  };
+
+  // Aggregate roster-type counts across a set of rosters.
+  // Returns an array of { label, description, count, pct, fees }.
+  BB.computeRosterTypes = function (rosters) {
+    var LABELS = [
+      { label: 'Zero RB',       description: 'No RBs in first 6 rounds' },
+      { label: 'Hero RB',       description: '1 RB in first 2 rounds, only 1 RB through 5 rounds' },
+      { label: 'RB Heavy',      description: '3+ RBs in first 4 rounds' },
+      { label: 'Elite QB',      description: 'Took a QB in first 6 rounds' },
+      { label: 'Elite TE',      description: 'Took a TE in first 4 rounds' },
+      { label: 'Late QB',       description: 'No QBs in first 10 rounds' },
+      { label: 'Hyper Fragile', description: 'Only 4 RBs on the roster' },
+    ];
+    var counts = {};
+    var fees = {};
+    LABELS.forEach(function (l) { counts[l.label] = 0; fees[l.label] = 0; });
+
+    rosters.forEach(function (r) {
+      var types = BB.classifyRoster(r);
+      types.forEach(function (t) {
+        if (counts[t] != null) {
+          counts[t]++;
+          fees[t] += r.entryFee || 0;
+        }
+      });
+    });
+
+    var total = rosters.length;
+    return LABELS.map(function (l) {
+      return {
+        label: l.label,
+        description: l.description,
+        count: counts[l.label],
+        pct: total ? counts[l.label] / total : 0,
+        fees: fees[l.label],
+      };
+    });
+  };
+
   // ---------- roster constructions ----------
   // Distribution of position-count shapes across your rosters.
   // For each roster, count QB / RB / WR / TE picks and form a key
