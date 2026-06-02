@@ -13,8 +13,8 @@
     if (!name) return '—';
     return '<a href="player.html?name=' + encodeURIComponent(name) + '">' + escapeHtml(name) + '</a>';
   }
-  function playerCell(name, team) {
-    return name ? BB.playerCell(name, team, { linkToPlayer: true }) : '—';
+  function playerCell(name, team, position) {
+    return name ? BB.playerCell(name, team, { linkToPlayer: true, position: position }) : '—';
   }
   function clvClass(clv) {
     if (clv == null) return '';
@@ -120,7 +120,7 @@
     var body = combos.map(function (c) {
       var liftCls = c.lift == null ? '' : (c.lift >= 1.15 ? 'clv-pos' : (c.lift <= 0.85 ? 'clv-neg' : ''));
       return '<tr>' +
-        '<td>' + playerCell(c.player, c.team) + '</td>' +
+        '<td>' + playerCell(c.player, c.team, c.position) + '</td>' +
         '<td>' + (c.position ? '<span class="badge pos-' + escapeHtml(c.position) + '">' + escapeHtml(c.position) + '</span>' : '—') + '</td>' +
         '<td>' + escapeHtml(c.team || '—') + '</td>' +
         '<td class="num">' + c.coCount + '</td>' +

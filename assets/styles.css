@@ -481,10 +481,13 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
   color: var(--text-dim);
   border: 1px solid var(--border);
 }
-.badge.pos-QB { background: color-mix(in srgb, var(--pos-qb) 16%, transparent); color: var(--pos-qb); border-color: color-mix(in srgb, var(--pos-qb) 35%, transparent); }
-.badge.pos-RB { background: color-mix(in srgb, var(--pos-rb) 16%, transparent); color: var(--pos-rb); border-color: color-mix(in srgb, var(--pos-rb) 35%, transparent); }
-.badge.pos-WR { background: color-mix(in srgb, var(--pos-wr) 16%, transparent); color: var(--pos-wr); border-color: color-mix(in srgb, var(--pos-wr) 35%, transparent); }
-.badge.pos-TE { background: color-mix(in srgb, var(--pos-te) 16%, transparent); color: var(--pos-te); border-color: color-mix(in srgb, var(--pos-te) 35%, transparent); }
+/* Position badges use a subtle top-light gradient so they feel like
+   physical pills instead of flat tints. Top edge is brighter than
+   the bottom, the way light catches a domed surface. */
+.badge.pos-QB { background: linear-gradient(180deg, color-mix(in srgb, var(--pos-qb) 28%, transparent) 0%, color-mix(in srgb, var(--pos-qb) 12%, transparent) 100%); color: var(--pos-qb); border-color: color-mix(in srgb, var(--pos-qb) 40%, transparent); }
+.badge.pos-RB { background: linear-gradient(180deg, color-mix(in srgb, var(--pos-rb) 28%, transparent) 0%, color-mix(in srgb, var(--pos-rb) 12%, transparent) 100%); color: var(--pos-rb); border-color: color-mix(in srgb, var(--pos-rb) 40%, transparent); }
+.badge.pos-WR { background: linear-gradient(180deg, color-mix(in srgb, var(--pos-wr) 28%, transparent) 0%, color-mix(in srgb, var(--pos-wr) 12%, transparent) 100%); color: var(--pos-wr); border-color: color-mix(in srgb, var(--pos-wr) 40%, transparent); }
+.badge.pos-TE { background: linear-gradient(180deg, color-mix(in srgb, var(--pos-te) 28%, transparent) 0%, color-mix(in srgb, var(--pos-te) 12%, transparent) 100%); color: var(--pos-te); border-color: color-mix(in srgb, var(--pos-te) 40%, transparent); }
 
 .empty-state {
   text-align: center;
@@ -549,6 +552,37 @@ table.data tbody tr[data-pos="TE"]:hover td:first-child { background: color-mix(
   min-width: 0;
 }
 .player-cell .player-name { min-width: 0; }
+
+/* Position-colored player name links — applies wherever a player
+   cell carries data-pos. Hover reverts to the underlined accent. */
+.player-cell[data-pos="QB"] .player-name a { color: var(--pos-qb); }
+.player-cell[data-pos="RB"] .player-name a { color: var(--pos-rb); }
+.player-cell[data-pos="WR"] .player-name a { color: var(--pos-wr); }
+.player-cell[data-pos="TE"] .player-name a { color: var(--pos-te); }
+.player-cell[data-pos] .player-name a:hover { filter: brightness(1.15); }
+
+/* Team-color left rail. Anything with --team-color set on it gets a
+   thin colored stripe on its left edge: team rows on the Stacks page,
+   each row of a stack on the Player Stacks view, and each pick on the
+   Rosters detail table. */
+[style*="--team-color"] {
+  box-shadow: inset 3px 0 0 var(--team-color, transparent);
+}
+/* On table rows specifically, the inset shadow on the row itself
+   doesn't render reliably because each td paints its own background.
+   We apply the stripe via the first cell. */
+table.data tbody tr[style*="--team-color"] {
+  box-shadow: none;
+}
+table.data tbody tr[style*="--team-color"] td:first-child {
+  box-shadow: inset 3px 0 0 var(--team-color, transparent);
+}
+/* Stack rows in the Player Stacks view — small inline element. */
+.stack-row[style*="--team-color"] {
+  box-shadow: inset 3px 0 0 var(--team-color, transparent);
+  padding-left: 6px;
+  border-radius: 3px;
+}
 .team-logo {
   display: inline-block;
   flex-shrink: 0;

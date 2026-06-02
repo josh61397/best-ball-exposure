@@ -116,7 +116,7 @@
 
     var body = rows.map(function (r) {
       return '<tr>' +
-        '<td>' + BB.playerCell(r.player, r.team, { linkToPlayer: true }) + '</td>' +
+        '<td>' + BB.playerCell(r.player, r.team, { linkToPlayer: true, position: r.position }) + '</td>' +
         '<td>' + (r.position ? '<span class="badge pos-' + escapeHtml(r.position) + '">' + escapeHtml(r.position) + '</span>' : '—') + '</td>' +
         '<td class="num">' + r.count + '</td>' +
         '<td class="num">' + BB.fmtPct(r.exposurePct) + '</td>' +

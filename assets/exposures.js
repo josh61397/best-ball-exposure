@@ -149,7 +149,7 @@
 
     var rows = combos.map(function (c) {
       var liftCls = c.lift == null ? '' : (c.lift >= 1.15 ? 'clv-pos' : (c.lift <= 0.85 ? 'clv-neg' : ''));
-      var nameCell = c.player ? BB.playerCell(c.player, c.team, { linkToPlayer: true, size: 14 }) : '—';
+      var nameCell = c.player ? BB.playerCell(c.player, c.team, { linkToPlayer: true, size: 14, position: c.position }) : '—';
       return '<tr>' +
         '<td>' + nameCell + '</td>' +
         '<td>' + (c.position ? '<span class="badge pos-' + escapeHtml(c.position) + '">' + escapeHtml(c.position) + '</span>' : '—') + '</td>' +
@@ -243,7 +243,7 @@
         '<span class="chevron">' + (isExpanded ? '▾' : '▸') + '</span>' +
         '</button>';
       // Inline the chevron with the player cell.
-      var playerCell = BB.playerCell(r.player, r.team, { linkToPlayer: true });
+      var playerCell = BB.playerCell(r.player, r.team, { linkToPlayer: true, position: r.position });
       var combinedCell = '<span class="player-cell-with-expand">' + chevron + playerCell + '</span>';
       var trClass = 'row-expandable' + (isExpanded ? ' is-expanded' : '');
       var posAttr = r.position ? ' data-pos="' + escapeHtml(r.position) + '"' : '';

@@ -1327,6 +1327,29 @@
     return ' style="background: hsla(' + hue + ', 85%, 50%, 0.38);"';
   };
 
+  // ---------- NFL team primary colors ----------
+  // Used for left-rail stripes on team rows / stack rows / pick rows.
+  // Colors per each team's official primary brand color.
+  var TEAM_COLORS = {
+    ARI: '#97233F', ATL: '#A71930', BAL: '#241773', BUF: '#00338D',
+    CAR: '#0085CA', CHI: '#0B162A', CIN: '#FB4F14', CLE: '#311D00',
+    DAL: '#003594', DEN: '#FB4F14', DET: '#0076B6', GB:  '#203731',
+    HOU: '#03202F', IND: '#002C5F', JAX: '#006778', KC:  '#E31837',
+    LV:  '#A5ACAF', LAC: '#0080C6', LAR: '#003594', MIA: '#008E97',
+    MIN: '#4F2683', NE:  '#002244', NO:  '#D3BC8D', NYG: '#0B2265',
+    NYJ: '#125740', PHI: '#004C54', PIT: '#FFB612', SF:  '#AA0000',
+    SEA: '#002244', TB:  '#D50A0A', TEN: '#4B92DB', WAS: '#5A1414',
+  };
+  BB.teamColor = function (team) {
+    return TEAM_COLORS[String(team || '').toUpperCase()] || null;
+  };
+  // Convenience: returns the inline style attr "--team-color: <hex>"
+  // (or empty string when the team has no known color).
+  BB.teamColorStyle = function (team) {
+    var c = BB.teamColor(team);
+    return c ? ' style="--team-color:' + c + '"' : '';
+  };
+
   // ---------- platform logos ----------
   // Hotlinks Google's favicon service for the major best-ball platforms.
   // It returns a 64px PNG and the browser caches aggressively, so 18-30px
@@ -1373,7 +1396,8 @@
       'onerror="this.style.visibility=\'hidden\'"/>';
   };
 
-  // Player name with logo prefix — used in tables.
+  // Player name with logo prefix — used in tables. Pass opts.position
+  // (QB/RB/WR/TE) to color the player name link in the position's hue.
   BB.playerCell = function (name, team, opts) {
     opts = opts || {};
     var safe = String(name == null ? '' : name).replace(/[&<>"']/g, function (c) {
@@ -1383,7 +1407,8 @@
     var inner = opts.linkToPlayer
       ? '<a href="player.html?name=' + encodeURIComponent(name || '') + '">' + safe + '</a>'
       : safe;
-    return '<span class="player-cell">' + logo + '<span class="player-name">' + inner + '</span></span>';
+    var posAttr = opts.position ? ' data-pos="' + opts.position + '"' : '';
+    return '<span class="player-cell"' + posAttr + '>' + logo + '<span class="player-name">' + inner + '</span></span>';
   };
 
   // ---------- formatting helpers ----------

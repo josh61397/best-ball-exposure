@@ -105,7 +105,7 @@
     '</tr></thead>';
 
     var body = players.map(function (p) {
-      var nameCell = BB.playerCell(p.player, p.team, { linkToPlayer: true });
+      var nameCell = BB.playerCell(p.player, p.team, { linkToPlayer: true, position: p.position });
       return '<tr>' +
         '<td>' + nameCell + '</td>' +
         '<td>' + (p.position ? '<span class="badge pos-' + escapeHtml(p.position) + '">' + escapeHtml(p.position) + '</span>' : '—') + '</td>' +

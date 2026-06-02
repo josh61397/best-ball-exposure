@@ -383,8 +383,8 @@
           // Negative DCV is value, so we flip the classification for color.
           var dcvCls = dcv == null ? '' : dcv < 0 ? 'clv-pos' : (dcv > 0 ? 'clv-neg' : '');
           var dcvText = dcv == null ? '—' : (dcv > 0 ? '+' : '') + dcv.toFixed(1);
-          var nameCell = p.player ? BB.playerCell(p.player, p.team, { linkToPlayer: true }) : '—';
-          return '<tr>' +
+          var nameCell = p.player ? BB.playerCell(p.player, p.team, { linkToPlayer: true, position: p.position }) : '—';
+          return '<tr' + BB.teamColorStyle(p.team) + '>' +
             '<td class="num">' + (p.round != null ? p.round : '—') + '</td>' +
             '<td class="num">' + (p.overallPick != null ? p.overallPick : '—') + '</td>' +
             '<td>' + nameCell + '</td>' +

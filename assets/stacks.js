@@ -193,7 +193,7 @@
       var teamCell = '<a class="team-cell-link" href="' + teamHref + '">' +
         '<span class="player-cell">' + BB.teamLogoHTML(r.team, { size: 18 }) +
         '<strong>' + escapeHtml(r.team) + '</strong></span></a>';
-      return '<tr>' +
+      return '<tr' + BB.teamColorStyle(r.team) + '>' +
         '<td>' + teamCell + '</td>' +
         '<td class="num">' + r.totalPicks + '</td>' +
         '<td class="num">' + r.rostersWithTeam + '</td>' +
@@ -234,7 +234,8 @@
     return '<div class="stack-cell">' + stack.players.map(function (p) {
       var logo = p.team ? BB.teamLogoHTML(p.team, { size: 14 }) : '<span class="team-logo team-logo-empty" style="width:14px;height:14px;"></span>';
       var posBadge = p.position ? '<span class="badge pos-' + escapeHtml(p.position) + '" style="padding:1px 5px;font-size:10px;">' + escapeHtml(p.position) + '</span>' : '';
-      return '<div class="stack-row">' + logo + posBadge +
+      var teamStyle = p.team ? BB.teamColorStyle(p.team) : '';
+      return '<div class="stack-row"' + teamStyle + '>' + logo + posBadge +
         '<a href="player.html?name=' + encodeURIComponent(p.player) + '">' + escapeHtml(p.player) + '</a>' +
         '<span class="stack-team">' + escapeHtml(p.team || '') + '</span>' +
         '</div>';
