@@ -9,6 +9,7 @@
   var contextEl = document.getElementById('context-filter');
   var rowCountEl = document.getElementById('row-count');
 
+  var PAGE_SIZE = 25;
   var state = {
     sortKey: 'count',
     sortDir: 'desc',
@@ -16,8 +17,10 @@
     platform: '',
     tournament: '',
     context: '',
-    // Which Roster Type row (if any) is currently expanded.
+    // Which Roster Type row (if any) is currently expanded, and which
+    // page (0-indexed) of its matching rosters we're showing.
     expandedType: null,
+    expandedPage: 0,
   };
 
   function escapeHtml(s) {
@@ -86,8 +89,16 @@
       var db = b.draftedAt || '';
       return db.localeCompare(da);
     });
-    var SHOW = 60;
-    var displayed = matching.slice(0, SHOW);
+
+    var totalPages = Math.max(1, Math.ceil(matching.length / PAGE_SIZE));
+    var page = state.expandedPage;
+    if (page < 0) page = 0;
+    if (page >= totalPages) page = totalPages - 1;
+    state.expandedPage = page;
+    var start = page * PAGE_SIZE;
+    var end = Math.min(start + PAGE_SIZE, matching.length);
+    var displayed = matching.slice(start, end);
+
     var rows = displayed.map(function (r) {
       var dateText = '—';
       if (r.draftedAt) {
@@ -107,10 +118,19 @@
         '</span>' +
         '</a>';
     }).join('');
-    var moreNote = matching.length > SHOW
-      ? '<div class="rt-more">+ ' + (matching.length - SHOW) + ' more — refine filters above to narrow.</div>'
-      : '';
-    return '<div class="rt-rosters">' + rows + moreNote + '</div>';
+
+    var pagerHtml = '';
+    if (matching.length > PAGE_SIZE) {
+      var prevDisabled = page === 0;
+      var nextDisabled = page >= totalPages - 1;
+      pagerHtml =
+        '<div class="rt-pager" data-stop="1">' +
+          '<button type="button" class="rt-page-btn" data-page-act="prev"' + (prevDisabled ? ' disabled' : '') + '>‹ Prev</button>' +
+          '<span class="rt-page-info">Showing ' + (start + 1) + '-' + end + ' of ' + matching.length + ' · page ' + (page + 1) + ' of ' + totalPages + '</span>' +
+          '<button type="button" class="rt-page-btn" data-page-act="next"' + (nextDisabled ? ' disabled' : '') + '>Next ›</button>' +
+        '</div>';
+    }
+    return '<div class="rt-rosters">' + rows + '</div>' + pagerHtml;
   }
 
   function renderRosterTypes(rosters) {
@@ -157,8 +177,26 @@
       row.addEventListener('click', function (e) {
         // Let clicks on inner links go through (they navigate to roster detail).
         if (e.target.closest('a.rt-roster-item')) return;
+        // Pager buttons handle their own clicks — don't toggle on those.
+        if (e.target.closest('.rt-pager')) return;
         var label = row.getAttribute('data-type');
-        state.expandedType = (state.expandedType === label) ? null : label;
+        if (state.expandedType === label) {
+          state.expandedType = null;
+        } else {
+          state.expandedType = label;
+          state.expandedPage = 0; // reset paging when opening a new type
+        }
+        renderRosterTypes(getFilteredRosters());
+      });
+    });
+
+    el.querySelectorAll('.rt-page-btn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (btn.disabled) return;
+        var act = btn.getAttribute('data-page-act');
+        if (act === 'prev') state.expandedPage -= 1;
+        else if (act === 'next') state.expandedPage += 1;
         renderRosterTypes(getFilteredRosters());
       });
     });
