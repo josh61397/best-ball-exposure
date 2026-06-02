@@ -65,9 +65,14 @@ a:hover { text-decoration: underline; }
 :root {
   --sidebar-w: 220px;
 }
+:root[data-sidebar="collapsed"] {
+  --sidebar-w: 64px;
+}
 body {
   padding-left: var(--sidebar-w);
+  transition: padding-left 160ms ease;
 }
+aside.sidebar { transition: width 160ms ease; }
 
 aside.sidebar {
   position: fixed;
@@ -84,17 +89,41 @@ aside.sidebar {
   overflow-y: auto;
 }
 
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 4px 12px 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10px;
+}
 .sidebar-brand {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 4px 8px 16px;
+  padding: 4px 4px;
   text-decoration: none;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 10px;
   color: var(--text);
+  min-width: 0;
 }
 .sidebar-brand:hover { text-decoration: none; }
+.sidebar-collapse-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 120ms, color 120ms, border-color 120ms;
+}
+.sidebar-collapse-btn:hover { background: var(--bg-elev-2); color: var(--text); border-color: var(--border); }
 .brand-mark {
   width: 32px;
   height: 32px;
@@ -190,6 +219,41 @@ aside.sidebar {
 .adp-stamp.fresh { color: var(--accent-2); border-color: color-mix(in srgb, var(--accent-2) 40%, transparent); background: color-mix(in srgb, var(--accent-2) 10%, transparent); }
 .adp-stamp.stale { color: var(--warn);    border-color: color-mix(in srgb, var(--warn) 40%, transparent);    background: color-mix(in srgb, var(--warn) 10%, transparent); }
 .rosters-count { font-variant-numeric: tabular-nums; }
+
+/* ---------- collapsed sidebar state ---------- */
+:root[data-sidebar="collapsed"] aside.sidebar {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+:root[data-sidebar="collapsed"] .brand-name { display: none; }
+:root[data-sidebar="collapsed"] .sidebar-top {
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0 12px;
+}
+:root[data-sidebar="collapsed"] .sidebar-brand {
+  flex: 0 0 auto;
+  justify-content: center;
+  padding: 0;
+}
+:root[data-sidebar="collapsed"] .nav-label { display: none; }
+:root[data-sidebar="collapsed"] .sidebar-nav a {
+  justify-content: center;
+  padding: 10px 0;
+}
+:root[data-sidebar="collapsed"] .sidebar-nav a.active::before {
+  left: -8px;
+}
+:root[data-sidebar="collapsed"] .sidebar-footer {
+  align-items: center;
+}
+:root[data-sidebar="collapsed"] .sidebar-meta { display: none; }
+:root[data-sidebar="collapsed"] .sidebar-meta-row {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+}
+:root[data-sidebar="collapsed"] .sidebar-meta-row .rosters-count { display: none; }
 
 /* On narrow viewports collapse sidebar to a horizontal bar at the top */
 @media (max-width: 720px) {

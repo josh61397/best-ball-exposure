@@ -1,6 +1,20 @@
 (function () {
   'use strict';
 
+  // ---------- sidebar collapsed state ----------
+  function isCollapsed() {
+    return document.documentElement.getAttribute('data-sidebar') === 'collapsed';
+  }
+  function setCollapsed(c) {
+    if (c) document.documentElement.setAttribute('data-sidebar', 'collapsed');
+    else document.documentElement.removeAttribute('data-sidebar');
+    try { localStorage.setItem('bb_sidebar_collapsed', c ? '1' : '0'); } catch (e) {}
+  }
+  function toggleCollapsed() {
+    setCollapsed(!isCollapsed());
+    render();
+  }
+
   // ---------- theme ----------
   function currentTheme() {
     return document.documentElement.getAttribute('data-theme') || 'dark';
@@ -68,15 +82,27 @@
       }
     }
 
+    var collapsed = isCollapsed();
+    var collapseChevron = collapsed
+      ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
+      : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
+
     var html =
       '<aside class="sidebar" id="site-nav">' +
-        '<a class="sidebar-brand" href="index.html">' +
-          '<span class="brand-mark">BB</span>' +
-          '<span class="brand-name">Best Ball <span class="accent">Exposure</span></span>' +
-        '</a>' +
+        '<div class="sidebar-top">' +
+          '<a class="sidebar-brand" href="index.html" title="Best Ball Exposure">' +
+            '<span class="brand-mark">BB</span>' +
+            '<span class="brand-name">Best Ball <span class="accent">Exposure</span></span>' +
+          '</a>' +
+          '<button class="sidebar-collapse-btn" id="sidebar-collapse" type="button" ' +
+            'aria-label="' + (collapsed ? 'Expand sidebar' : 'Collapse sidebar') + '" ' +
+            'title="' + (collapsed ? 'Expand sidebar' : 'Collapse sidebar') + '">' +
+            collapseChevron +
+          '</button>' +
+        '</div>' +
         '<nav class="sidebar-nav">' +
           pages.map(function (p) {
-            return '<a href="' + p.href + '"' + (isActive(p.href) ? ' class="active"' : '') + '>' +
+            return '<a href="' + p.href + '"' + (isActive(p.href) ? ' class="active"' : '') + ' title="' + p.label + '">' +
               '<span class="nav-icon">' + (ICONS[p.icon] || '') + '</span>' +
               '<span class="nav-label">' + p.label + '</span>' +
             '</a>';
@@ -96,6 +122,8 @@
 
     var btn = document.getElementById('theme-toggle');
     if (btn) btn.addEventListener('click', toggleTheme);
+    var collapseBtn = document.getElementById('sidebar-collapse');
+    if (collapseBtn) collapseBtn.addEventListener('click', toggleCollapsed);
   }
   window.BB_renderNav = render;
   if (document.readyState === 'loading') {
