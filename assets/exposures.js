@@ -246,7 +246,8 @@
       var playerCell = BB.playerCell(r.player, r.team, { linkToPlayer: true });
       var combinedCell = '<span class="player-cell-with-expand">' + chevron + playerCell + '</span>';
       var trClass = 'row-expandable' + (isExpanded ? ' is-expanded' : '');
-      var mainTr = '<tr class="' + trClass + '" data-norm="' + escapeHtml(normName) + '">' +
+      var posAttr = r.position ? ' data-pos="' + escapeHtml(r.position) + '"' : '';
+      var mainTr = '<tr class="' + trClass + '" data-norm="' + escapeHtml(normName) + '"' + posAttr + '>' +
         '<td>' + combinedCell + '</td>' +
         '<td>' + (r.position ? '<span class="badge pos-' + escapeHtml(r.position) + '">' + escapeHtml(r.position) + '</span>' : '—') + '</td>' +
         '<td>' + escapeHtml(r.team || '—') + '</td>' +

@@ -234,8 +234,8 @@
           paths +
           dots +
           hover +
-          '<line x1="0" x2="0" y1="0" y2="' + innerH + '" stroke="var(--border)"/>' +
-          '<line x1="0" x2="' + innerW + '" y1="' + innerH + '" y2="' + innerH + '" stroke="var(--border)"/>' +
+          '<line x1="0" x2="0" y1="0" y2="' + innerH + '" stroke="color-mix(in srgb, var(--accent) 35%, var(--border))" stroke-width="1.5"/>' +
+          '<line x1="0" x2="' + innerW + '" y1="' + innerH + '" y2="' + innerH + '" stroke="color-mix(in srgb, var(--accent) 35%, var(--border))" stroke-width="1.5"/>' +
         '</g>' +
       '</svg>' +
       '<div id="hover-tip" style="display:none;position:absolute;background:var(--bg-elev-2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px;pointer-events:none;z-index:5;"></div>';

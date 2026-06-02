@@ -128,7 +128,10 @@ aside.sidebar {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: var(--accent);
+  /* Gradient feels more "logo" than flat tile. */
+  background: linear-gradient(135deg,
+    var(--accent) 0%,
+    var(--accent-strong) 100%);
   color: var(--accent-on);
   display: flex;
   align-items: center;
@@ -137,6 +140,7 @@ aside.sidebar {
   font-size: 13px;
   letter-spacing: 0.04em;
   flex-shrink: 0;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 .brand-name {
   font-weight: 700;
@@ -437,12 +441,33 @@ table.data th {
   position: sticky;
   top: 0;
   z-index: 1;
+  /* Accent underline under the whole header row — pulls the eye to it. */
+  border-bottom: 2px solid color-mix(in srgb, var(--accent) 32%, var(--border));
 }
 table.data th.sortable { cursor: pointer; }
 table.data th.sortable:hover { color: var(--text); }
 table.data th .sort-ind { color: var(--accent); margin-left: 4px; }
 table.data tr:last-child td { border-bottom: 0; }
-table.data tr:hover td { background: var(--bg-elev-2); }
+table.data tbody tr { position: relative; }
+/* Row-level accent: a faint left rail appears on hover, brighter when
+   the row is in the 'is-expanded' state. Lets users see what they're
+   pointing at without changing the cell backgrounds (which already
+   carry heat-map color). */
+table.data tbody tr:hover td { background: var(--bg-elev-2); }
+table.data tbody tr:hover td:first-child {
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* Bigger accent focus ring on interactive controls. */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible,
+.theme-toggle:focus-visible,
+.row-expand-btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  outline-offset: 2px;
+}
 table.data td.num, table.data th.num { text-align: right; font-variant-numeric: tabular-nums; }
 
 .badge {
@@ -504,6 +529,18 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
 
 .clv-pos { color: var(--accent-2); }
 .clv-neg { color: var(--danger); }
+
+/* Position-tinted table rows. Applied to the first cell so the
+   heat-map cells in later columns retain their own colors. */
+table.data tbody tr[data-pos="QB"] td:first-child { background: color-mix(in srgb, var(--pos-qb) 6%, transparent); }
+table.data tbody tr[data-pos="RB"] td:first-child { background: color-mix(in srgb, var(--pos-rb) 6%, transparent); }
+table.data tbody tr[data-pos="WR"] td:first-child { background: color-mix(in srgb, var(--pos-wr) 6%, transparent); }
+table.data tbody tr[data-pos="TE"] td:first-child { background: color-mix(in srgb, var(--pos-te) 6%, transparent); }
+table.data tbody tr[data-pos]:hover td:first-child { background: color-mix(in srgb, var(--pos-qb) 6%, var(--bg-elev-2)); }
+table.data tbody tr[data-pos="QB"]:hover td:first-child { background: color-mix(in srgb, var(--pos-qb) 12%, var(--bg-elev-2)); }
+table.data tbody tr[data-pos="RB"]:hover td:first-child { background: color-mix(in srgb, var(--pos-rb) 12%, var(--bg-elev-2)); }
+table.data tbody tr[data-pos="WR"]:hover td:first-child { background: color-mix(in srgb, var(--pos-wr) 12%, var(--bg-elev-2)); }
+table.data tbody tr[data-pos="TE"]:hover td:first-child { background: color-mix(in srgb, var(--pos-te) 12%, var(--bg-elev-2)); }
 
 .player-cell {
   display: inline-flex;

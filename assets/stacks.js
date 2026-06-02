@@ -284,7 +284,10 @@
 
     var rPct = rangeFor(capped, 'pct');
     var body = '<tbody>' + capped.map(function (st) {
-      return '<tr>' +
+      // Lead position = the first token of the type (e.g. "QB+WR" -> QB).
+      var leadPos = (st.type || '').split('+')[0] || '';
+      var posAttr = leadPos ? ' data-pos="' + leadPos + '"' : '';
+      return '<tr' + posAttr + '>' +
         '<td>' + renderStackCell(st) + '</td>' +
         '<td><code class="stack-combo">' + escapeHtml(st.type) + '</code></td>' +
         '<td class="num">' + st.count + '</td>' +
