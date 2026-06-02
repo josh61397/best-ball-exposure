@@ -16,6 +16,8 @@
     platform: '',
     tournament: '',
     context: '',
+    // Which Roster Type row (if any) is currently expanded.
+    expandedType: null,
   };
 
   function escapeHtml(s) {
@@ -71,27 +73,95 @@
     tourneyEl.value = state.tournament;
   }
 
+  function renderRosterTypeRosters(label, rosters) {
+    var matching = rosters.filter(function (r) {
+      return BB.classifyRoster(r).indexOf(label) !== -1;
+    });
+    if (!matching.length) {
+      return '<div class="rt-rosters"><div class="rt-empty">No matching rosters in the current view.</div></div>';
+    }
+    // Most recent first
+    matching.sort(function (a, b) {
+      var da = a.draftedAt || '';
+      var db = b.draftedAt || '';
+      return db.localeCompare(da);
+    });
+    var SHOW = 60;
+    var displayed = matching.slice(0, SHOW);
+    var rows = displayed.map(function (r) {
+      var dateText = '—';
+      if (r.draftedAt) {
+        var d = new Date(r.draftedAt);
+        if (!isNaN(d.getTime())) dateText = (d.getMonth() + 1) + '/' + d.getDate() + '/' + String(d.getFullYear()).slice(-2);
+      }
+      var href = 'rosters.html?id=' + encodeURIComponent(r.rosterId);
+      var fee = (r.entryFee != null) ? BB.fmtMoney(r.entryFee) : '—';
+      var pos = BB.rosterDraftPosition ? BB.rosterDraftPosition(r) : null;
+      return '<a class="rt-roster-item" href="' + escapeHtml(href) + '">' +
+        BB.platformLogoHTML(r.platform, { size: 14 }) +
+        '<span class="rt-roster-name">' + escapeHtml(r.tournament || '(unknown)') + '</span>' +
+        '<span class="rt-roster-meta">' +
+          '<span>' + escapeHtml(dateText) + '</span>' +
+          (pos != null ? '<span>pick&nbsp;' + pos + '</span>' : '') +
+          '<span>' + fee + '</span>' +
+        '</span>' +
+        '</a>';
+    }).join('');
+    var moreNote = matching.length > SHOW
+      ? '<div class="rt-more">+ ' + (matching.length - SHOW) + ' more — refine filters above to narrow.</div>'
+      : '';
+    return '<div class="rt-rosters">' + rows + moreNote + '</div>';
+  }
+
   function renderRosterTypes(rosters) {
     var el = document.getElementById('roster-types');
     if (!el) return;
     if (!rosters.length) { el.innerHTML = ''; return; }
     var types = BB.computeRosterTypes(rosters);
+    // Sort by count desc so most common archetypes float to the top.
+    types.sort(function (a, b) { return b.count - a.count; });
     var max = types.reduce(function (m, t) { return Math.max(m, t.count); }, 0);
-    var html = '<div class="roster-types-grid">' + types.map(function (t) {
+
+    var rowsHtml = types.map(function (t) {
+      var isEmpty = t.count === 0;
+      var isExpanded = !isEmpty && state.expandedType === t.label;
+      var pctText = isEmpty ? '—' : BB.fmtPct(t.pct);
       var barPct = max ? (t.count / max * 100) : 0;
-      var label = t.count === 0 ? 'none' : t.count.toString();
-      var pctText = t.count ? BB.fmtPct(t.pct) : '—';
-      return '<div class="card roster-type-card' + (t.count === 0 ? ' is-empty' : '') + '" title="' + escapeHtml(t.description) + '">' +
-        '<div class="rt-head">' +
-          '<span class="rt-label">' + escapeHtml(t.label) + '</span>' +
-          '<span class="rt-pct">' + pctText + '</span>' +
+      var chevronChar = isExpanded ? '▾' : (isEmpty ? '' : '▸');
+      var cls = 'rt-row' +
+        (isEmpty ? ' is-empty' : ' is-clickable') +
+        (isExpanded ? ' is-expanded' : '');
+
+      var main =
+        '<div class="rt-row-main">' +
+          '<div class="rt-label-block">' +
+            '<span class="rt-chevron">' + chevronChar + '</span>' +
+            '<span class="rt-label">' + escapeHtml(t.label) + '</span>' +
+          '</div>' +
+          '<div class="rt-bar"><div class="rt-bar-fill" style="width:' + barPct.toFixed(1) + '%"></div></div>' +
+          '<div class="rt-stats">' +
+            '<span class="rt-count-num">' + t.count + '</span>' +
+            '<span class="rt-pct-num">' + pctText + '</span>' +
+          '</div>' +
         '</div>' +
-        '<div class="rt-count">' + label + ' <span class="rt-suffix">' + (t.count === 1 ? 'roster' : 'rosters') + '</span></div>' +
-        '<div class="rt-bar"><div class="rt-bar-fill" style="width:' + barPct.toFixed(1) + '%"></div></div>' +
-        '<div class="rt-desc">' + escapeHtml(t.description) + '</div>' +
-      '</div>';
-    }).join('') + '</div>';
-    el.innerHTML = html;
+        '<div class="rt-desc-line">' + escapeHtml(t.description) + '</div>';
+
+      var expansion = isExpanded ? renderRosterTypeRosters(t.label, rosters) : '';
+
+      return '<div class="' + cls + '" data-type="' + escapeHtml(t.label) + '">' + main + expansion + '</div>';
+    }).join('');
+
+    el.innerHTML = '<div class="roster-types-list">' + rowsHtml + '</div>';
+
+    el.querySelectorAll('.rt-row.is-clickable').forEach(function (row) {
+      row.addEventListener('click', function (e) {
+        // Let clicks on inner links go through (they navigate to roster detail).
+        if (e.target.closest('a.rt-roster-item')) return;
+        var label = row.getAttribute('data-type');
+        state.expandedType = (state.expandedType === label) ? null : label;
+        renderRosterTypes(getFilteredRosters());
+      });
+    });
   }
 
   function renderHistograms(rosters) {
