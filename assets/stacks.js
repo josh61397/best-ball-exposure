@@ -16,7 +16,8 @@
 
   var LEDES = {
     team:   'Your roster construction grouped by NFL team. A <strong>stack</strong> = a roster with 2+ players from the same team. <strong>Top Combo</strong> shows the most common position composition on your stacked rosters for that team.',
-    player: 'Which combinations of <em>specific players</em> appear together most often on your rosters. Defaults to QB-anchored stacks (every shown stack contains at least one QB). Untick the checkbox to see all pairings regardless of position.'
+    player: 'Which combinations of <em>specific players</em> appear together most often on your rosters. Defaults to QB-anchored stacks (every shown stack contains at least one QB). Untick the checkbox to see all pairings regardless of position.',
+    frequency: 'For every QB you\'ve drafted, how often you paired them with <strong>0 / 1 / 2 / 3+</strong> teammates (same NFL team, non-QB). Expand a QB to see which specific teammates show up with them. The right-hand panel shows how your entry fees split across stack sizes — each roster is bucketed by its <em>largest</em> QB stack.'
   };
 
   var state = {
@@ -25,14 +26,15 @@
     platform: '',
     tournament: '',
     context: '',
-    team:   { sortKey: 'stackedRosters', sortDir: 'desc' },
-    player: { size: 2, showAll: false, sortKey: 'count', sortDir: 'desc' },
+    team:      { sortKey: 'stackedRosters', sortDir: 'desc' },
+    player:    { size: 2, showAll: false, sortKey: 'count', sortDir: 'desc' },
+    frequency: { sortKey: 'totalRosters', sortDir: 'desc', expanded: {} },
   };
 
   // Persist selections.
   try {
     var saved = JSON.parse(localStorage.getItem('bb_stacks_state') || '{}');
-    if (saved.view === 'player' || saved.view === 'team') state.view = saved.view;
+    if (saved.view === 'player' || saved.view === 'team' || saved.view === 'frequency') state.view = saved.view;
     if (saved.size === 3) state.player.size = 3;
     if (saved.showAll) state.player.showAll = true;
   } catch (e) {}
@@ -105,11 +107,17 @@
     document.querySelectorAll('[data-player-only]').forEach(function (el) {
       el.style.display = state.view === 'player' ? '' : 'none';
     });
-    if (rowLabelEl) rowLabelEl.textContent = state.view === 'player' ? 'stacks' : 'teams';
+    if (rowLabelEl) {
+      rowLabelEl.textContent =
+        state.view === 'player'    ? 'stacks' :
+        state.view === 'frequency' ? 'QBs' :
+                                     'teams';
+    }
     ledeEl.innerHTML = LEDES[state.view] || '';
-    searchEl.placeholder = state.view === 'player'
-      ? 'Search player or stack type…'
-      : 'Search team or combo…';
+    searchEl.placeholder =
+      state.view === 'player'    ? 'Search player or stack type…' :
+      state.view === 'frequency' ? 'Search QB or team…' :
+                                   'Search team or combo…';
     viewToggleEl.querySelectorAll('button').forEach(function (b) {
       b.classList.toggle('active', b.getAttribute('data-view') === state.view);
     });
@@ -317,6 +325,338 @@
   }
 
   // ============================================================
+  // FREQUENCY VIEW (Stack Size)
+  // ============================================================
+  // For every QB on every roster, count how many same-team, non-QB
+  // teammates appear on that roster. Bucket into 0 / 1 / 2 / 3+.
+  // Also track teammate co-occurrence per QB (for the expanded panel),
+  // and a per-roster fee bucket keyed by the roster's LARGEST QB stack
+  // (so the fee totals on the right panel sum to 100% of fees).
+  function computeQbStackFrequency(rosters) {
+    var normalize = (window.BB_DATA && window.BB_DATA.normalizeName)
+      ? window.BB_DATA.normalizeName
+      : function (s) { return String(s || '').toLowerCase().trim(); };
+
+    var byQb = {};
+    var feeBuckets = {
+      0: { size: 0, label: '0',  rosters: 0, fees: 0 },
+      1: { size: 1, label: '1',  rosters: 0, fees: 0 },
+      2: { size: 2, label: '2',  rosters: 0, fees: 0 },
+      3: { size: 3, label: '3+', rosters: 0, fees: 0 },
+    };
+    var feeTotals = { totalFees: 0, qbRosters: 0, totalRosters: rosters.length };
+
+    rosters.forEach(function (r) {
+      feeTotals.totalFees += r.entryFee || 0;
+      var picks = r.picks || [];
+      // Bucket picks by team for fast same-team lookup.
+      var byTeam = {};
+      picks.forEach(function (p) {
+        if (!p.team) return;
+        (byTeam[p.team] = byTeam[p.team] || []).push(p);
+      });
+
+      var qbsOnRoster = picks.filter(function (p) {
+        return p.position === 'QB' && p.team && p.player;
+      });
+      if (!qbsOnRoster.length) return;
+      feeTotals.qbRosters++;
+
+      var maxStackSize = 0;
+      qbsOnRoster.forEach(function (qb) {
+        var teamPicks = byTeam[qb.team] || [];
+        var teammates = teamPicks.filter(function (p) {
+          return p.position !== 'QB' && p.player;
+        });
+        var stackSize = teammates.length;
+        if (stackSize > maxStackSize) maxStackSize = stackSize;
+
+        var key = normalize(qb.player);
+        if (!byQb[key]) {
+          byQb[key] = {
+            normName: key,
+            player: qb.player,
+            team: qb.team,
+            totalRosters: 0,
+            sumSize: 0,
+            buckets: { 0: 0, 1: 0, 2: 0, 3: 0 },
+            fees: 0,
+            teammates: {},
+          };
+        }
+        var e = byQb[key];
+        e.totalRosters++;
+        e.sumSize += stackSize;
+        e.fees += r.entryFee || 0;
+        var b = stackSize >= 3 ? 3 : stackSize;
+        e.buckets[b]++;
+
+        teammates.forEach(function (t) {
+          var tk = normalize(t.player);
+          if (!e.teammates[tk]) {
+            e.teammates[tk] = { player: t.player, position: t.position, team: t.team, count: 0 };
+          }
+          e.teammates[tk].count++;
+        });
+      });
+
+      var rb = maxStackSize >= 3 ? 3 : maxStackSize;
+      feeBuckets[rb].rosters++;
+      feeBuckets[rb].fees += r.entryFee || 0;
+    });
+
+    var qbRows = Object.keys(byQb).map(function (k) {
+      var e = byQb[k];
+      var teammates = Object.keys(e.teammates).map(function (tk) {
+        var t = e.teammates[tk];
+        return {
+          player: t.player,
+          position: t.position,
+          team: t.team,
+          count: t.count,
+          pct: e.totalRosters ? t.count / e.totalRosters : 0,
+        };
+      }).sort(function (a, b) {
+        if (b.count !== a.count) return b.count - a.count;
+        return (a.player || '').localeCompare(b.player || '');
+      });
+      return {
+        normName: e.normName,
+        player: e.player,
+        team: e.team,
+        totalRosters: e.totalRosters,
+        avgSize: e.totalRosters ? e.sumSize / e.totalRosters : 0,
+        buckets: e.buckets,
+        fees: e.fees,
+        teammates: teammates,
+      };
+    });
+
+    return {
+      qbRows: qbRows,
+      feeBuckets: [feeBuckets[0], feeBuckets[1], feeBuckets[2], feeBuckets[3]],
+      totals: feeTotals,
+    };
+  }
+
+  var FREQ_TT = {
+    avg:    'Average number of teammates (same NFL team, non-QB) drafted alongside this QB across rosters where you have the QB.',
+    bucket: 'Rosters where this QB was paired with exactly this many same-team, non-QB teammates. The 3+ bucket includes 3, 4, 5… players.',
+    fees:   'Total entry fees of rosters that contain this QB.',
+  };
+
+  var FREQ_COLS = [
+    { key: 'qb',           label: 'QB',       sortable: false },
+    { key: 'totalRosters', label: 'Rosters',  sortable: true, num: true },
+    { key: 'avgSize',      label: 'Avg Size', sortable: true, num: true, tooltip: FREQ_TT.avg },
+    { key: 'b0',           label: '0',        sortable: true, num: true, tooltip: FREQ_TT.bucket },
+    { key: 'b1',           label: '1',        sortable: true, num: true, tooltip: FREQ_TT.bucket },
+    { key: 'b2',           label: '2',        sortable: true, num: true, tooltip: FREQ_TT.bucket },
+    { key: 'b3',           label: '3+',       sortable: true, num: true, tooltip: FREQ_TT.bucket },
+    { key: 'fees',         label: 'Fees',     sortable: true, num: true, tooltip: FREQ_TT.fees },
+  ];
+
+  function bucketKeyToVal(row, key) {
+    if (key === 'b0') return row.buckets[0];
+    if (key === 'b1') return row.buckets[1];
+    if (key === 'b2') return row.buckets[2];
+    if (key === 'b3') return row.buckets[3];
+    return row[key];
+  }
+
+  function renderBucketCell(count, total, range) {
+    var pct = total ? count / total : 0;
+    var heat = heatStyle(pct, range);
+    var pctTxt = total ? '<span class="bucket-pct">' + BB.fmtPct(pct) + '</span>' : '';
+    return '<td class="num bucket-cell"' + heat + '>' + count + ' ' + pctTxt + '</td>';
+  }
+
+  function renderTeammatePanel(row) {
+    if (!row.teammates.length) {
+      return '<div class="combo-panel"><div class="combo-panel-head">' +
+        '<span>No teammates appeared with ' + escapeHtml(row.player) + ' on these rosters.</span>' +
+        '</div></div>';
+    }
+    var rTm = rangeFor(row.teammates, 'pct');
+    var rows = row.teammates.map(function (t) {
+      var logo = t.team ? BB.teamLogoHTML(t.team, { size: 14 }) : '';
+      var posBadge = t.position
+        ? '<span class="badge pos-' + escapeHtml(t.position) + '">' + escapeHtml(t.position) + '</span>'
+        : '';
+      return '<tr>' +
+        '<td><span class="player-cell" data-pos="' + escapeHtml(t.position || '') + '">' +
+          logo + '<span class="player-name">' +
+          '<a href="player.html?name=' + encodeURIComponent(t.player) + '">' + escapeHtml(t.player) + '</a>' +
+          '</span></span></td>' +
+        '<td>' + posBadge + '</td>' +
+        '<td class="num">' + t.count + '</td>' +
+        '<td class="num"' + heatStyle(t.pct, rTm) + '>' + BB.fmtPct(t.pct) + '</td>' +
+        '</tr>';
+    }).join('');
+    return '<div class="combo-panel">' +
+      '<div class="combo-panel-head">' +
+        '<strong>Teammates drafted with ' + escapeHtml(row.player) + '</strong>' +
+        '<span class="combo-panel-link">' + row.totalRosters + ' roster' + (row.totalRosters === 1 ? '' : 's') + '</span>' +
+      '</div>' +
+      '<table class="data combo-table">' +
+        '<thead><tr><th>Teammate</th><th>Pos</th><th class="num">Together</th><th class="num">% of QB Rosters</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody>' +
+      '</table>' +
+      '<p class="combo-panel-foot">% is share of rosters where you drafted ' + escapeHtml(row.player) + ' that also include this teammate.</p>' +
+    '</div>';
+  }
+
+  function renderFeesPanel(feeBuckets, totals) {
+    var totalFees = totals.totalFees || 0;
+    var bRange = rangeFor(feeBuckets, function (b) { return totalFees ? b.fees / totalFees : 0; });
+    var rows = feeBuckets.map(function (b) {
+      var pct = totalFees ? b.fees / totalFees : 0;
+      return '<tr>' +
+        '<td><code class="stack-combo">' + b.label + '</code></td>' +
+        '<td class="num">' + b.rosters + '</td>' +
+        '<td class="num">' + BB.fmtMoney(b.fees) + '</td>' +
+        '<td class="num"' + heatStyle(pct, bRange) + '>' + BB.fmtPct(pct) + '</td>' +
+      '</tr>';
+    }).join('');
+    var noQbRosters = (totals.totalRosters || 0) - (totals.qbRosters || 0);
+    var foot = noQbRosters > 0
+      ? '<p class="freq-side-foot">' + noQbRosters + ' roster' + (noQbRosters === 1 ? '' : 's') + ' had no QB and ' +
+        'were excluded from the fee buckets.</p>'
+      : '';
+    return '<aside class="freq-side card">' +
+      '<h3>Fees by Stack Size</h3>' +
+      '<p class="freq-side-sub">Each roster is bucketed by the <em>largest</em> QB stack on it.</p>' +
+      '<table class="data">' +
+        '<thead><tr><th>Stack</th><th class="num">Rosters</th><th class="num">Fees</th><th class="num">% of Fees</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody>' +
+      '</table>' +
+      foot +
+    '</aside>';
+  }
+
+  function renderFrequency(rosters) {
+    var data = computeQbStackFrequency(rosters);
+    var rows = data.qbRows;
+
+    var s = state.search.toLowerCase().trim();
+    if (s) {
+      rows = rows.filter(function (r) {
+        if ((r.player || '').toLowerCase().indexOf(s) !== -1) return true;
+        if ((r.team || '').toLowerCase().indexOf(s) !== -1) return true;
+        return false;
+      });
+    }
+
+    var fs = state.frequency;
+    var key = fs.sortKey;
+    var dir = fs.sortDir === 'asc' ? 1 : -1;
+    rows.sort(function (a, b) {
+      var av, bv;
+      if (key === 'qb') {
+        av = (a.player || '').toLowerCase(); bv = (b.player || '').toLowerCase();
+        return av < bv ? -1 * dir : av > bv ? 1 * dir : 0;
+      }
+      av = bucketKeyToVal(a, key);
+      bv = bucketKeyToVal(b, key);
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      return (av - bv) * dir;
+    });
+
+    rowCountEl.textContent = rows.length.toLocaleString();
+
+    var head = '<thead><tr>' + FREQ_COLS.map(function (c) {
+      var ind = c.key === fs.sortKey ? (fs.sortDir === 'asc' ? '↑' : '↓') : '';
+      var classes = (c.num ? 'num ' : '') + (c.sortable ? 'sortable' : '') + (c.tooltip ? ' tooltip-trigger' : '');
+      var ttAttr = c.tooltip ? ' data-tooltip="' + c.tooltip.replace(/"/g, '&quot;') + '"' : '';
+      var info = c.tooltip ? ' <span class="info-mark">ⓘ</span>' : '';
+      return '<th class="' + classes + '" data-key="' + c.key + '"' + ttAttr + '>' +
+        c.label + info + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
+    }).join('') + '</tr></thead>';
+
+    var colSpan = FREQ_COLS.length;
+    // Heat-map each bucket column across visible rows on its % (count / totalRosters).
+    var rB0 = rangeFor(rows, function (r) { return r.totalRosters ? r.buckets[0] / r.totalRosters : 0; });
+    var rB1 = rangeFor(rows, function (r) { return r.totalRosters ? r.buckets[1] / r.totalRosters : 0; });
+    var rB2 = rangeFor(rows, function (r) { return r.totalRosters ? r.buckets[2] / r.totalRosters : 0; });
+    var rB3 = rangeFor(rows, function (r) { return r.totalRosters ? r.buckets[3] / r.totalRosters : 0; });
+    var rAvg = rangeFor(rows, 'avgSize');
+
+    var body = '<tbody>' + rows.map(function (r) {
+      var isExpanded = !!fs.expanded[r.normName];
+      var chevron = '<button type="button" class="row-expand-btn" data-norm="' + escapeHtml(r.normName) +
+        '" aria-expanded="' + isExpanded + '" aria-label="' + (isExpanded ? 'Collapse' : 'Expand') + ' teammate breakdown for ' + escapeHtml(r.player) + '">' +
+        '<span class="chevron">' + (isExpanded ? '▾' : '▸') + '</span>' +
+        '</button>';
+      var teamHref = 'team.html?code=' + encodeURIComponent(r.team);
+      var qbCell =
+        '<span class="player-cell-with-expand">' + chevron +
+        '<span class="player-cell" data-pos="QB">' + BB.teamLogoHTML(r.team, { size: 18 }) +
+        '<span class="player-name">' +
+        '<a href="player.html?name=' + encodeURIComponent(r.player) + '">' + escapeHtml(r.player) + '</a>' +
+        '</span>' +
+        '<a class="stack-team" href="' + teamHref + '" style="margin-left:6px;">' + escapeHtml(r.team) + '</a>' +
+        '</span>' +
+        '</span>';
+      var trClass = 'row-expandable' + (isExpanded ? ' is-expanded' : '');
+      var mainTr = '<tr class="' + trClass + '" data-pos="QB" data-norm="' + escapeHtml(r.normName) + '"' +
+        BB.teamColorStyle(r.team) + '>' +
+        '<td>' + qbCell + '</td>' +
+        '<td class="num">' + r.totalRosters + '</td>' +
+        '<td class="num"' + heatStyle(r.avgSize, rAvg) + '>' + r.avgSize.toFixed(2) + '</td>' +
+        renderBucketCell(r.buckets[0], r.totalRosters, rB0) +
+        renderBucketCell(r.buckets[1], r.totalRosters, rB1) +
+        renderBucketCell(r.buckets[2], r.totalRosters, rB2) +
+        renderBucketCell(r.buckets[3], r.totalRosters, rB3) +
+        '<td class="num">' + BB.fmtMoney(r.fees) + '</td>' +
+        '</tr>';
+      var detailTr = isExpanded
+        ? '<tr class="row-expand-detail"><td colspan="' + colSpan + '">' + renderTeammatePanel(r) + '</td></tr>'
+        : '';
+      return mainTr + detailTr;
+    }).join('') + '</tbody>';
+
+    var tableHTML = '<table class="data">' + head + body + '</table>';
+    var sideHTML = renderFeesPanel(data.feeBuckets, data.totals);
+
+    contentEl.innerHTML =
+      '<div class="freq-grid">' +
+        '<div class="freq-main">' + tableHTML + '</div>' +
+        sideHTML +
+      '</div>';
+
+    // Wire up expand toggles.
+    contentEl.querySelectorAll('.row-expand-btn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var n = btn.getAttribute('data-norm');
+        fs.expanded[n] = !fs.expanded[n];
+        render();
+      });
+    });
+    contentEl.querySelectorAll('tr.row-expandable').forEach(function (tr) {
+      tr.addEventListener('click', function (e) {
+        if (e.target.closest('a')) return;
+        if (e.target.closest('.row-expand-btn')) return;
+        var n = tr.getAttribute('data-norm');
+        fs.expanded[n] = !fs.expanded[n];
+        render();
+      });
+    });
+
+    // Sort header wiring.
+    contentEl.querySelectorAll('th.sortable').forEach(function (th) {
+      th.addEventListener('click', function () {
+        var k = th.getAttribute('data-key');
+        if (fs.sortKey === k) fs.sortDir = fs.sortDir === 'asc' ? 'desc' : 'asc';
+        else { fs.sortKey = k; fs.sortDir = k === 'qb' ? 'asc' : 'desc'; }
+        render();
+      });
+    });
+  }
+
+  // ============================================================
   // SHARED RENDER
   // ============================================================
   function render() {
@@ -326,7 +666,8 @@
       rowCountEl.textContent = '0';
       return;
     }
-    if (state.view === 'player') return renderPlayer(rosters);
+    if (state.view === 'player')    return renderPlayer(rosters);
+    if (state.view === 'frequency') return renderFrequency(rosters);
     return renderTeam(rosters);
   }
 

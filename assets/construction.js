@@ -156,15 +156,17 @@
         '<div class="rt-row-main">' +
           '<div class="rt-label-block">' +
             '<span class="rt-chevron">' + chevronChar + '</span>' +
-            '<span class="rt-label">' + escapeHtml(t.label) + '</span>' +
+            '<div class="rt-label-text">' +
+              '<span class="rt-label">' + escapeHtml(t.label) + '</span>' +
+              '<span class="rt-desc-inline">' + escapeHtml(t.description) + '</span>' +
+            '</div>' +
           '</div>' +
           '<div class="rt-bar"><div class="rt-bar-fill" style="width:' + barPct.toFixed(1) + '%"></div></div>' +
           '<div class="rt-stats">' +
             '<span class="rt-count-num">' + t.count + '</span>' +
             '<span class="rt-pct-num">' + pctText + '</span>' +
           '</div>' +
-        '</div>' +
-        '<div class="rt-desc-line">' + escapeHtml(t.description) + '</div>';
+        '</div>';
 
       var expansion = isExpanded ? renderRosterTypeRosters(t.label, rosters) : '';
 

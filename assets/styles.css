@@ -851,11 +851,11 @@ table.player-stacks-table tbody tr td {
   margin-bottom: 20px;
 }
 .rt-row {
-  padding: 10px 14px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0;
   transition: background 120ms;
 }
 .rt-row:last-child { border-bottom: 0; }
@@ -865,14 +865,14 @@ table.player-stacks-table tbody tr td {
 .rt-row.is-expanded {
   background: color-mix(in srgb, var(--accent) 8%, var(--bg-elev));
   border-left: 3px solid var(--accent);
-  padding-left: 11px;
+  padding-left: 9px;
 }
 
 .rt-row-main {
   display: grid;
-  grid-template-columns: minmax(140px, 200px) 1fr minmax(100px, 130px);
+  grid-template-columns: minmax(160px, 220px) 1fr minmax(96px, 120px);
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 .rt-label-block {
   display: flex;
@@ -880,28 +880,45 @@ table.player-stacks-table tbody tr td {
   gap: 6px;
   min-width: 0;
 }
+.rt-label-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  line-height: 1.2;
+}
 .rt-chevron {
   color: var(--text-muted);
   font-size: 11px;
-  width: 12px;
+  width: 10px;
   text-align: center;
+  flex-shrink: 0;
 }
 .rt-label {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text);
   letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+.rt-desc-inline {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .rt-bar {
-  height: 8px;
+  height: 6px;
   background: color-mix(in srgb, var(--text-muted) 18%, transparent);
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
 }
 .rt-bar-fill {
   height: 100%;
   background: var(--accent);
-  border-radius: 4px;
+  border-radius: 3px;
   transition: width 240ms ease;
 }
 .rt-stats {
@@ -912,21 +929,16 @@ table.player-stacks-table tbody tr td {
   font-variant-numeric: tabular-nums;
 }
 .rt-count-num {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text);
+  line-height: 1.1;
 }
 .rt-pct-num {
-  font-size: 12px;
-  color: var(--text-dim);
-  min-width: 44px;
-  text-align: right;
-}
-.rt-desc-line {
-  color: var(--text-muted);
   font-size: 11.5px;
-  padding-left: 18px;
-  line-height: 1.4;
+  color: var(--text-dim);
+  min-width: 40px;
+  text-align: right;
 }
 
 /* Inline panel of matching rosters when a row is expanded. */
@@ -1016,7 +1028,7 @@ table.player-stacks-table tbody tr td {
   .rt-row-main { grid-template-columns: 1fr; gap: 6px; }
   .rt-bar { order: 3; }
   .rt-stats { order: 2; justify-content: flex-start; }
-  .rt-desc-line { padding-left: 0; }
+  .rt-desc-inline { white-space: normal; }
 }
 
 /* Position-count histograms on the Construction page. */
@@ -1282,8 +1294,51 @@ footer.site {
   font-size: 12px;
 }
 
+/* Stacks → Stack Size view — QB frequency table on the left, fee-by-bucket panel on the right. */
+.freq-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+  align-items: start;
+}
+.freq-main { min-width: 0; }
+.freq-side {
+  padding: 14px 16px;
+  position: sticky;
+  top: 12px;
+}
+.freq-side h3 {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+.freq-side .freq-side-sub {
+  margin: 0 0 10px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.freq-side table.data th,
+.freq-side table.data td {
+  padding: 6px 10px;
+  font-size: 12.5px;
+}
+.freq-side .freq-side-foot {
+  margin: 8px 2px 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.bucket-cell { font-variant-numeric: tabular-nums; }
+.bucket-cell .bucket-pct {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-left: 4px;
+}
+
 @media (max-width: 800px) {
   header.site { flex-wrap: wrap; }
   main { padding: 16px; }
   .two-col { grid-template-columns: 1fr; }
+  .freq-grid { grid-template-columns: 1fr; }
+  .freq-side { position: static; }
 }
