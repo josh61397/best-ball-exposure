@@ -406,6 +406,73 @@ button.danger:hover { background: color-mix(in srgb, var(--danger) 12%, transpar
 }
 .toolbar label { color: var(--text-dim); font-size: 13px; }
 
+/* Filter bar — position buttons on top, secondary filters below with labels */
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.filter-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.filter-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  line-height: 1;
+}
+.filter-group input[type=search],
+.filter-group select {
+  background: var(--bg-elev);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font: inherit;
+  min-width: 180px;
+}
+.filter-group label { color: var(--text-dim); font-size: 13px; line-height: 2; }
+
+/* Position filter buttons */
+.pos-btn-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.pos-btn {
+  padding: 7px 22px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: opacity 120ms, filter 120ms;
+  font-family: inherit;
+}
+.pos-btn-all       { background: var(--bg-elev-2); color: var(--text-muted); border: 1px solid var(--border); }
+.pos-btn-all.active{ background: var(--accent);    color: var(--accent-on);  border-color: var(--accent); }
+.pos-btn-qb        { background: color-mix(in srgb, var(--pos-qb) 22%, var(--bg-elev-2)); color: var(--pos-qb); }
+.pos-btn-qb.active { background: var(--pos-qb); color: #fff; }
+.pos-btn-rb        { background: color-mix(in srgb, var(--pos-rb) 22%, var(--bg-elev-2)); color: var(--pos-rb); }
+.pos-btn-rb.active { background: var(--pos-rb); color: #fff; }
+.pos-btn-wr        { background: color-mix(in srgb, var(--pos-wr) 22%, var(--bg-elev-2)); color: var(--pos-wr); }
+.pos-btn-wr.active { background: var(--pos-wr); color: var(--accent-on); }
+.pos-btn-te        { background: color-mix(in srgb, var(--pos-te) 22%, var(--bg-elev-2)); color: var(--pos-te); }
+.pos-btn-te.active { background: var(--pos-te); color: var(--accent-on); }
+.pos-btn:not(.active):hover { filter: brightness(1.15); }
+
 table.data {
   width: 100%;
   border-collapse: separate;
@@ -631,6 +698,72 @@ table.roster-table tbody tr td:nth-child(9) {
 }
 h2.grade-section.positive { color: var(--accent-2); }
 h2.grade-section.negative { color: var(--danger); }
+
+/* Win/loss cards — Drafts Gained vs Lost section */
+.wl-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+@media (max-width: 700px) {
+  .wl-grid { grid-template-columns: 1fr; }
+}
+.wl-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.wl-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.wl-label {
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+.wl-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+.wl-pct {
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 4px;
+}
+.wl-tag {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+.wl-bar {
+  display: flex;
+  height: 7px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: var(--bg-elev-2);
+  margin-bottom: 10px;
+}
+.wl-seg { height: 100%; }
+.wl-gained { background: var(--accent-2); }
+.wl-even   { background: var(--text-muted); opacity: 0.35; }
+.wl-lost   { background: var(--danger); }
+.wl-counts {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+.wl-sep { color: var(--text-muted); }
 
 .seg-toggle {
   display: inline-flex;
@@ -1328,11 +1461,20 @@ footer.site {
   color: var(--text-muted);
   line-height: 1.4;
 }
-.bucket-cell { font-variant-numeric: tabular-nums; }
-.bucket-cell .bucket-pct {
+.bucket-cell {
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+}
+.bucket-cell .bucket-roster-pct {
+  display: block;
+  font-size: 12.5px;
+  line-height: 1.2;
+}
+.bucket-cell .bucket-fee-pct {
+  display: block;
+  font-size: 10.5px;
   color: var(--text-muted);
-  font-size: 11px;
-  margin-left: 4px;
+  line-height: 1.2;
 }
 
 @media (max-width: 800px) {

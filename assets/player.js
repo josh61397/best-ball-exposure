@@ -165,27 +165,134 @@
       '</div>';
   }
 
-  function renderRosters(report) {
+  // Canonical market ADP from an ADP row — prefer Underdog, then DK, then Drafters.
+  function canonADP(row) {
+    if (!row) return null;
+    if (row.ud != null) return row.ud;
+    if (row.dk != null) return row.dk;
+    if (row.drafters != null) return row.drafters;
+    if (row.bb10 != null) return row.bb10;
+    if (row.rtsports != null) return row.rtsports;
+    return null;
+  }
+
+  function fmtDelta(v) {
+    if (v == null || isNaN(v)) return '—';
+    return (v > 0 ? '+' : '') + v.toFixed(1);
+  }
+  function deltaClass(v) {
+    if (v == null) return '';
+    if (v > 0.5) return 'clv-pos';
+    if (v < -0.5) return 'clv-neg';
+    return '';
+  }
+  function simpleRange(arr) {
+    if (!arr.length) return null;
+    var min = Math.min.apply(null, arr);
+    var max = Math.max.apply(null, arr);
+    return min === max ? null : { min: min, max: max };
+  }
+
+  async function renderRosters(report) {
     if (!report.rostersWith.length) return '';
+
+    var normName = window.BB_DATA && window.BB_DATA.normalizeName
+      ? window.BB_DATA.normalizeName(report.player)
+      : report.player.toLowerCase().trim();
+
+    // Today's ADP — used for RTV column and as fallback when no history exists.
+    var currentAdpRow = window.BB_DATA ? window.BB_DATA.lookupADP(report.player) : null;
+    var currentADP = canonADP(currentAdpRow);
+
+    // Pre-fetch historical ADP for every unique draft date in parallel.
+    var uniqueDates = {};
+    report.rostersWith.forEach(function (r) {
+      if (r.draftedAt) uniqueDates[String(r.draftedAt).slice(0, 10)] = true;
+    });
+    var histByDate = {};
+    await Promise.all(Object.keys(uniqueDates).map(async function (d) {
+      histByDate[d] = await BB.fetchHistoryForDate(d);
+    }));
+
     var rows = report.rostersWith.slice().sort(function (a, b) {
       return (a._pick.overallPick || 0) - (b._pick.overallPick || 0);
     });
-    var head = '<thead><tr><th>Tournament</th><th>Platform</th><th class="num">Pick</th><th class="num">Round</th><th class="num">Entry fee</th><th></th></tr></thead>';
+
+    // Pre-compute CLV / RTV values for heat-map range.
+    var clvVals = [], rtvVals = [];
+    rows.forEach(function (r) {
+      var pick = r._pick.overallPick;
+      if (pick == null) return;
+      var date = r.draftedAt ? String(r.draftedAt).slice(0, 10) : null;
+      var hist = date && histByDate[date];
+      var histRow = hist && hist[normName];
+      var draftADP = canonADP(histRow) != null ? canonADP(histRow) : currentADP;
+      if (draftADP != null) clvVals.push(pick - draftADP);
+      if (currentADP != null) rtvVals.push(pick - currentADP);
+    });
+    var clvRange = simpleRange(clvVals);
+    var rtvRange = simpleRange(rtvVals);
+
+    var TT = {
+      draftAdp:  'Market ADP (Underdog › DK › Drafters) on the day you submitted this draft.\nFalls back to today\'s ADP when no historical snapshot exists for that date.',
+      clv:       'CLV — your pick number minus the market ADP at draft date.\nPositive = you got the player later than the market was pricing them = value.',
+      todayAdp:  'Today\'s market ADP.',
+      rtv:       'RTV — your pick number minus today\'s market ADP.\nPositive = the market now prices this player earlier than you paid = your pick aged well.',
+    };
+
+    var head = '<thead><tr>' +
+      '<th>Tournament</th>' +
+      '<th>Platform</th>' +
+      '<th class="num">Pick</th>' +
+      '<th class="num tooltip-trigger" data-tooltip="' + escapeHtml(TT.draftAdp)  + '">Draft ADP <span class="info-mark">ⓘ</span></th>' +
+      '<th class="num tooltip-trigger" data-tooltip="' + escapeHtml(TT.clv)       + '">CLV <span class="info-mark">ⓘ</span></th>' +
+      '<th class="num tooltip-trigger" data-tooltip="' + escapeHtml(TT.todayAdp)  + '">Today\'s ADP <span class="info-mark">ⓘ</span></th>' +
+      '<th class="num tooltip-trigger" data-tooltip="' + escapeHtml(TT.rtv)       + '">RTV <span class="info-mark">ⓘ</span></th>' +
+      '<th class="num">Fee</th>' +
+      '<th></th>' +
+    '</tr></thead>';
+
     var body = rows.map(function (r) {
+      var pick = r._pick.overallPick;
+      var date = r.draftedAt ? String(r.draftedAt).slice(0, 10) : null;
+      var hist = date && histByDate[date];
+      var histRow = hist && hist[normName];
+      var rawDraftADP = canonADP(histRow);
+      var draftADP = rawDraftADP != null ? rawDraftADP : currentADP;
+      var clv = (pick != null && draftADP  != null) ? pick - draftADP  : null;
+      var rtv = (pick != null && currentADP != null) ? pick - currentADP : null;
+      var noHistory = rawDraftADP == null && draftADP != null;
+      var draftAdpCell = BB.fmtADP(draftADP) + (noHistory ? ' <span style="color:var(--text-muted);font-size:10px;" title="No history for this date — using today\'s ADP">~</span>' : '');
       return '<tr>' +
         '<td>' + escapeHtml(r.tournament || '(unknown)') + '</td>' +
-        '<td><span class="badge">' + escapeHtml(r.platform) + '</span></td>' +
-        '<td class="num">' + (r._pick.overallPick != null ? r._pick.overallPick : '—') + '</td>' +
-        '<td class="num">' + (r._pick.round != null ? r._pick.round : '—') + '</td>' +
+        '<td>' + (BB.platformLogoHTML(r.platform, { size: 16 }) || '<span class="badge">' + escapeHtml(r.platform) + '</span>') + '</td>' +
+        '<td class="num">' + (pick != null ? pick : '—') + '</td>' +
+        '<td class="num">' + draftAdpCell + '</td>' +
+        '<td class="num ' + deltaClass(clv) + '"' + BB.heatStyle(clv, clvRange) + '>' + fmtDelta(clv) + '</td>' +
+        '<td class="num">' + BB.fmtADP(currentADP) + '</td>' +
+        '<td class="num ' + deltaClass(rtv) + '"' + BB.heatStyle(rtv, rtvRange) + '>' + fmtDelta(rtv) + '</td>' +
         '<td class="num">' + BB.fmtMoney(r.entryFee) + '</td>' +
         '<td><a href="rosters.html?id=' + encodeURIComponent(r.rosterId) + '">View →</a></td>' +
-        '</tr>';
+      '</tr>';
     }).join('');
-    return '<h2>Rosters with ' + escapeHtml(report.player) + ' <span style="color:var(--text-muted);font-size:13px;font-weight:400;">(' + rows.length + ')</span></h2>' +
-      '<table class="data">' + head + '<tbody>' + body + '</tbody></table>';
+
+    var noHistCount = rows.filter(function (r) {
+      var date = r.draftedAt ? String(r.draftedAt).slice(0, 10) : null;
+      var hist = date && histByDate[date];
+      return !hist || !hist[normName];
+    }).length;
+    var foot = noHistCount
+      ? '<p style="color:var(--text-muted);font-size:11px;margin:6px 2px 0;">' +
+          noHistCount + ' roster' + (noHistCount === 1 ? '' : 's') + ' marked ~ had no ADP history for that date and show today\'s ADP instead.' +
+        '</p>'
+      : '';
+
+    return '<h2>Rosters with ' + escapeHtml(report.player) +
+      ' <span style="color:var(--text-muted);font-size:13px;font-weight:400;">(' + rows.length + ')</span></h2>' +
+      '<table class="data">' + head + '<tbody>' + body + '</tbody></table>' + foot;
   }
 
-  function init() {
+  async function init() {
     var name = getPlayerNameFromURL();
     if (!name) {
       renderEmpty('No player specified', 'Open this page from <a href="exposures.html">Exposures</a> by clicking a player name.');
@@ -198,7 +305,6 @@
     }
     var report = BB.playerReport(rosters, name);
     if (!report.exposureCount) {
-      // Still show the hero with reference ADP info so user knows the player exists in ADP universe
       var adp = window.BB_DATA.lookupADP(name);
       if (!adp) {
         renderEmpty(name + ' not found', 'No matching player in your rosters or the ADP reference.');
@@ -216,12 +322,19 @@
         renderADPRow(report);
       return;
     }
+
+    // Render the fast synchronous sections immediately, with a loading placeholder
+    // for the rosters table (which needs async history fetches).
     contentEl.innerHTML =
       renderHero(report) +
       renderADPRow(report) +
       renderCombos(report) +
       renderRoundDistribution(report) +
-      renderRosters(report);
+      '<div id="player-rosters-slot"><p style="color:var(--text-muted);font-size:13px;padding:8px 0;">Loading roster data…</p></div>';
+
+    var rostersHtml = await renderRosters(report);
+    var slot = document.getElementById('player-rosters-slot');
+    if (slot) slot.outerHTML = rostersHtml;
   }
 
   init();

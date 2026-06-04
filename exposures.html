@@ -11,30 +11,46 @@
   <div id="nav-slot"></div>
   <main>
     <h1>Player exposures</h1>
-    <p class="lede">How often each player appears across your rosters, what share of your entry fees they represent, and your average pick vs. market ADP. <strong>CLV = My ADP − Market ADP</strong> — positive (green) means you got them later than the market.</p>
 
-    <div class="toolbar">
-      <input type="search" id="search" placeholder="Search player…" />
-      <select id="pos-filter">
-        <option value="">All positions</option>
-        <option value="QB">QB</option>
-        <option value="RB">RB</option>
-        <option value="WR">WR</option>
-        <option value="TE">TE</option>
-      </select>
-      <select id="platform-filter">
-        <option value="">All platforms</option>
-      </select>
-      <select id="tournament-filter">
-        <option value="">All tournaments</option>
-      </select>
-      <select id="context-filter">
-        <option value="">All</option>
-        <option value="superflex">SuperFlex only</option>
-        <option value="post-draft">Post-Draft (18-round)</option>
-        <option value="pre-draft">Pre-Draft only</option>
-      </select>
-      <label style="margin-left:auto;"><span id="row-count">0</span> players</label>
+
+    <div class="filter-bar">
+      <div class="filter-group">
+        <div class="filter-label">Position</div>
+        <div class="pos-btn-group" id="pos-filter">
+          <button type="button" class="pos-btn pos-btn-all active" data-pos="">All</button>
+          <button type="button" class="pos-btn pos-btn-qb"  data-pos="QB">QB</button>
+          <button type="button" class="pos-btn pos-btn-rb"  data-pos="RB">RB</button>
+          <button type="button" class="pos-btn pos-btn-wr"  data-pos="WR">WR</button>
+          <button type="button" class="pos-btn pos-btn-te"  data-pos="TE">TE</button>
+        </div>
+      </div>
+      <div class="filter-row">
+        <div class="filter-group">
+          <div class="filter-label">Search</div>
+          <input type="search" id="search" placeholder="Search player…" />
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Platform</div>
+          <select id="platform-filter"><option value="">All platforms</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Tournament</div>
+          <select id="tournament-filter"><option value="">All tournaments</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Context</div>
+          <select id="context-filter">
+            <option value="">All</option>
+            <option value="superflex">SuperFlex only</option>
+            <option value="post-draft">Post-Draft (18-round)</option>
+            <option value="pre-draft">Pre-Draft only</option>
+          </select>
+        </div>
+        <div class="filter-group" style="margin-left:auto;justify-content:flex-end;">
+          <div class="filter-label">&nbsp;</div>
+          <label><span id="row-count">0</span> players</label>
+        </div>
+      </div>
     </div>
 
     <div id="content"></div>

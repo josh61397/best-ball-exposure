@@ -4,7 +4,7 @@
 
   var contentEl = document.getElementById('content');
   var searchEl = document.getElementById('search');
-  var posEl = document.getElementById('pos-filter');
+  var posGroupEl = document.getElementById('pos-filter');
   var platformEl = document.getElementById('platform-filter');
   var tourneyEl = document.getElementById('tournament-filter');
   var contextEl = document.getElementById('context-filter');
@@ -301,7 +301,16 @@
   }
 
   searchEl.addEventListener('input', function (e) { state.search = e.target.value; render(); });
-  posEl.addEventListener('change', function (e) { state.pos = e.target.value; render(); });
+  if (posGroupEl) {
+    posGroupEl.querySelectorAll('.pos-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.pos = btn.getAttribute('data-pos') || '';
+        posGroupEl.querySelectorAll('.pos-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        render();
+      });
+    });
+  }
   platformEl.addEventListener('change', function (e) { state.platform = e.target.value; render(); });
   tourneyEl.addEventListener('change', function (e) { state.tournament = e.target.value; render(); });
   if (contextEl) contextEl.addEventListener('change', function (e) { state.context = e.target.value; render(); });

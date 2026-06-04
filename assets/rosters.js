@@ -63,8 +63,7 @@
   }
 
   function renderHeader() {
-    return '<h1>Rosters</h1>' +
-      '<p class="lede">All your imported drafts in one table. Click a row to see picks and stacks. Heat-map shows value relative to the visible rows.</p>';
+    return '<h1>Rosters</h1>';
   }
 
   function renderToolbarSkeleton() {
@@ -144,12 +143,13 @@
       return (av - bv) * dir;
     });
 
-    // Heat-map ranges for the four value columns. Skip Superflex rosters —
-    // their numbers are computed against 1-QB ADP and would distort the scale.
-    function rangeFor(getter) {
+    // Heat-map ranges for the value columns.
+    // CLV excludes Superflex rosters (their CLV is computed against 1-QB ADP, which
+    // distorts the scale). RTV includes all rosters — we have today's ADP for everyone.
+    function rangeFor(getter, excludeSf) {
       var min = Infinity, max = -Infinity;
       rows.forEach(function (r) {
-        if (BB.rosterIsSuperflex(r.roster)) return;
+        if (excludeSf && BB.rosterIsSuperflex(r.roster)) return;
         var v = getter(r);
         if (v == null || isNaN(v)) return;
         if (v < min) min = v;
@@ -158,10 +158,10 @@
       if (!isFinite(min) || !isFinite(max) || min === max) return null;
       return { min: min, max: max };
     }
-    var rClvAdp = rangeFor(function (r) { return r.value.clv.totalADP; });
-    var rClvDcv = rangeFor(function (r) { return r.value.dcvClv.total; });
-    var rRtvAdp = rangeFor(function (r) { return r.value.rtv.totalADP; });
-    var rRtvDcv = rangeFor(function (r) { return r.value.dcvRtv.total; });
+    var rClvAdp = rangeFor(function (r) { return r.value.clv.totalADP; },  true);
+    var rClvDcv = rangeFor(function (r) { return r.value.dcvClv.total; },  true);
+    var rRtvAdp = rangeFor(function (r) { return r.value.rtv.totalADP; },  false);
+    var rRtvDcv = rangeFor(function (r) { return r.value.dcvRtv.total; },  false);
 
     // Tooltip copy for the CLV / RTV columns.
     // Convention: positive = drafted LATER than market = value mined.
@@ -234,8 +234,8 @@
       if (qb && /superflex|super[\s_-]?flex/i.test(qb)) {
         typeBadge += ' <span class="badge" style="margin-left:4px;">SF</span>';
       }
-      var sfTip = isSf ? ' title="Superflex roster — Superflex ADP not tracked, value disabled"' : '';
-      var dashCell = '<td class="num"' + sfTip + '>—</td>';
+      var sfClvTip = ' title="Superflex roster — CLV disabled (no SF historical ADP)"';
+      var clvDashCell = '<td class="num"' + sfClvTip + '>—</td>';
       var titleCell = '<span class="title-cell">' + BB.platformLogoHTML(r.platform, { size: 16 }) +
         '<a href="' + escapeHtml(rosterHref) + '">' + escapeHtml(r.tournament || '(unknown)') + '</a></span>';
       return '<tr class="row-link' + (isSf ? ' superflex' : '') + '" data-href="' + escapeHtml(rosterHref) + '">' +
@@ -245,17 +245,17 @@
         '<td class="num">' + (r.entryFee != null ? BB.fmtMoney(r.entryFee) : '—') + '</td>' +
         '<td class="num">' + (r.draftSize != null ? r.draftSize : '—') + '</td>' +
         '<td class="num">' + (pos != null ? pos : '—') + '</td>' +
-        (isSf ? dashCell : '<td class="num"' + BB.heatStyle(v.clv.totalADP, rClvAdp) + '>' + fmtClvCell(v.clv.totalADP) + '</td>') +
-        (isSf ? dashCell : '<td class="num"' + BB.heatStyle(v.dcvClv.total, rClvDcv, { invert: true }) + '>' + fmtClvCell(v.dcvClv.total) + '</td>') +
-        (isSf ? dashCell : '<td class="num"' + BB.heatStyle(v.rtv.totalADP, rRtvAdp) + '>' + fmtClvCell(v.rtv.totalADP) + '</td>') +
-        (isSf ? dashCell : '<td class="num"' + BB.heatStyle(v.dcvRtv.total, rRtvDcv, { invert: true }) + '>' + fmtClvCell(v.dcvRtv.total) + '</td>') +
+        (isSf ? clvDashCell : '<td class="num"' + BB.heatStyle(v.clv.totalADP, rClvAdp) + '>' + fmtClvCell(v.clv.totalADP) + '</td>') +
+        (isSf ? clvDashCell : '<td class="num"' + BB.heatStyle(v.dcvClv.total, rClvDcv, { invert: true }) + '>' + fmtClvCell(v.dcvClv.total) + '</td>') +
+        '<td class="num"' + BB.heatStyle(v.rtv.totalADP, rRtvAdp) + '>' + fmtClvCell(v.rtv.totalADP) + '</td>' +
+        '<td class="num"' + BB.heatStyle(v.dcvRtv.total, rRtvDcv, { invert: true }) + '>' + fmtClvCell(v.dcvRtv.total) + '</td>' +
         '</tr>';
     }).join('');
 
     document.getElementById('table-wrap').innerHTML =
       '<table class="data roster-table"><thead>' + groupRow + headerRow + '</thead><tbody>' + body + '</tbody></table>' +
       '<p style="color:var(--text-muted);font-size:12px;margin-top:8px;">' +
-        'CLV uses market ADP at draft date when available; older drafts fall back to today\'s ADP (matches RTV). As daily history accumulates, CLV will reflect true closing-line value for new drafts.' +
+        'CLV uses market ADP at draft date when available; older drafts fall back to today\'s ADP (matches RTV). CLV is hidden for Superflex rosters (no SF historical ADP). RTV uses today\'s 1-QB ADP for all rosters including Superflex.' +
       '</p>';
 
     document.querySelectorAll('.row-link').forEach(function (tr) {
@@ -320,8 +320,8 @@
 
     var sfBanner = isSf
       ? '<div class="flash info" style="margin-bottom:16px;">' +
-          '<strong>Superflex roster</strong> — ADP comparisons disabled. ' +
-          'Our market ADP only covers 1-QB best ball, so per-pick ADP value and Draft Capital can\'t be computed meaningfully.' +
+          '<strong>Superflex roster</strong> — CLV disabled (no Superflex historical ADP). ' +
+          'ADP and Draft Capital columns below use today\'s 1-QB market ADP as a reference.' +
         '</div>'
       : '';
 
@@ -390,9 +390,9 @@
             '<td>' + nameCell + '</td>' +
             '<td>' + (p.position ? '<span class="badge pos-' + escapeHtml(p.position) + '">' + escapeHtml(p.position) + '</span>' : '—') + '</td>' +
             '<td>' + escapeHtml(p.team || '—') + '</td>' +
-            '<td class="num">' + (isSf ? '—' : BB.fmtADP(udAdp)) + '</td>' +
-            '<td class="num ' + (isSf ? '' : adpValCls) + '">' + (isSf ? '—' : adpValText) + '</td>' +
-            '<td class="num ' + (isSf ? '' : dcvCls) + '">' + (isSf ? '—' : dcvText) + '</td>' +
+            '<td class="num">' + BB.fmtADP(udAdp) + '</td>' +
+            '<td class="num ' + adpValCls + '">' + adpValText + '</td>' +
+            '<td class="num ' + dcvCls + '">' + dcvText + '</td>' +
             '</tr>';
         }).join('') +
         '</tbody></table>';

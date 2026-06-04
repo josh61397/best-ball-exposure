@@ -51,7 +51,7 @@
       '<th class="num">Unique players</th><th>First draft</th><th>Last draft</th></tr></thead><tbody>' +
       rows.map(function (r) {
         return '<tr>' +
-          '<td><span class="badge">' + escapeHtml(r.platform) + '</span></td>' +
+          '<td>' + (BB.platformLogoHTML(r.platform, { size: 20 }) || '<span class="badge">' + escapeHtml(r.platform) + '</span>') + '</td>' +
           '<td>' + escapeHtml(r.tournament) + '</td>' +
           '<td class="num">' + r.entries + '</td>' +
           '<td class="num">' + BB.fmtMoney(r.fees) + '</td>' +
@@ -95,7 +95,7 @@
       '<th>Platform</th><th>Tournament</th><th>Format</th><th>QB</th><th>Draft period</th></tr></thead><tbody>' +
       rows.map(function (t) {
         return '<tr>' +
-          '<td><span class="badge">' + escapeHtml(t.platform) + '</span></td>' +
+          '<td>' + (BB.platformLogoHTML(t.platform, { size: 20 }) || '<span class="badge">' + escapeHtml(t.platform) + '</span>') + '</td>' +
           '<td>' + escapeHtml(t.name) + '</td>' +
           '<td>' + escapeHtml(t.format || '—') + '</td>' +
           '<td>' + escapeHtml(t.qbFormat || '—') + '</td>' +

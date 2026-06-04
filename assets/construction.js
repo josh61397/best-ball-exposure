@@ -10,6 +10,7 @@
   var rowCountEl = document.getElementById('row-count');
 
   var PAGE_SIZE = 25;
+  var CONSTRUCTION_PAGE_SIZE = 5;
   var state = {
     sortKey: 'count',
     sortDir: 'desc',
@@ -21,6 +22,8 @@
     // page (0-indexed) of its matching rosters we're showing.
     expandedType: null,
     expandedPage: 0,
+    // Pagination for the Roster Constructions table.
+    constructionPage: 0,
   };
 
   function escapeHtml(s) {
@@ -272,6 +275,15 @@
 
     rowCountEl.textContent = rows.length.toLocaleString();
 
+    // Clamp page within bounds whenever the result set changes.
+    var totalPages = Math.max(1, Math.ceil(rows.length / CONSTRUCTION_PAGE_SIZE));
+    if (state.constructionPage >= totalPages) state.constructionPage = totalPages - 1;
+    if (state.constructionPage < 0) state.constructionPage = 0;
+    var cPage = state.constructionPage;
+    var cStart = cPage * CONSTRUCTION_PAGE_SIZE;
+    var cEnd = Math.min(cStart + CONSTRUCTION_PAGE_SIZE, rows.length);
+    var pageRows = rows.slice(cStart, cEnd);
+
     var COLS = [
       { key: 'key',   label: 'Construction',  sortable: true },
       { key: 'count', label: '# Rosters',     sortable: true, num: true },
@@ -287,7 +299,7 @@
 
     var rPct = rangeFor(rows, 'pct');
 
-    var body = '<tbody>' + rows.map(function (r) {
+    var body = '<tbody>' + pageRows.map(function (r) {
       var keyCell =
         '<div class="construction-key">' +
           '<code class="stack-combo construction-code">' + escapeHtml(r.key) + '</code>' +
@@ -300,22 +312,38 @@
         '</tr>';
     }).join('') + '</tbody>';
 
-    contentEl.innerHTML = '<table class="data construction-table">' + head + body + '</table>';
+    var prevDisabled = cPage === 0;
+    var nextDisabled = cPage >= totalPages - 1;
+    var pagerHtml = rows.length > CONSTRUCTION_PAGE_SIZE
+      ? '<div class="rt-pager construction-pager">' +
+          '<button type="button" class="rt-page-btn" id="construction-prev"' + (prevDisabled ? ' disabled' : '') + '>‹ Prev</button>' +
+          '<span class="rt-page-info">Showing ' + (cStart + 1) + '–' + cEnd + ' of ' + rows.length + '</span>' +
+          '<button type="button" class="rt-page-btn" id="construction-next"' + (nextDisabled ? ' disabled' : '') + '>Next ›</button>' +
+        '</div>'
+      : '';
+
+    contentEl.innerHTML = '<table class="data construction-table">' + head + body + '</table>' + pagerHtml;
 
     contentEl.querySelectorAll('th.sortable').forEach(function (th) {
       th.addEventListener('click', function () {
         var k = th.getAttribute('data-key');
         if (state.sortKey === k) state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
         else { state.sortKey = k; state.sortDir = k === 'key' ? 'asc' : 'desc'; }
+        state.constructionPage = 0;
         render();
       });
     });
+
+    var prevBtn = document.getElementById('construction-prev');
+    var nextBtn = document.getElementById('construction-next');
+    if (prevBtn) prevBtn.addEventListener('click', function () { state.constructionPage -= 1; render(); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { state.constructionPage += 1; render(); });
   }
 
-  searchEl.addEventListener('input', function (e) { state.search = e.target.value; render(); });
-  platformEl.addEventListener('change', function (e) { state.platform = e.target.value; render(); });
-  tourneyEl.addEventListener('change', function (e) { state.tournament = e.target.value; render(); });
-  if (contextEl) contextEl.addEventListener('change', function (e) { state.context = e.target.value; render(); });
+  searchEl.addEventListener('input', function (e) { state.search = e.target.value; state.constructionPage = 0; render(); });
+  platformEl.addEventListener('change', function (e) { state.platform = e.target.value; state.constructionPage = 0; render(); });
+  tourneyEl.addEventListener('change', function (e) { state.tournament = e.target.value; state.constructionPage = 0; render(); });
+  if (contextEl) contextEl.addEventListener('change', function (e) { state.context = e.target.value; state.constructionPage = 0; render(); });
 
   populateFilters();
   render();

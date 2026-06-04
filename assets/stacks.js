@@ -11,14 +11,9 @@
   var contextEl = document.getElementById('context-filter');
   var rowCountEl = document.getElementById('row-count');
   var rowLabelEl = document.getElementById('row-label');
-  var ledeEl = document.getElementById('page-lede');
+
   var viewToggleEl = document.getElementById('view-toggle');
 
-  var LEDES = {
-    team:   'Your roster construction grouped by NFL team. A <strong>stack</strong> = a roster with 2+ players from the same team. <strong>Top Combo</strong> shows the most common position composition on your stacked rosters for that team.',
-    player: 'Which combinations of <em>specific players</em> appear together most often on your rosters. Defaults to QB-anchored stacks (every shown stack contains at least one QB). Untick the checkbox to see all pairings regardless of position.',
-    frequency: 'For every QB you\'ve drafted, how often you paired them with <strong>0 / 1 / 2 / 3+</strong> teammates (same NFL team, non-QB). Expand a QB to see which specific teammates show up with them. The right-hand panel shows how your entry fees split across stack sizes — each roster is bucketed by its <em>largest</em> QB stack.'
-  };
 
   var state = {
     view: 'team',
@@ -113,7 +108,7 @@
         state.view === 'frequency' ? 'QBs' :
                                      'teams';
     }
-    ledeEl.innerHTML = LEDES[state.view] || '';
+
     searchEl.placeholder =
       state.view === 'player'    ? 'Search player or stack type…' :
       state.view === 'frequency' ? 'Search QB or team…' :
@@ -379,7 +374,8 @@
             team: qb.team,
             totalRosters: 0,
             sumSize: 0,
-            buckets: { 0: 0, 1: 0, 2: 0, 3: 0 },
+            buckets:     { 0: 0, 1: 0, 2: 0, 3: 0 },
+            bucketFees:  { 0: 0, 1: 0, 2: 0, 3: 0 },
             fees: 0,
             teammates: {},
           };
@@ -390,6 +386,7 @@
         e.fees += r.entryFee || 0;
         var b = stackSize >= 3 ? 3 : stackSize;
         e.buckets[b]++;
+        e.bucketFees[b] += r.entryFee || 0;
 
         teammates.forEach(function (t) {
           var tk = normalize(t.player);
@@ -427,6 +424,7 @@
         totalRosters: e.totalRosters,
         avgSize: e.totalRosters ? e.sumSize / e.totalRosters : 0,
         buckets: e.buckets,
+        bucketFees: e.bucketFees,
         fees: e.fees,
         teammates: teammates,
       };
@@ -441,7 +439,7 @@
 
   var FREQ_TT = {
     avg:    'Average number of teammates (same NFL team, non-QB) drafted alongside this QB across rosters where you have the QB.',
-    bucket: 'Rosters where this QB was paired with exactly this many same-team, non-QB teammates. The 3+ bucket includes 3, 4, 5… players.',
+    bucket: 'Top %: share of this QB\'s rosters with that many teammates. Bottom %: share of this QB\'s total fees from those rosters. The 3+ bucket includes 3, 4, 5… players.',
     fees:   'Total entry fees of rosters that contain this QB.',
   };
 
@@ -464,11 +462,15 @@
     return row[key];
   }
 
-  function renderBucketCell(count, total, range) {
-    var pct = total ? count / total : 0;
+  function renderBucketCell(count, total, totalFees, bucketFees, range) {
+    var pct      = total      ? count      / total      : 0;
+    var feePct   = totalFees  ? bucketFees / totalFees  : 0;
     var heat = heatStyle(pct, range);
-    var pctTxt = total ? '<span class="bucket-pct">' + BB.fmtPct(pct) + '</span>' : '';
-    return '<td class="num bucket-cell"' + heat + '>' + count + ' ' + pctTxt + '</td>';
+    if (!total) return '<td class="num bucket-cell"' + heat + '>—</td>';
+    return '<td class="num bucket-cell"' + heat + '>' +
+      '<span class="bucket-roster-pct">' + BB.fmtPct(pct) + '</span>' +
+      '<span class="bucket-fee-pct">' + BB.fmtPct(feePct) + '</span>' +
+    '</td>';
   }
 
   function renderTeammatePanel(row) {
@@ -605,10 +607,10 @@
         '<td>' + qbCell + '</td>' +
         '<td class="num">' + r.totalRosters + '</td>' +
         '<td class="num"' + heatStyle(r.avgSize, rAvg) + '>' + r.avgSize.toFixed(2) + '</td>' +
-        renderBucketCell(r.buckets[0], r.totalRosters, rB0) +
-        renderBucketCell(r.buckets[1], r.totalRosters, rB1) +
-        renderBucketCell(r.buckets[2], r.totalRosters, rB2) +
-        renderBucketCell(r.buckets[3], r.totalRosters, rB3) +
+        renderBucketCell(r.buckets[0], r.totalRosters, r.fees, r.bucketFees[0], rB0) +
+        renderBucketCell(r.buckets[1], r.totalRosters, r.fees, r.bucketFees[1], rB1) +
+        renderBucketCell(r.buckets[2], r.totalRosters, r.fees, r.bucketFees[2], rB2) +
+        renderBucketCell(r.buckets[3], r.totalRosters, r.fees, r.bucketFees[3], rB3) +
         '<td class="num">' + BB.fmtMoney(r.fees) + '</td>' +
         '</tr>';
       var detailTr = isExpanded

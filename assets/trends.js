@@ -8,8 +8,6 @@
     { key: 'ud',       label: 'Underdog',   color: 'var(--pos-wr)' },
     { key: 'dk',       label: 'DraftKings', color: 'var(--pos-rb)' },
     { key: 'drafters', label: 'Drafters',   color: 'var(--pos-qb)' },
-    { key: 'bb10',     label: 'BB10',       color: 'var(--pos-te)' },
-    { key: 'rtsports', label: 'RTSports',   color: 'var(--danger)' },
   ];
 
   var state = {

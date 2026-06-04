@@ -42,35 +42,56 @@
     return html;
   }
 
-  function winLossBar(label, gained, lost, even, total) {
-    var totalNon = gained + lost + even;
-    if (!totalNon) return '';
-    var pctG = (gained / totalNon * 100).toFixed(1);
-    var pctL = (lost / totalNon * 100).toFixed(1);
-    var pctE = (even / totalNon * 100).toFixed(1);
-    return '<div style="margin-bottom:16px;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">' +
-        '<strong>' + escapeHtml(label) + '</strong>' +
-        '<span style="font-size:12px;color:var(--text-dim);">' +
-          '<span class="clv-pos">' + gained + ' gained</span> · ' +
-          '<span class="clv-neg">' + lost + ' lost</span>' +
-          (even ? ' · ' + even + ' even' : '') +
-        '</span>' +
+  function winLossCard(label, sub, gained, lost, even) {
+    var total = gained + lost + even;
+    if (!total) return '<div class="card wl-card"><div class="wl-label">' + escapeHtml(label) + '</div><div style="color:var(--text-muted);font-size:13px;">No data</div></div>';
+    var gainedPct = gained / total;
+    var lostPct   = lost   / total;
+    var evenPct   = even   / total;
+    var pctDisplay = (gainedPct * 100).toFixed(1) + '%';
+    var heroClass  = gainedPct >= 0.5 ? 'clv-pos' : 'clv-neg';
+    var bar =
+      '<div class="wl-bar">' +
+        '<div class="wl-seg wl-gained" style="width:' + (gainedPct * 100).toFixed(2) + '%"></div>' +
+        (even ? '<div class="wl-seg wl-even" style="width:' + (evenPct * 100).toFixed(2) + '%"></div>' : '') +
+        '<div class="wl-seg wl-lost" style="width:' + (lostPct * 100).toFixed(2) + '%"></div>' +
+      '</div>';
+    return '<div class="card wl-card">' +
+      '<div class="wl-header">' +
+        '<span class="wl-label">' + escapeHtml(label) + '</span>' +
+        '<span class="wl-sub">' + escapeHtml(sub) + '</span>' +
       '</div>' +
-      '<div style="display:flex;height:18px;border-radius:4px;overflow:hidden;border:1px solid var(--border);">' +
-        '<div style="background:var(--accent-2);width:' + pctG + '%;" title="' + gained + ' drafts gained (' + pctG + '%)"></div>' +
-        (even ? '<div style="background:var(--text-muted);width:' + pctE + '%;opacity:0.4;" title="' + even + ' even"></div>' : '') +
-        '<div style="background:var(--danger);width:' + pctL + '%;" title="' + lost + ' drafts lost (' + pctL + '%)"></div>' +
+      '<div class="wl-pct ' + heroClass + '">' + pctDisplay + '</div>' +
+      '<div class="wl-tag">of drafts gained value</div>' +
+      bar +
+      '<div class="wl-counts">' +
+        '<span class="clv-pos">' + gained + ' gained</span>' +
+        '<span class="wl-sep">·</span>' +
+        '<span class="clv-neg">' + lost + ' lost</span>' +
+        (even ? '<span class="wl-sep">·</span><span style="color:var(--text-muted)">' + even + ' even</span>' : '') +
       '</div>' +
     '</div>';
   }
 
   function renderWinLoss(grade) {
     return '<h2>Drafts gained vs lost</h2>' +
-      '<div class="card">' +
-        winLossBar('CLV — based on ADP at draft date', grade.clvGained, grade.clvLost, grade.clvEven) +
-        winLossBar('RTV — based on today\'s ADP',     grade.rtvGained, grade.rtvLost, grade.rtvEven) +
+      '<div class="wl-grid">' +
+        winLossCard('CLV', 'ADP at draft date', grade.clvGained, grade.clvLost, grade.clvEven) +
+        winLossCard('RTV', 'today\'s ADP',      grade.rtvGained, grade.rtvLost, grade.rtvEven) +
       '</div>';
+  }
+
+  // Monochromatic heat — all one hue, alpha varies from faint (low) to solid (high).
+  // hue: 120 = green (gained), 0 = red (lost).
+  function monoHeat(v, range, hue) {
+    if (range == null || v == null || isNaN(v)) return '';
+    var t = (v - range.min) / (range.max - range.min);
+    if (t < 0) t = 0; else if (t > 1) t = 1;
+    var curved = t < 0.5
+      ? 0.5 * Math.pow(2 * t, 1.4)
+      : 1 - 0.5 * Math.pow(2 * (1 - t), 1.4);
+    var alpha = (0.12 + curved * 0.46).toFixed(2);
+    return ' style="background: hsla(' + hue + ', 80%, 45%, ' + alpha + ');"';
   }
 
   function renderTopTable(title, players, metricKey, accent) {
@@ -93,6 +114,9 @@
     var totalRange = rangeFor(players, function (p) { return p[metricKey]; });
     var avgKey = metricKey === 'clvTotal' ? 'clvAvg' : 'rtvAvg';
     var avgRange = rangeFor(players, function (p) { return p[avgKey]; });
+    // Gained tables → green (120), lost tables → red (0).
+    var hue = accent === 'positive' ? 120 : 0;
+    var metricLabel = metricKey === 'clvTotal' ? 'CLV' : 'RTV';
 
     var head = '<thead><tr>' +
       '<th>Player</th>' +
@@ -100,8 +124,8 @@
       '<th>Tm</th>' +
       '<th class="num">Times Drafted</th>' +
       '<th class="num">Avg Pick</th>' +
-      '<th class="num">Total ' + (metricKey === 'clvTotal' ? 'CLV' : 'RTV') + '</th>' +
-      '<th class="num">Avg ' + (metricKey === 'clvTotal' ? 'CLV' : 'RTV') + '</th>' +
+      '<th class="num">Total ' + metricLabel + '</th>' +
+      '<th class="num">Avg ' + metricLabel + '</th>' +
     '</tr></thead>';
 
     var body = players.map(function (p) {
@@ -112,8 +136,8 @@
         '<td>' + escapeHtml(p.team || '—') + '</td>' +
         '<td class="num">' + p.draftedCount + '</td>' +
         '<td class="num">' + (p.avgPick != null ? p.avgPick.toFixed(1) : '—') + '</td>' +
-        '<td class="num"' + BB.heatStyle(p[metricKey], totalRange) + '>' + fmtSigned(p[metricKey]) + '</td>' +
-        '<td class="num"' + BB.heatStyle(p[avgKey], avgRange) + '>' + fmtSigned(p[avgKey]) + '</td>' +
+        '<td class="num"' + monoHeat(p[metricKey], totalRange, hue) + '>' + fmtSigned(p[metricKey]) + '</td>' +
+        '<td class="num"' + monoHeat(p[avgKey], avgRange, hue) + '>' + fmtSigned(p[avgKey]) + '</td>' +
       '</tr>';
     }).join('');
 
