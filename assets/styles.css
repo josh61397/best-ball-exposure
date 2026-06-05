@@ -144,18 +144,21 @@ p.lede, .stat-sub, .empty-state p, .combo-panel-foot { line-height: 1.6; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-/* ---------- left sidebar nav ---------- */
+/* =========================================================================
+   Sidebar shell — 72px persistent vertical rail
+   - Always visible on desktop, never a drawer/hamburger
+   - Logo zone → nav items → bottom-pinned utilities
+   - Single layout component (rendered by nav.js into #nav-slot); every page
+     inherits this shell unchanged.
+   - Under 768px the rail collapses into a fixed bottom tab bar with the
+     5 most-used items as icon-only tabs.
+   ========================================================================= */
 :root {
-  --sidebar-w: 220px;
-}
-:root[data-sidebar="collapsed"] {
-  --sidebar-w: 64px;
+  --sidebar-w: 72px;
 }
 body {
   padding-left: var(--sidebar-w);
-  transition: padding-left 160ms ease;
 }
-aside.sidebar { transition: width 160ms ease; }
 
 aside.sidebar {
   position: fixed;
@@ -165,261 +168,150 @@ aside.sidebar {
   height: 100vh;
   background: var(--bg-elev);
   border-right: 1px solid var(--border);
-  padding: 18px 12px 14px;
   display: flex;
   flex-direction: column;
   z-index: 50;
-  overflow-y: auto;
+  box-shadow: none;
 }
 
-.sidebar-top {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 4px 12px 4px;
+/* Active-row very subtle background tint per spec */
+:root          { --sb-active-bg: #FAFAFA; }
+[data-theme="dark"] { --sb-active-bg: #1C1C1C; }
+
+/* ----- Logo zone ----- */
+.sb-logo {
+  height: 56px;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 10px;
-}
-.sidebar-brand {
-  flex: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 4px 4px;
-  text-decoration: none;
-  color: var(--text);
-  min-width: 0;
+  justify-content: center;
+  flex-shrink: 0;
 }
-.sidebar-brand:hover { text-decoration: none; }
-.sidebar-collapse-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-muted);
+.sb-logo-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  padding: 0;
-  flex-shrink: 0;
-  transition: background 120ms, color 120ms, border-color 120ms;
+  text-decoration: none;
 }
-.sidebar-collapse-btn:hover { background: var(--bg-elev-2); color: var(--text); border-color: var(--border); }
-.brand-mark {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+.sb-logo-link:hover { text-decoration: none; }
+.sb-logo-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   background: var(--accent);
   color: var(--accent-on);
-  display: flex;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  flex-shrink: 0;
 }
-/* When the brand mark is an actual image (our Draftolio logo), drop the
-   gradient tile and let the logo span the sidebar's full available width
-   so it reads as the primary brand element rather than a tiny corner mark.
-   The image keeps its native aspect via object-fit. */
-.brand-mark.brand-mark-img {
-  background: transparent;
-  box-shadow: none;
-  object-fit: contain;
-  border-radius: 6px;
-  width: 100%;
-  height: auto;
-  max-height: 56px;
-}
-.brand-name {
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.01em;
-  line-height: 1.2;
-}
-.brand-name .accent { color: var(--accent); }
 
-.sidebar-nav {
+/* ----- Nav items (shared with footer utilities) ----- */
+.sb-nav {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  flex: 1;
+  overflow-y: auto;
 }
-.sidebar-nav a {
+.sb-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  color: var(--text-dim);
-  font-weight: 500;
-  font-size: 13.5px;
+  justify-content: center;
+  gap: 4px;
+  height: 56px;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-left: 2px solid transparent;
   text-decoration: none;
+  color: var(--text-muted);
+  cursor: pointer;
   position: relative;
+  font: inherit;
+  transition: color 120ms, background 120ms, border-color 120ms;
 }
-.sidebar-nav a:hover { background: var(--bg-elev-2); color: var(--text); text-decoration: none; }
-.sidebar-nav a.active {
-  background: color-mix(in srgb, var(--accent) 12%, var(--bg-elev-2));
+.sb-item:hover {
   color: var(--text);
+  text-decoration: none;
+  background: transparent;
 }
-.sidebar-nav a.active::before {
-  content: '';
-  position: absolute;
-  left: -12px;
-  top: 6px;
-  bottom: 6px;
-  width: 3px;
-  background: var(--accent);
-  border-radius: 0 3px 3px 0;
+.sb-item.is-active {
+  color: var(--text);
+  border-left-color: var(--accent);
+  background: var(--sb-active-bg);
 }
-.sidebar-nav .nav-icon {
+.sb-item .sb-icon {
   width: 18px;
   height: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: currentColor;
 }
-.sidebar-nav .nav-icon svg { width: 100%; height: 100%; display: block; }
-.sidebar-nav .nav-label { min-width: 0; }
-
-.sidebar-footer {
-  border-top: 1px solid var(--border);
-  padding-top: 10px;
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.sidebar-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-muted);
-  font-size: 12px;
-  padding: 0 4px;
-}
-.sidebar-meta-row { justify-content: space-between; }
-.adp-stamp {
-  padding: 3px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  border: 1px solid var(--border);
-}
-.adp-stamp.fresh { color: var(--accent-2); border-color: color-mix(in srgb, var(--accent-2) 40%, transparent); background: color-mix(in srgb, var(--accent-2) 10%, transparent); }
-.adp-stamp.stale { color: var(--warn);    border-color: color-mix(in srgb, var(--warn) 40%, transparent);    background: color-mix(in srgb, var(--warn) 10%, transparent); }
-.rosters-count { font-variant-numeric: tabular-nums; }
-
-/* ---------- collapsed sidebar state ---------- */
-:root[data-sidebar="collapsed"] aside.sidebar {
-  padding-left: 8px;
-  padding-right: 8px;
-}
-:root[data-sidebar="collapsed"] .brand-name { display: none; }
-:root[data-sidebar="collapsed"] .sidebar-top {
-  flex-direction: column;
-  gap: 8px;
-  padding: 4px 0 12px;
-}
-:root[data-sidebar="collapsed"] .sidebar-brand {
-  flex: 0 0 auto;
-  justify-content: center;
-  padding: 0;
-}
-/* In the collapsed sidebar there's barely any horizontal room — clamp the
-   image to a small square so the wide horizontal logo doesn't shrink into
-   illegibility. */
-:root[data-sidebar="collapsed"] .brand-mark.brand-mark-img {
-  width: 36px;
-  height: 36px;
-}
-:root[data-sidebar="collapsed"] .nav-label { display: none; }
-:root[data-sidebar="collapsed"] .sidebar-nav a {
-  justify-content: center;
-  padding: 10px 0;
-}
-:root[data-sidebar="collapsed"] .sidebar-nav a.active::before {
-  left: -8px;
-}
-:root[data-sidebar="collapsed"] .sidebar-footer {
-  align-items: center;
-}
-:root[data-sidebar="collapsed"] .sidebar-meta { display: none; }
-:root[data-sidebar="collapsed"] .sidebar-meta-row {
-  display: flex;
-  justify-content: center;
-  padding: 0;
-}
-:root[data-sidebar="collapsed"] .sidebar-meta-row .rosters-count { display: none; }
-
-/* On narrow viewports collapse sidebar to a horizontal bar at the top */
-@media (max-width: 720px) {
-  body { padding-left: 0; padding-top: 56px; }
-  aside.sidebar {
-    width: 100%;
-    height: auto;
-    flex-direction: row;
-    align-items: center;
-    padding: 8px 12px;
-    border-right: 0;
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-    overflow-y: hidden;
-    gap: 8px;
-  }
-  .sidebar-brand { border-bottom: 0; margin-bottom: 0; padding: 0 6px 0 0; flex-shrink: 0; }
-  .brand-mark { width: 28px; height: 28px; font-size: 12px; }
-  .brand-name { display: none; }
-  .sidebar-nav { flex-direction: row; gap: 2px; }
-  .sidebar-nav a { padding: 6px 8px; }
-  .sidebar-nav a.active::before { display: none; }
-  .sidebar-nav .nav-label { display: none; }
-  .sidebar-footer { border-top: 0; padding-top: 0; margin-top: 0; margin-left: auto; flex-direction: row; }
-}
-
-.theme-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 7px 10px;
-  margin-top: 6px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text-secondary);
-  font: inherit;
-  font-size: 12.5px;
+.sb-item .sb-icon svg { width: 18px; height: 18px; display: block; }
+.sb-item .sb-label {
+  font-family: var(--font-body);
   font-weight: 500;
-  cursor: pointer;
-  transition: background 120ms, color 120ms, border-color 120ms;
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
-.theme-toggle:hover {
-  color: var(--text);
-  background: var(--surface-hover);
-  border-color: var(--border-strong);
-}
-.theme-toggle-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
+
+/* ----- Bottom zone ----- */
+.sb-footer {
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
   flex-shrink: 0;
-  color: var(--text-secondary);
 }
-.theme-toggle:hover .theme-toggle-icon { color: var(--accent); }
-:root[data-sidebar="collapsed"] .theme-toggle-text { display: none; }
-:root[data-sidebar="collapsed"] .theme-toggle {
-  justify-content: center;
-  padding: 8px;
-  gap: 0;
+.sb-footer .sb-item { border-left: 2px solid transparent; }
+
+/* =========================================================================
+   Mobile — under 768px the rail becomes a bottom tab bar.
+   Logo + bottom utilities hide; only nav items flagged data-mobile="1"
+   render. Active tab uses a 2px yellow TOP border and yellow icon color.
+   ========================================================================= */
+@media (max-width: 768px) {
+  body { padding-left: 0; padding-bottom: 56px; }
+  aside.sidebar {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 56px;
+    flex-direction: row;
+    border-right: 0;
+    border-top: 1px solid var(--border);
+  }
+  .sb-logo,
+  .sb-footer { display: none; }
+  .sb-nav {
+    flex: 1;
+    flex-direction: row;
+    overflow: visible;
+  }
+  .sb-nav .sb-item {
+    flex: 1;
+    height: 56px;
+    border-left: 0;
+    border-top: 2px solid transparent;
+    background: transparent !important;
+  }
+  .sb-nav .sb-item[data-mobile="0"] { display: none; }
+  .sb-nav .sb-item.is-active {
+    color: var(--accent);
+    border-top-color: var(--accent);
+    border-left-color: transparent;
+  }
+  .sb-nav .sb-item.is-active .sb-icon { color: var(--accent); }
+  .sb-nav .sb-item .sb-label { display: none; }
 }
 
 main {
