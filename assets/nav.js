@@ -16,18 +16,24 @@
   }
 
   // ---------- theme ----------
+  // Light is the default; persisted in localStorage as 'light' or 'dark'.
   function currentTheme() {
-    return document.documentElement.getAttribute('data-theme') || 'dark';
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
   }
   function applyTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
     try { localStorage.setItem('bb_theme', t); } catch (e) {}
   }
   function toggleTheme() {
-    applyTheme(currentTheme() === 'light' ? 'dark' : 'light');
+    applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
     render();
   }
   window.BB_toggleTheme = toggleTheme;
+
+  // Inline SVGs for the theme toggle icon — outlined sun and moon, themed
+  // via currentColor so they respect the active palette.
+  var SUN_ICON  = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';
+  var MOON_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
 
   // Inline SVG icons — themed via currentColor.
   var ICONS = {
@@ -64,8 +70,9 @@
     }
 
     var theme = currentTheme();
-    var themeIcon = theme === 'light' ? '☾' : '☀';
-    var themeLabel = theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
+    var themeIcon  = theme === 'dark' ? SUN_ICON : MOON_ICON;
+    var themeLabel = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+    var themeText  = theme === 'dark' ? 'Light mode' : 'Dark mode';
     var nRosters = (window.BB && BB.loadRosters().length) || 0;
 
     // ADP freshness stamp
@@ -92,7 +99,6 @@
         '<div class="sidebar-top">' +
           '<a class="sidebar-brand" href="index.html" title="Draftolio Pro">' +
             '<img class="brand-mark brand-mark-img" src="assets/logo.png" alt="Draftolio Pro" />' +
-            '<span class="brand-name">Draftolio <span class="accent">Pro</span></span>' +
           '</a>' +
           '<button class="sidebar-collapse-btn" id="sidebar-collapse" type="button" ' +
             'aria-label="' + (collapsed ? 'Expand sidebar' : 'Collapse sidebar') + '" ' +
@@ -112,8 +118,11 @@
           (adpInfo ? '<div class="sidebar-meta">' + adpInfo + '</div>' : '') +
           '<div class="sidebar-meta sidebar-meta-row">' +
             '<span class="rosters-count">' + nRosters + ' roster' + (nRosters === 1 ? '' : 's') + '</span>' +
-            '<button id="theme-toggle" class="theme-toggle" type="button" aria-label="' + themeLabel + '" title="' + themeLabel + '">' + themeIcon + '</button>' +
           '</div>' +
+          '<button id="theme-toggle" class="theme-toggle" type="button" aria-label="' + themeLabel + '" title="' + themeLabel + '">' +
+            '<span class="theme-toggle-icon">' + themeIcon + '</span>' +
+            '<span class="theme-toggle-text">' + themeText + '</span>' +
+          '</button>' +
         '</div>' +
       '</aside>';
 

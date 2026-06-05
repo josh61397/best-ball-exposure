@@ -376,16 +376,22 @@
       });
     }
 
-    // 216 = last pick of an 18-round, 12-team draft — used as the baseline
-    // for any player who wasn't ranked at the start of the range.
+    // 216 = last pick of an 18-round, 12-team draft. Used as both the
+    // baseline for players who weren't ranked at the start of the range
+    // AND as the cap on either side — anything beyond 216 is functionally
+    // undraftable, so showing it as 216 keeps changes comparable.
     var BASELINE_ADP = 216;
+    function capADP(v) {
+      if (v == null) return null;
+      return v > BASELINE_ADP ? BASELINE_ADP : v;
+    }
 
     var rows = (endDay.players || []).map(function (endP) {
       var norm = window.BB_DATA.normalizeName(endP.name);
       var startP = startByNorm[norm];
       var rawStart = canonADP(startP);
-      var startADP = rawStart != null ? rawStart : BASELINE_ADP;
-      var endADP = canonADP(endP);
+      var startADP = capADP(rawStart != null ? rawStart : BASELINE_ADP);
+      var endADP = capADP(canonADP(endP));
       var adpChange = (endADP != null) ? (startADP - endADP) : null;
       var startDC = dcAt(startADP);
       var endDC = dcAt(endADP);

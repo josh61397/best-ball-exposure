@@ -1,49 +1,110 @@
+/* =========================================================================
+   Color tokens
+   - Light is the default; :root carries the light palette.
+   - Dark mode is opted in via [data-theme="dark"] on <html>.
+   - Every color elsewhere in the codebase references a var(--name) — no
+   - hardcoded hex values in components.
+   - Backward-compat names (--bg-elev, --bg-elev-2, --text-dim, --accent-2,
+     --danger, --accent-strong) alias the new semantic names so existing
+     rules don't need to be rewritten.
+   ========================================================================= */
 :root {
-  --bg: #0f1115;
-  --bg-elev: #181b22;
-  --bg-elev-2: #1f232c;
-  --border: #2a2f3a;
-  --grid: #2a2f3a;
-  --text: #e7e9ee;
-  --text-dim: #9aa3b2;
-  --text-muted: #6b7383;
-  --accent: #6cf;
-  --accent-strong: #4cb6f0;
-  --accent-on: #0d1117;
-  --accent-2: #5ac46d;
-  --warn: #f5b452;
-  --danger: #ef6a6a;
-  --pos-qb: #c66cff;
-  --pos-rb: #5ac46d;
-  --pos-wr: #6cf;
-  --pos-te: #f5b452;
-  --pos-dst: #9aa3b2;
-  --shadow: 0 0 0 transparent;
-  color-scheme: dark;
+  /* surfaces */
+  --bg:             #FFFFFF;
+  --surface:        #F5F5F5;
+  --surface-hover:  #EEEEEE;
+
+  /* borders */
+  --border:         #E0E0E0;
+  --border-strong:  #C0C0C0;
+  --grid:           var(--border);
+
+  /* text */
+  --text:           #0A0A0A;
+  --text-secondary: #6B7280;
+  --text-muted:     #9CA3AF;
+
+  /* accent (Draftolio yellow) — slightly deeper on white for legibility */
+  --accent:         #F5C400;
+  --accent-on:      #0A0A0A;
+
+  /* semantic */
+  --positive:       #16A34A;
+  --negative:       #DC2626;
+  --warn:           #B6741A;
+
+  /* utility constants — used for text-on-colored-background */
+  --white:          #FFFFFF;
+
+  /* shadows — light mode only; dark mode flattens them */
+  --shadow-sm:      0 1px 2px rgba(10, 10, 10, 0.04), 0 1px 3px rgba(10, 10, 10, 0.06);
+  --shadow:         var(--shadow-sm);
+  --shadow-popover: 0 8px 24px rgba(10, 10, 10, 0.12);
+
+  /* position colors — domain identity, kept the same across modes */
+  --pos-qb:         #8B3FBF;
+  --pos-rb:         #1D8A4F;
+  --pos-wr:         #0A78D6;
+  --pos-te:         #B6741A;
+  --pos-dst:        #6B7280;
+
+  /* backward-compat aliases */
+  --bg-elev:        var(--surface);
+  --bg-elev-2:      var(--surface-hover);
+  --text-dim:       var(--text-secondary);
+  --accent-2:       var(--positive);
+  --danger:         var(--negative);
+  --accent-strong:  var(--accent);
+
+  color-scheme: light;
 }
 
-:root[data-theme="light"] {
-  --bg: #f5f7fa;
-  --bg-elev: #ffffff;
-  --bg-elev-2: #eef1f6;
-  --border: #d9dde5;
-  --grid: #e3e6ec;
-  --text: #1a1d24;
-  --text-dim: #4a5160;
-  --text-muted: #7d8492;
-  --accent: #0a78d6;
-  --accent-strong: #0962b0;
-  --accent-on: #ffffff;
-  --accent-2: #1d8a4f;
-  --warn: #b6741a;
-  --danger: #c53030;
-  --pos-qb: #8b3fbf;
-  --pos-rb: #1d8a4f;
-  --pos-wr: #0a78d6;
-  --pos-te: #b6741a;
-  --pos-dst: #4a5160;
-  --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
-  color-scheme: light;
+[data-theme="dark"] {
+  /* surfaces */
+  --bg:             #0A0A0A;
+  --surface:        #141414;
+  --surface-hover:  #1C1C1C;
+
+  /* borders */
+  --border:         #262626;
+  --border-strong:  #404040;
+  --grid:           var(--border);
+
+  /* text */
+  --text:           #FFFFFF;
+  --text-secondary: #9CA3AF;
+  --text-muted:     #6B7280;
+
+  /* accent */
+  --accent:         #FFD500;
+  --accent-on:      #0A0A0A;
+
+  /* semantic */
+  --positive:       #22C55E;
+  --negative:       #EF4444;
+  --warn:           #F5B452;
+
+  /* no shadows in dark mode */
+  --shadow-sm:      none;
+  --shadow:         none;
+  --shadow-popover: 0 8px 24px rgba(0, 0, 0, 0.55);
+
+  /* position colors — brighter variants for dark backgrounds */
+  --pos-qb:         #C66CFF;
+  --pos-rb:         #5AC46D;
+  --pos-wr:         #6CCFFF;
+  --pos-te:         #F5B452;
+  --pos-dst:        #9CA3AF;
+
+  /* aliases inherit the new values via the same names above */
+  --bg-elev:        var(--surface);
+  --bg-elev-2:      var(--surface-hover);
+  --text-dim:       var(--text-secondary);
+  --accent-2:       var(--positive);
+  --danger:         var(--negative);
+  --accent-strong:  var(--accent);
+
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -128,10 +189,7 @@ aside.sidebar {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  /* Gradient feels more "logo" than flat tile. */
-  background: linear-gradient(135deg,
-    var(--accent) 0%,
-    var(--accent-strong) 100%);
+  background: var(--accent);
   color: var(--accent-on);
   display: flex;
   align-items: center;
@@ -140,15 +198,17 @@ aside.sidebar {
   font-size: 13px;
   letter-spacing: 0.04em;
   flex-shrink: 0;
-  box-shadow: 0 1px 3px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 /* When the brand mark is an actual image (our Draftolio logo), drop the
-   gradient tile and let the logo render on its own. */
+   gradient tile and let the logo render on its own. With no text alongside
+   it, give the mark a bit more room so it's the visual anchor for the corner. */
 .brand-mark.brand-mark-img {
   background: transparent;
   box-shadow: none;
   object-fit: contain;
   border-radius: 6px;
+  width: 40px;
+  height: 40px;
 }
 .brand-name {
   font-weight: 700;
@@ -293,22 +353,43 @@ aside.sidebar {
 }
 
 .theme-toggle {
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--bg-elev-2);
-  color: var(--text-dim);
-  font-size: 14px;
-  line-height: 1;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  margin-top: 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
   cursor: pointer;
   transition: background 120ms, color 120ms, border-color 120ms;
 }
-.theme-toggle:hover { color: var(--text); border-color: var(--text-muted); }
+.theme-toggle:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+}
+.theme-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+.theme-toggle:hover .theme-toggle-icon { color: var(--accent); }
+:root[data-sidebar="collapsed"] .theme-toggle-text { display: none; }
+:root[data-sidebar="collapsed"] .theme-toggle {
+  justify-content: center;
+  padding: 8px;
+  gap: 0;
+}
 
 main {
   max-width: 1400px;
@@ -387,7 +468,7 @@ button.danger:hover { background: color-mix(in srgb, var(--danger) 12%, transpar
   cursor: pointer;
   text-decoration: underline;
 }
-.link-button:hover { color: #4cb6f0; background: none; }
+.link-button:hover { color: var(--accent); background: none; }
 
 .actions-row {
   display: flex;
@@ -503,7 +584,7 @@ button.danger:hover { background: color-mix(in srgb, var(--danger) 12%, transpar
   background: var(--bg-elev);
   border: 1px solid var(--border);
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-popover);
   z-index: 20;
   padding: 8px 0;
 }
@@ -598,9 +679,9 @@ button.danger:hover { background: color-mix(in srgb, var(--danger) 12%, transpar
 .pos-btn-all       { background: var(--bg-elev-2); color: var(--text-muted); border: 1px solid var(--border); }
 .pos-btn-all.active{ background: var(--accent);    color: var(--accent-on);  border-color: var(--accent); }
 .pos-btn-qb        { background: color-mix(in srgb, var(--pos-qb) 22%, var(--bg-elev-2)); color: var(--pos-qb); }
-.pos-btn-qb.active { background: var(--pos-qb); color: #fff; }
+.pos-btn-qb.active { background: var(--pos-qb); color: var(--white); }
 .pos-btn-rb        { background: color-mix(in srgb, var(--pos-rb) 22%, var(--bg-elev-2)); color: var(--pos-rb); }
-.pos-btn-rb.active { background: var(--pos-rb); color: #fff; }
+.pos-btn-rb.active { background: var(--pos-rb); color: var(--white); }
 .pos-btn-wr        { background: color-mix(in srgb, var(--pos-wr) 22%, var(--bg-elev-2)); color: var(--pos-wr); }
 .pos-btn-wr.active { background: var(--pos-wr); color: var(--accent-on); }
 .pos-btn-te        { background: color-mix(in srgb, var(--pos-te) 22%, var(--bg-elev-2)); color: var(--pos-te); }
@@ -682,13 +763,12 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
   color: var(--text-dim);
   border: 1px solid var(--border);
 }
-/* Position badges use a subtle top-light gradient so they feel like
-   physical pills instead of flat tints. Top edge is brighter than
-   the bottom, the way light catches a domed surface. */
-.badge.pos-QB { background: linear-gradient(180deg, color-mix(in srgb, var(--pos-qb) 28%, transparent) 0%, color-mix(in srgb, var(--pos-qb) 12%, transparent) 100%); color: var(--pos-qb); border-color: color-mix(in srgb, var(--pos-qb) 40%, transparent); }
-.badge.pos-RB { background: linear-gradient(180deg, color-mix(in srgb, var(--pos-rb) 28%, transparent) 0%, color-mix(in srgb, var(--pos-rb) 12%, transparent) 100%); color: var(--pos-rb); border-color: color-mix(in srgb, var(--pos-rb) 40%, transparent); }
-.badge.pos-WR { background: linear-gradient(180deg, color-mix(in srgb, var(--pos-wr) 28%, transparent) 0%, color-mix(in srgb, var(--pos-wr) 12%, transparent) 100%); color: var(--pos-wr); border-color: color-mix(in srgb, var(--pos-wr) 40%, transparent); }
-.badge.pos-TE { background: linear-gradient(180deg, color-mix(in srgb, var(--pos-te) 28%, transparent) 0%, color-mix(in srgb, var(--pos-te) 12%, transparent) 100%); color: var(--pos-te); border-color: color-mix(in srgb, var(--pos-te) 40%, transparent); }
+/* Position badges — flat tinted background using color-mix with the
+   surface so the badge reads the same in light and dark mode. */
+.badge.pos-QB { background: color-mix(in srgb, var(--pos-qb) 18%, var(--surface)); color: var(--pos-qb); border-color: color-mix(in srgb, var(--pos-qb) 35%, transparent); }
+.badge.pos-RB { background: color-mix(in srgb, var(--pos-rb) 18%, var(--surface)); color: var(--pos-rb); border-color: color-mix(in srgb, var(--pos-rb) 35%, transparent); }
+.badge.pos-WR { background: color-mix(in srgb, var(--pos-wr) 18%, var(--surface)); color: var(--pos-wr); border-color: color-mix(in srgb, var(--pos-wr) 35%, transparent); }
+.badge.pos-TE { background: color-mix(in srgb, var(--pos-te) 18%, var(--surface)); color: var(--pos-te); border-color: color-mix(in srgb, var(--pos-te) 35%, transparent); }
 
 .empty-state {
   text-align: center;
@@ -1490,7 +1570,7 @@ table.combo-table .badge {
   letter-spacing: normal;
   text-transform: none;
   line-height: 1.5;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-popover);
   opacity: 0;
   pointer-events: none;
   transition: opacity 120ms ease;
