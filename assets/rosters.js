@@ -67,16 +67,30 @@
   }
 
   function renderToolbarSkeleton() {
-    return '<div class="toolbar">' +
-      '<input type="search" id="search" placeholder="Search tournament or player…" style="min-width:240px;" />' +
-      '<select id="platform-filter"><option value="">All platforms</option></select>' +
-      '<select id="context-filter">' +
-        '<option value="">All</option>' +
-        '<option value="superflex">SuperFlex only</option>' +
-        '<option value="post-draft">Post-Draft (18-round)</option>' +
-        '<option value="pre-draft">Pre-Draft only</option>' +
-      '</select>' +
-      '<div style="margin-left:auto;color:var(--text-muted);font-size:12px;" id="row-count"></div>' +
+    return '<div class="filter-bar">' +
+      '<div class="filter-row">' +
+        '<div class="filter-group">' +
+          '<div class="filter-label">Search</div>' +
+          '<input type="search" id="search" placeholder="Search tournament or player…" style="min-width:240px;" />' +
+        '</div>' +
+        '<div class="filter-group">' +
+          '<div class="filter-label">Platform</div>' +
+          '<select id="platform-filter"><option value="">All platforms</option></select>' +
+        '</div>' +
+        '<div class="filter-group">' +
+          '<div class="filter-label">Context</div>' +
+          '<select id="context-filter">' +
+            '<option value="">All</option>' +
+            '<option value="superflex">SuperFlex only</option>' +
+            '<option value="post-draft">Post-Draft (18-round)</option>' +
+            '<option value="pre-draft">Pre-Draft only</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="filter-group" style="margin-left:auto;justify-content:flex-end;">' +
+          '<div class="filter-label">&nbsp;</div>' +
+          '<div style="color:var(--text-muted);font-size:12px;line-height:2;" id="row-count"></div>' +
+        '</div>' +
+      '</div>' +
     '</div>';
   }
 

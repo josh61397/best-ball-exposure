@@ -12,22 +12,88 @@
   <main>
     <h1>ADP trends</h1>
 
-
-    <div class="toolbar">
-      <input type="search" id="player-search" list="player-list" placeholder="Search player…" autocomplete="off" style="min-width:280px;" />
-      <datalist id="player-list"></datalist>
-      <select id="range">
-        <option value="7">Last 7 days</option>
-        <option value="30" selected>Last 30 days</option>
-        <option value="90">Last 90 days</option>
-        <option value="all">All history</option>
-      </select>
-      <div id="history-meta" style="margin-left:auto;color:var(--text-muted);font-size:12px;"></div>
+    <div class="seg-toggle" id="view-toggle" role="tablist" style="margin-bottom:16px;">
+      <button type="button" data-view="chart" class="active">Chart</button>
+      <button type="button" data-view="table">Table</button>
     </div>
 
-    <div id="chart-container"></div>
-    <div id="legend"></div>
-    <div id="player-meta" style="margin-top:16px;"></div>
+    <!-- Shared range filter -->
+    <div class="filter-bar">
+      <!-- CHART VIEW filters -->
+      <div class="filter-row" data-view-only="chart">
+        <div class="filter-group">
+          <div class="filter-label">Player</div>
+          <input type="search" id="player-search" list="player-list" placeholder="Search player…" autocomplete="off" style="min-width:280px;" />
+          <datalist id="player-list"></datalist>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Range</div>
+          <select id="range">
+            <option value="7">Last 7 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="all">All history</option>
+          </select>
+        </div>
+        <div class="filter-group" style="margin-left:auto;justify-content:flex-end;">
+          <div class="filter-label">&nbsp;</div>
+          <div id="history-meta" style="color:var(--text-muted);font-size:12px;line-height:2;"></div>
+        </div>
+      </div>
+
+      <!-- TABLE VIEW filters -->
+      <div data-view-only="table" class="view-hidden" style="display:flex;flex-direction:column;gap:10px;">
+        <div class="filter-group">
+          <div class="filter-label">Position</div>
+          <div class="pos-btn-group" id="table-pos-filter">
+            <button type="button" class="pos-btn pos-btn-all active" data-pos="">All</button>
+            <button type="button" class="pos-btn pos-btn-qb"  data-pos="QB">QB</button>
+            <button type="button" class="pos-btn pos-btn-rb"  data-pos="RB">RB</button>
+            <button type="button" class="pos-btn pos-btn-wr"  data-pos="WR">WR</button>
+            <button type="button" class="pos-btn pos-btn-te"  data-pos="TE">TE</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="filter-group">
+            <div class="filter-label">Search</div>
+            <input type="search" id="table-search" placeholder="Search player…" autocomplete="off" style="min-width:220px;" />
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">Range</div>
+            <select id="table-range">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="all">All history</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">Direction</div>
+            <div class="seg-toggle" id="dir-toggle" role="tablist">
+              <button type="button" data-dir="all"     class="active">All</button>
+              <button type="button" data-dir="risers">Risers</button>
+              <button type="button" data-dir="fallers">Fallers</button>
+            </div>
+          </div>
+          <div class="filter-group" style="margin-left:auto;justify-content:flex-end;">
+            <div class="filter-label">&nbsp;</div>
+            <div id="table-meta" style="color:var(--text-muted);font-size:12px;line-height:2;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART VIEW content -->
+    <div data-view-only="chart">
+      <div id="chart-container"></div>
+      <div id="legend"></div>
+      <div id="player-meta" style="margin-top:16px;"></div>
+    </div>
+
+    <!-- TABLE VIEW content -->
+    <div data-view-only="table" class="view-hidden">
+      <div id="table-container"><div class="empty-state" style="padding:24px;">Loading…</div></div>
+    </div>
   </main>
 
   <footer class="site">ADP snapshots committed daily by the GitHub Actions workflow.</footer>

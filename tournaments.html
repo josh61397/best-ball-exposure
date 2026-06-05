@@ -17,10 +17,21 @@
     <div id="your-entries"></div>
 
     <h2>Tournament reference</h2>
-    <div class="toolbar">
-      <input type="search" id="ref-search" placeholder="Search tournament…" />
-      <select id="ref-platform"><option value="">All platforms</option></select>
-      <select id="ref-period"><option value="">All draft periods</option></select>
+    <div class="filter-bar">
+      <div class="filter-row">
+        <div class="filter-group">
+          <div class="filter-label">Search</div>
+          <input type="search" id="ref-search" placeholder="Search tournament…" />
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Platform</div>
+          <select id="ref-platform"><option value="">All platforms</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Draft period</div>
+          <select id="ref-period"><option value="">All draft periods</option></select>
+        </div>
+      </div>
     </div>
     <div id="ref-table"></div>
   </main>

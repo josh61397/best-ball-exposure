@@ -439,7 +439,7 @@
 
   var FREQ_TT = {
     avg:    'Average number of teammates (same NFL team, non-QB) drafted alongside this QB across rosters where you have the QB.',
-    bucket: 'Top %: share of this QB\'s rosters with that many teammates. Bottom %: share of this QB\'s total fees from those rosters. The 3+ bucket includes 3, 4, 5… players.',
+    bucket: '% of this QB\'s rosters with that many same-team, non-QB teammates. The 3+ bucket includes 3, 4, 5… players.',
     fees:   'Total entry fees of rosters that contain this QB.',
   };
 
@@ -462,15 +462,11 @@
     return row[key];
   }
 
-  function renderBucketCell(count, total, totalFees, bucketFees, range) {
-    var pct      = total      ? count      / total      : 0;
-    var feePct   = totalFees  ? bucketFees / totalFees  : 0;
+  function renderBucketCell(count, total, range) {
+    var pct  = total ? count / total : 0;
     var heat = heatStyle(pct, range);
     if (!total) return '<td class="num bucket-cell"' + heat + '>—</td>';
-    return '<td class="num bucket-cell"' + heat + '>' +
-      '<span class="bucket-roster-pct">' + BB.fmtPct(pct) + '</span>' +
-      '<span class="bucket-fee-pct">' + BB.fmtPct(feePct) + '</span>' +
-    '</td>';
+    return '<td class="num bucket-cell"' + heat + '>' + BB.fmtPct(pct) + '</td>';
   }
 
   function renderTeammatePanel(row) {
@@ -607,10 +603,10 @@
         '<td>' + qbCell + '</td>' +
         '<td class="num">' + r.totalRosters + '</td>' +
         '<td class="num"' + heatStyle(r.avgSize, rAvg) + '>' + r.avgSize.toFixed(2) + '</td>' +
-        renderBucketCell(r.buckets[0], r.totalRosters, r.fees, r.bucketFees[0], rB0) +
-        renderBucketCell(r.buckets[1], r.totalRosters, r.fees, r.bucketFees[1], rB1) +
-        renderBucketCell(r.buckets[2], r.totalRosters, r.fees, r.bucketFees[2], rB2) +
-        renderBucketCell(r.buckets[3], r.totalRosters, r.fees, r.bucketFees[3], rB3) +
+        renderBucketCell(r.buckets[0], r.totalRosters, rB0) +
+        renderBucketCell(r.buckets[1], r.totalRosters, rB1) +
+        renderBucketCell(r.buckets[2], r.totalRosters, rB2) +
+        renderBucketCell(r.buckets[3], r.totalRosters, rB3) +
         '<td class="num">' + BB.fmtMoney(r.fees) + '</td>' +
         '</tr>';
       var detailTr = isExpanded
@@ -619,14 +615,7 @@
       return mainTr + detailTr;
     }).join('') + '</tbody>';
 
-    var tableHTML = '<table class="data">' + head + body + '</table>';
-    var sideHTML = renderFeesPanel(data.feeBuckets, data.totals);
-
-    contentEl.innerHTML =
-      '<div class="freq-grid">' +
-        '<div class="freq-main">' + tableHTML + '</div>' +
-        sideHTML +
-      '</div>';
+    contentEl.innerHTML = '<table class="data">' + head + body + '</table>';
 
     // Wire up expand toggles.
     contentEl.querySelectorAll('.row-expand-btn').forEach(function (btn) {

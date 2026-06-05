@@ -13,21 +13,34 @@
     <h1>Team construction</h1>
 
 
-    <div class="toolbar">
-      <input type="search" id="search" placeholder="Search a construction (e.g. 1-7-8)…" style="min-width:240px;" />
-      <select id="platform-filter">
-        <option value="">All platforms</option>
-      </select>
-      <select id="tournament-filter">
-        <option value="">All tournaments</option>
-      </select>
-      <select id="context-filter">
-        <option value="">All</option>
-        <option value="superflex">SuperFlex only</option>
-        <option value="post-draft">Post-Draft (18-round)</option>
-        <option value="pre-draft">Pre-Draft only</option>
-      </select>
-      <label style="margin-left:auto;"><span id="row-count">0</span> shapes</label>
+    <div class="filter-bar">
+      <div class="filter-row">
+        <div class="filter-group">
+          <div class="filter-label">Search</div>
+          <input type="search" id="search" placeholder="Search a construction (e.g. 1-7-8)…" style="min-width:240px;" />
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Platform</div>
+          <select id="platform-filter"><option value="">All platforms</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Tournament</div>
+          <select id="tournament-filter"><option value="">All tournaments</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Context</div>
+          <select id="context-filter">
+            <option value="">All</option>
+            <option value="superflex">SuperFlex only</option>
+            <option value="post-draft">Post-Draft (18-round)</option>
+            <option value="pre-draft">Pre-Draft only</option>
+          </select>
+        </div>
+        <div class="filter-group" style="margin-left:auto;justify-content:flex-end;">
+          <div class="filter-label">&nbsp;</div>
+          <label><span id="row-count">0</span> shapes</label>
+        </div>
+      </div>
     </div>
 
     <h2 style="margin-top:8px;">Roster types <span style="color:var(--text-muted);font-size:13px;font-weight:400;">— a roster can match multiple</span></h2>

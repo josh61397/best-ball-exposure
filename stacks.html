@@ -19,29 +19,48 @@
       <button type="button" data-view="frequency">Stack Size</button>
     </div>
 
-    <div class="toolbar">
-      <input type="search" id="search" placeholder="Search…" />
-      <select id="size-filter" data-player-only style="display:none;">
-        <option value="2">2-player stacks</option>
-        <option value="3">3-player stacks</option>
-      </select>
-      <label class="checkbox-pill" data-player-only style="display:none;">
-        <input type="checkbox" id="all-toggle" />
-        <span>Show all stacks (any position)</span>
-      </label>
-      <select id="platform-filter">
-        <option value="">All platforms</option>
-      </select>
-      <select id="tournament-filter">
-        <option value="">All tournaments</option>
-      </select>
-      <select id="context-filter">
-        <option value="">All</option>
-        <option value="superflex">SuperFlex only</option>
-        <option value="post-draft">Post-Draft (18-round)</option>
-        <option value="pre-draft">Pre-Draft only</option>
-      </select>
-      <label style="margin-left:auto;"><span id="row-count">0</span> <span id="row-label">teams</span></label>
+    <div class="filter-bar">
+      <div class="filter-row">
+        <div class="filter-group">
+          <div class="filter-label">Search</div>
+          <input type="search" id="search" placeholder="Search…" />
+        </div>
+        <div class="filter-group" data-player-only style="display:none;">
+          <div class="filter-label">Stack size</div>
+          <select id="size-filter">
+            <option value="2">2-player stacks</option>
+            <option value="3">3-player stacks</option>
+          </select>
+        </div>
+        <div class="filter-group" data-player-only style="display:none;">
+          <div class="filter-label">&nbsp;</div>
+          <label class="checkbox-pill">
+            <input type="checkbox" id="all-toggle" />
+            <span>Show all stacks (any position)</span>
+          </label>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Platform</div>
+          <select id="platform-filter"><option value="">All platforms</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Tournament</div>
+          <select id="tournament-filter"><option value="">All tournaments</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Context</div>
+          <select id="context-filter">
+            <option value="">All</option>
+            <option value="superflex">SuperFlex only</option>
+            <option value="post-draft">Post-Draft (18-round)</option>
+            <option value="pre-draft">Pre-Draft only</option>
+          </select>
+        </div>
+        <div class="filter-group" style="margin-left:auto;justify-content:flex-end;">
+          <div class="filter-label">&nbsp;</div>
+          <label><span id="row-count">0</span> <span id="row-label">teams</span></label>
+        </div>
+      </div>
     </div>
 
     <div id="content"></div>

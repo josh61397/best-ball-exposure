@@ -16,6 +16,17 @@
     range: '30',
     perDayCache: {},       // date -> parsed JSON (player rows)
     series: null,          // { date -> { ud, dk, drafters, bb10, rtsports } } for selected player
+    view: 'chart',         // 'chart' | 'table'
+    table: {
+      range: '30',
+      positions: [],       // [] = all
+      direction: 'all',    // 'all' | 'risers' | 'fallers'
+      search: '',
+      sortKey: 'adpChange',
+      sortDir: 'desc',
+      rows: null,          // computed rows for current range
+      loadedKey: null,     // cache key — range used to compute `rows`
+    },
   };
 
   var searchEl = document.getElementById('player-search');
@@ -25,6 +36,15 @@
   var chartEl = document.getElementById('chart-container');
   var legendEl = document.getElementById('legend');
   var playerMetaEl = document.getElementById('player-meta');
+
+  // Table view DOM
+  var viewToggleEl    = document.getElementById('view-toggle');
+  var tableContainer  = document.getElementById('table-container');
+  var tablePosFilter  = document.getElementById('table-pos-filter');
+  var tableSearchEl   = document.getElementById('table-search');
+  var tableRangeEl    = document.getElementById('table-range');
+  var tableMetaEl     = document.getElementById('table-meta');
+  var dirToggleEl     = document.getElementById('dir-toggle');
 
   function escapeHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -296,6 +316,264 @@
       '</div>';
   }
 
+  // ============================================================
+  // TABLE VIEW
+  // ============================================================
+  function canonADP(row) {
+    if (!row) return null;
+    if (row.ud != null) return row.ud;
+    if (row.dk != null) return row.dk;
+    if (row.drafters != null) return row.drafters;
+    if (row.bb10 != null) return row.bb10;
+    if (row.rtsports != null) return row.rtsports;
+    return null;
+  }
+  function dcAt(adp) {
+    if (adp == null) return null;
+    return BB.draftCapital ? BB.draftCapital(Math.round(adp)) : null;
+  }
+  function applyViewToToolbar() {
+    document.querySelectorAll('[data-view-only]').forEach(function (el) {
+      var match = el.getAttribute('data-view-only') === state.view;
+      el.classList.toggle('view-hidden', !match);
+    });
+    if (viewToggleEl) {
+      viewToggleEl.querySelectorAll('button').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-view') === state.view);
+      });
+    }
+  }
+  function setView(v) {
+    state.view = v;
+    try { localStorage.setItem('bb_trends_view', v); } catch (e) {}
+    applyViewToToolbar();
+    if (v === 'table') ensureTableRows().then(renderTable);
+  }
+
+  // Compute change in canonical ADP from first→last day of the range.
+  // Returns array of { name, pos, team, startADP, endADP, adpChange, dcChange }
+  async function computeTableRows(rangeKey) {
+    var dates = state.range === rangeKey ? datesInRange() : (function () {
+      // build dates list for the specified range without mutating state
+      if (rangeKey === 'all') return state.dates.slice();
+      var n = parseInt(rangeKey, 10);
+      return state.dates.slice(-n);
+    })();
+    if (dates.length < 1) return [];
+    var startDate = dates[0];
+    var endDate = dates[dates.length - 1];
+
+    // If the range has only one day, there's nothing to compare — just show
+    // the current snapshot with a 0 change.
+    var startDay = await fetchDay(startDate).catch(function () { return null; });
+    var endDay   = startDate === endDate ? startDay : await fetchDay(endDate).catch(function () { return null; });
+    if (!endDay) return [];
+
+    var startByNorm = {};
+    if (startDay) {
+      (startDay.players || []).forEach(function (p) {
+        startByNorm[window.BB_DATA.normalizeName(p.name)] = p;
+      });
+    }
+
+    var rows = (endDay.players || []).map(function (endP) {
+      var norm = window.BB_DATA.normalizeName(endP.name);
+      var startP = startByNorm[norm];
+      var startADP = canonADP(startP);
+      var endADP = canonADP(endP);
+      var adpChange = (startADP != null && endADP != null) ? (startADP - endADP) : null;
+      var startDC = dcAt(startADP);
+      var endDC = dcAt(endADP);
+      var dcChange = (startDC != null && endDC != null) ? (endDC - startDC) : null;
+      return {
+        name: endP.name,
+        pos: endP.pos || '',
+        team: endP.team || '',
+        startADP: startADP,
+        endADP: endADP,
+        adpChange: adpChange,
+        dcChange: dcChange,
+        isNew: startADP == null && endADP != null,
+      };
+    });
+    return rows;
+  }
+
+  async function ensureTableRows() {
+    var ts = state.table;
+    if (ts.rows && ts.loadedKey === ts.range) return;
+    tableContainer.innerHTML = '<div class="empty-state" style="padding:24px;">Loading…</div>';
+    ts.rows = await computeTableRows(ts.range);
+    ts.loadedKey = ts.range;
+  }
+
+  function fmtSigned(v, digits) {
+    if (v == null || isNaN(v)) return '—';
+    var s = v.toFixed(digits == null ? 1 : digits);
+    return (v > 0 ? '+' : (v < 0 ? '' : '')) + s;
+  }
+  function changeCell(v, digits) {
+    if (v == null || isNaN(v)) return '<td class="num">—</td>';
+    var arrow = v > 0 ? '▲' : (v < 0 ? '▼' : '');
+    var cls   = v > 0 ? 'clv-pos' : (v < 0 ? 'clv-neg' : '');
+    return '<td class="num ' + cls + '">' + (arrow ? arrow + ' ' : '') + Math.abs(v).toFixed(digits == null ? 1 : digits) + '</td>';
+  }
+
+  function renderTable() {
+    var ts = state.table;
+    if (!ts.rows) {
+      tableContainer.innerHTML = '<div class="empty-state" style="padding:24px;">Loading…</div>';
+      return;
+    }
+    var rows = ts.rows.slice();
+
+    // Filter: position
+    if (ts.positions.length) {
+      rows = rows.filter(function (r) { return ts.positions.indexOf(r.pos) !== -1; });
+    }
+    // Filter: search
+    var s = ts.search.toLowerCase().trim();
+    if (s) {
+      rows = rows.filter(function (r) {
+        return (r.name || '').toLowerCase().indexOf(s) !== -1 ||
+               (r.team || '').toLowerCase().indexOf(s) !== -1;
+      });
+    }
+    // Filter: direction
+    if (ts.direction === 'risers')  rows = rows.filter(function (r) { return r.adpChange != null && r.adpChange > 0; });
+    if (ts.direction === 'fallers') rows = rows.filter(function (r) { return r.adpChange != null && r.adpChange < 0; });
+
+    // Sort
+    var key = ts.sortKey;
+    var dir = ts.sortDir === 'asc' ? 1 : -1;
+    rows.sort(function (a, b) {
+      var av, bv;
+      if (key === 'name' || key === 'team' || key === 'pos') {
+        av = (a[key] || '').toLowerCase(); bv = (b[key] || '').toLowerCase();
+        return av < bv ? -1 * dir : av > bv ? 1 * dir : 0;
+      }
+      av = a[key]; bv = b[key];
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      return (av - bv) * dir;
+    });
+
+    tableMetaEl.textContent = rows.length.toLocaleString() + ' player' + (rows.length === 1 ? '' : 's');
+
+    if (!rows.length) {
+      tableContainer.innerHTML = '<div class="empty-state"><h2>No matches</h2><p>Adjust filters or expand the range.</p></div>';
+      return;
+    }
+
+    var COLS = [
+      { key: 'team',      label: 'Team',     sortable: true },
+      { key: 'name',      label: 'Player',   sortable: true },
+      { key: 'pos',       label: 'Pos',      sortable: true },
+      { key: 'startADP',  label: 'Start ADP', sortable: true, num: true },
+      { key: 'endADP',    label: 'End ADP',   sortable: true, num: true },
+      { key: 'adpChange', label: 'ADP Change', sortable: true, num: true },
+      { key: 'dcChange',  label: 'Draft Capital Change', sortable: true, num: true },
+    ];
+    var head = '<thead><tr>' + COLS.map(function (c) {
+      var ind = c.key === ts.sortKey ? (ts.sortDir === 'asc' ? '↑' : '↓') : '';
+      var classes = (c.num ? 'num ' : '') + (c.sortable ? 'sortable' : '');
+      return '<th class="' + classes + '" data-key="' + c.key + '">' +
+        c.label + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
+    }).join('') + '</tr></thead>';
+
+    var body = '<tbody>' + rows.map(function (r) {
+      var teamCell = r.team
+        ? '<a class="team-cell-link" href="team.html?code=' + encodeURIComponent(r.team) + '">' +
+            '<span class="player-cell">' + BB.teamLogoHTML(r.team, { size: 18 }) +
+            '<strong>' + escapeHtml(r.team) + '</strong></span></a>'
+        : '—';
+      var playerCell = '<span class="player-cell" data-pos="' + escapeHtml(r.pos) + '">' +
+        '<span class="player-name">' +
+        '<a href="trends.html?player=' + encodeURIComponent(r.name) + '">' + escapeHtml(r.name) + '</a>' +
+        '</span></span>';
+      var posBadge = r.pos
+        ? '<span class="badge pos-' + escapeHtml(r.pos) + '">' + escapeHtml(r.pos) + '</span>'
+        : '—';
+      var startCell = r.startADP != null ? r.startADP.toFixed(1) : (r.isNew ? '<span style="color:var(--text-muted);" title="No snapshot for the start of this range">new</span>' : '—');
+      var endCell   = r.endADP   != null ? r.endADP.toFixed(1)   : '—';
+      return '<tr data-pos="' + escapeHtml(r.pos) + '"' + BB.teamColorStyle(r.team) + '>' +
+        '<td>' + teamCell + '</td>' +
+        '<td>' + playerCell + '</td>' +
+        '<td>' + posBadge + '</td>' +
+        '<td class="num">' + startCell + '</td>' +
+        '<td class="num">' + endCell + '</td>' +
+        changeCell(r.adpChange) +
+        changeCell(r.dcChange) +
+      '</tr>';
+    }).join('') + '</tbody>';
+
+    tableContainer.innerHTML = '<table class="data">' + head + body + '</table>';
+
+    tableContainer.querySelectorAll('th.sortable').forEach(function (th) {
+      th.addEventListener('click', function () {
+        var k = th.getAttribute('data-key');
+        if (ts.sortKey === k) ts.sortDir = ts.sortDir === 'asc' ? 'desc' : 'asc';
+        else { ts.sortKey = k; ts.sortDir = (k === 'name' || k === 'team' || k === 'pos') ? 'asc' : 'desc'; }
+        renderTable();
+      });
+    });
+  }
+
+  // Wire up table-view controls
+  if (viewToggleEl) {
+    viewToggleEl.querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () { setView(b.getAttribute('data-view')); });
+    });
+  }
+  if (tablePosFilter) {
+    function syncTablePosButtons() {
+      tablePosFilter.querySelectorAll('.pos-btn').forEach(function (b) {
+        var p = b.getAttribute('data-pos') || '';
+        var isActive = p === '' ? state.table.positions.length === 0
+                                : state.table.positions.indexOf(p) !== -1;
+        b.classList.toggle('active', isActive);
+      });
+    }
+    tablePosFilter.querySelectorAll('.pos-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var p = btn.getAttribute('data-pos') || '';
+        if (p === '') state.table.positions = [];
+        else {
+          var idx = state.table.positions.indexOf(p);
+          if (idx === -1) state.table.positions.push(p);
+          else state.table.positions.splice(idx, 1);
+        }
+        syncTablePosButtons();
+        renderTable();
+      });
+    });
+    syncTablePosButtons();
+  }
+  if (tableSearchEl) {
+    tableSearchEl.addEventListener('input', function (e) {
+      state.table.search = e.target.value;
+      renderTable();
+    });
+  }
+  if (tableRangeEl) {
+    tableRangeEl.addEventListener('change', async function () {
+      state.table.range = tableRangeEl.value;
+      await ensureTableRows();
+      renderTable();
+    });
+  }
+  if (dirToggleEl) {
+    dirToggleEl.querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        state.table.direction = b.getAttribute('data-dir');
+        dirToggleEl.querySelectorAll('button').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        renderTable();
+      });
+    });
+  }
+
   async function onPlayerChanged() {
     var name = searchEl.value.trim();
     if (!name) {
@@ -324,10 +602,17 @@
   });
 
   (async function init() {
+    // Restore persisted view
+    try {
+      var savedView = localStorage.getItem('bb_trends_view');
+      if (savedView === 'table' || savedView === 'chart') state.view = savedView;
+    } catch (e) {}
+
     populatePlayerList();
     await loadIndex();
     if (!state.dates.length) {
       renderEmpty('No history available yet. The first daily snapshot will appear after the scheduled refresh runs.');
+      applyViewToToolbar();
       return;
     }
     // Deep link: trends.html?player=Name pre-fills the picker
@@ -339,5 +624,10 @@
       state.series = await buildSeriesForPlayer(startingPlayer);
     }
     renderChart();
+    applyViewToToolbar();
+    if (state.view === 'table') {
+      await ensureTableRows();
+      renderTable();
+    }
   })();
 })();

@@ -14,7 +14,7 @@
     sortKey: 'exposurePct',
     sortDir: 'desc',
     search: '',
-    pos: '',
+    positions: [],   // [] = all positions; otherwise subset of ['QB','RB','WR','TE']
     platform: '',
     tournament: '',
     context: '',
@@ -180,7 +180,7 @@
     var superflexExcluded = rows.__superflexExcluded || 0;
     var search = state.search.toLowerCase().trim();
     rows = rows.filter(function (r) {
-      if (state.pos && r.position !== state.pos) return false;
+      if (state.positions.length && state.positions.indexOf(r.position) === -1) return false;
       if (search && (r.player || '').toLowerCase().indexOf(search) === -1) return false;
       return true;
     });
@@ -301,15 +301,32 @@
   }
 
   searchEl.addEventListener('input', function (e) { state.search = e.target.value; render(); });
+  function syncPosButtons() {
+    if (!posGroupEl) return;
+    posGroupEl.querySelectorAll('.pos-btn').forEach(function (b) {
+      var p = b.getAttribute('data-pos') || '';
+      var isActive = p === '' ? state.positions.length === 0
+                              : state.positions.indexOf(p) !== -1;
+      b.classList.toggle('active', isActive);
+    });
+  }
   if (posGroupEl) {
     posGroupEl.querySelectorAll('.pos-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        state.pos = btn.getAttribute('data-pos') || '';
-        posGroupEl.querySelectorAll('.pos-btn').forEach(function (b) { b.classList.remove('active'); });
-        btn.classList.add('active');
+        var p = btn.getAttribute('data-pos') || '';
+        if (p === '') {
+          // Clicking "All" clears the selection (show everything).
+          state.positions = [];
+        } else {
+          var idx = state.positions.indexOf(p);
+          if (idx === -1) state.positions.push(p);
+          else state.positions.splice(idx, 1);
+        }
+        syncPosButtons();
         render();
       });
     });
+    syncPosButtons();
   }
   platformEl.addEventListener('change', function (e) { state.platform = e.target.value; render(); });
   tourneyEl.addEventListener('change', function (e) { state.tournament = e.target.value; render(); });

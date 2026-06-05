@@ -406,6 +406,9 @@ button.danger:hover { background: color-mix(in srgb, var(--danger) 12%, transpar
 }
 .toolbar label { color: var(--text-dim); font-size: 13px; }
 
+/* Hide elements that don't match the current view (e.g. Chart vs Table on Trends) */
+.view-hidden { display: none !important; }
+
 /* Filter bar — position buttons on top, secondary filters below with labels */
 .filter-bar {
   display: flex;
