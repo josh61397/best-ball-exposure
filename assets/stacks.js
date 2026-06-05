@@ -632,7 +632,7 @@
         '</span>' +
         '</span>';
       var trClass = 'row-expandable' + (isExpanded ? ' is-expanded' : '');
-      var mainTr = '<tr class="' + trClass + '" data-pos="QB" data-norm="' + escapeHtml(r.normName) + '"' +
+      var mainTr = '<tr class="' + trClass + '" data-norm="' + escapeHtml(r.normName) + '"' +
         BB.teamColorStyle(r.team) + '>' +
         '<td data-col="qb">' + qbCell + '</td>' +
         '<td class="num" data-col="totalRosters">' + r.totalRosters + '</td>' +

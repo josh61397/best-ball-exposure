@@ -1059,13 +1059,13 @@ code.stack-combo {
 .stack-cell {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 8px;
 }
 .stack-row {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12.5px;
+  font-size: 13px;
   min-width: 0;
 }
 .stack-row .team-logo { flex-shrink: 0; }
@@ -1138,6 +1138,8 @@ a.team-cell-link:hover .team-logo { opacity: 0.85; }
 
 table.player-stacks-table tbody tr td {
   vertical-align: middle;
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 
 .construction-key {
@@ -1742,9 +1744,9 @@ table.data tbody td {
   font-size: 12px;
   line-height: 1.4;
 }
-/* Numeric cells override back to the mono font (selector order keeps the
-   mono rule above winning, but make it explicit). */
-table.data tbody td.num { font-family: var(--font-mono); font-weight: 500; }
+/* Numeric cells use the body font; tabular-nums (set globally on .num)
+   keeps digits aligned without switching typeface. */
+table.data tbody td.num { font-family: var(--font-body); font-weight: 500; }
 
 /* Player name links inside table cells get the same body treatment. */
 .player-cell .player-name,
@@ -2113,7 +2115,7 @@ table.data tbody td {
 table.data tbody td.num,
 table.data thead th.num {
   text-align: right;
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-variant-numeric: tabular-nums;
   font-weight: 500;
 }

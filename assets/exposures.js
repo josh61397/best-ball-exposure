@@ -293,13 +293,22 @@
       ? Math.round(rows[0].count / rows[0].exposurePct)
       : rosters.length;
     var totalFees = rosters.reduce(function (a, r) { return a + (r.entryFee || 0); }, 0);
-    var uniquePlayers = rows.length;
-    var topPlayer = rows[0];
+    var avgEntryFee = rosters.length ? totalFees / rosters.length : 0;
+    var grade = await BB.gradeRosters(rosters);
+    var avgClvPerDraft = grade.clvAvgPerDraft;
+    var avgClvHtml;
+    if (avgClvPerDraft == null) {
+      avgClvHtml = '—';
+    } else {
+      var clvCls = avgClvPerDraft > 0 ? 'clv-pos' : 'clv-neg';
+      var clvTxt = (avgClvPerDraft > 0 ? '+' : '') + avgClvPerDraft.toFixed(1);
+      avgClvHtml = '<span class="' + clvCls + '">' + clvTxt + '</span>';
+    }
     var statBarHtml = BB.statBar([
       { label: 'Total rosters',  value: totalRostersInView.toLocaleString(), key: true },
       { label: 'Total fees',     value: BB.fmtMoney(totalFees) },
-      { label: 'Unique players', value: uniquePlayers.toLocaleString() },
-      { label: 'Most drafted',   value: topPlayer ? topPlayer.player : '—' },
+      { label: 'Avg entry fee',  value: BB.fmtMoney(avgEntryFee) },
+      { label: 'Avg CLV / draft', html: avgClvHtml },
     ]);
 
     contentEl.innerHTML =
