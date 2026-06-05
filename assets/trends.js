@@ -86,7 +86,10 @@
 
   async function fetchDay(date) {
     if (state.perDayCache[date]) return state.perDayCache[date];
-    var resp = await fetch('data/history/' + date + '.json', { cache: 'force-cache' });
+    // Default cache policy: respect HTTP cache headers and revalidate.
+    // Previously force-cache, which served indefinitely stale files even
+    // after backfill updates landed.
+    var resp = await fetch('data/history/' + date + '.json');
     if (!resp.ok) throw new Error('day ' + date + ' ' + resp.status);
     var json = await resp.json();
     state.perDayCache[date] = json;

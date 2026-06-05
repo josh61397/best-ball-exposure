@@ -558,7 +558,7 @@
     if (!date) return null;
     if (_historyCache.hasOwnProperty(date)) return _historyCache[date];
     try {
-      var resp = await fetch('data/history/' + date + '.json', { cache: 'force-cache' });
+      var resp = await fetch('data/history/' + date + '.json');
       if (!resp.ok) { _historyCache[date] = null; return null; }
       var json = await resp.json();
       var map = {};
