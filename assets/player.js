@@ -54,10 +54,13 @@
   }
 
   function renderHero(report) {
-    var pos = report.position || '—';
-    var badge = report.position ?
-      '<span class="badge pos-' + escapeHtml(pos) + '" style="font-size:13px;padding:4px 10px;">' + escapeHtml(pos) + '</span>' : '';
-    var team = report.team ? '<span class="badge" style="font-size:13px;padding:4px 10px;">' + escapeHtml(report.team) + '</span>' : '';
+    var pos = report.position || '';
+    var posBadge = pos
+      ? '<span class="badge pos-' + escapeHtml(pos) + ' player-hero-badge">' + escapeHtml(pos) + '</span>'
+      : '';
+    var teamBadge = report.team
+      ? '<span class="badge player-hero-badge player-hero-badge-muted">' + escapeHtml(report.team) + '</span>'
+      : '';
     var byeWeek = null;
     if (report.team && window.BB_DATA && window.BB_DATA.schedule) {
       var sched = window.BB_DATA.schedule[report.team];
@@ -67,35 +70,45 @@
         }
       }
     }
-    var byeBadge = byeWeek ? '<span class="badge" style="font-size:13px;padding:4px 10px;">Bye W' + byeWeek + '</span>' : '';
+    var byeBadge = byeWeek
+      ? '<span class="badge player-hero-badge player-hero-badge-muted">Bye W' + byeWeek + '</span>'
+      : '';
 
     var clv = report.clv;
     var clvCls = clvClass(clv);
+    var clvVal = clvText(clv);
 
-    var teamLogo = report.team
-      ? BB.teamLogoHTML(report.team, { size: 40, className: 'team-logo-hero' })
-      : '';
     var trendsHref = 'trends.html?view=chart&player=' + encodeURIComponent(report.player);
-    var trendsBtn = '<a class="adp-trend-btn" href="' + trendsHref + '">' +
-      '<span class="adp-trend-icon" aria-hidden="true">📈</span>' +
-      '<span>View ADP Trend</span>' +
-    '</a>';
-    return '<header class="topbar">' +
-        '<h1 class="topbar-title">' + escapeHtml(report.player) + '</h1>' +
-        '<div class="topbar-actions">' + trendsBtn + '</div>' +
-      '</header>' +
-      '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">' +
-        teamLogo + badge + team + byeBadge +
-      '</div>' +
-      '<p class="lede">Drafted across ' + report.exposureCount + ' of your ' + report.totalRosters + ' rosters.</p>' +
-      '<div class="cards">' +
-        statCard('Drafted', report.exposureCount.toLocaleString(), 'of ' + report.totalRosters + ' rosters') +
-        statCard('% Drafted', BB.fmtPct(report.exposurePct)) +
-        statCard('Fees', BB.fmtMoney(report.fees), BB.fmtPct(report.feesPct) + ' of total') +
-        statCard('My ADP', BB.fmtADP(report.myADP)) +
-        statCard('Market ADP', BB.fmtADP(report.marketADP), 'Underdog') +
-        statCard('CLV', clvText(clv), 'My ADP − Market ADP', clvCls) +
+    var trendsBtn = '<a class="player-hero-action" href="' + trendsHref + '">ADP Trends</a>';
+    var rostersBtn = '<a class="player-hero-action" href="#player-rosters">View Rosters</a>';
+
+    function cell(label, value, sub, cls) {
+      return '<div class="player-hero-stat">' +
+        '<div class="player-hero-stat-label">' + label + '</div>' +
+        '<div class="player-hero-stat-value' + (cls ? ' ' + cls : '') + '">' + value + '</div>' +
+        (sub ? '<div class="player-hero-stat-sub">' + sub + '</div>' : '') +
       '</div>';
+    }
+
+    return '<header class="player-hero">' +
+        '<div class="player-hero-head">' +
+          '<h1 class="player-hero-name">' + escapeHtml(report.player) + '</h1>' +
+          '<div class="player-hero-badges">' + posBadge + teamBadge + byeBadge + '</div>' +
+          '<div class="player-hero-actions">' + trendsBtn + rostersBtn + '</div>' +
+        '</div>' +
+        '<div class="player-hero-subtitle">' +
+          'Drafted across <strong>' + report.exposureCount + '</strong> of your ' +
+          report.totalRosters + ' rosters' +
+        '</div>' +
+        '<div class="player-hero-stats">' +
+          cell('Drafted', report.exposureCount.toLocaleString(), 'of ' + report.totalRosters + ' rosters', 'is-key') +
+          cell('% Drafted', BB.fmtPct(report.exposurePct)) +
+          cell('Fees', BB.fmtMoney(report.fees), BB.fmtPct(report.feesPct) + ' of total') +
+          cell('My ADP', BB.fmtADP(report.myADP)) +
+          cell('Market ADP', BB.fmtADP(report.marketADP), 'Underdog') +
+          cell('CLV', clvVal, 'My ADP − Market', clvCls) +
+        '</div>' +
+      '</header>';
   }
 
   function renderADPRow(report) {
@@ -295,9 +308,11 @@
         '</p>'
       : '';
 
-    return '<h2>Rosters with ' + escapeHtml(report.player) +
+    return '<section id="player-rosters" style="scroll-margin-top:16px;">' +
+      '<h2>Rosters with ' + escapeHtml(report.player) +
       ' <span style="color:var(--text-muted);font-size:13px;font-weight:400;">(' + rows.length + ')</span></h2>' +
-      '<table class="data">' + head + '<tbody>' + body + '</tbody></table>' + foot;
+      '<table class="data">' + head + '<tbody>' + body + '</tbody></table>' + foot +
+      '</section>';
   }
 
   async function init() {
