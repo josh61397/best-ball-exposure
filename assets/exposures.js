@@ -287,7 +287,23 @@
       return mainTr + detailTr;
     }).join('') + '</tbody>';
 
+    // Top-of-page stat bar — reuses the shared BB.statBar component so it
+    // matches the strip on every other data page.
+    var totalRostersInView = (rows.length && rows[0].exposurePct)
+      ? Math.round(rows[0].count / rows[0].exposurePct)
+      : rosters.length;
+    var totalFees = rosters.reduce(function (a, r) { return a + (r.entryFee || 0); }, 0);
+    var uniquePlayers = rows.length;
+    var topPlayer = rows[0];
+    var statBarHtml = BB.statBar([
+      { label: 'Total rosters',  value: totalRostersInView.toLocaleString(), key: true },
+      { label: 'Total fees',     value: BB.fmtMoney(totalFees) },
+      { label: 'Unique players', value: uniquePlayers.toLocaleString() },
+      { label: 'Most drafted',   value: topPlayer ? topPlayer.player : '—' },
+    ]);
+
     contentEl.innerHTML =
+      statBarHtml +
       '<div class="table-toolbar">' + colPicker.renderButton() + '</div>' +
       '<div class="tbl-exposures"><table class="data">' + head + body + '</table></div>';
     colPicker.bind(contentEl);

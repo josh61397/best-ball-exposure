@@ -63,7 +63,7 @@
   }
 
   function renderHeader() {
-    return '<h1>Rosters</h1>';
+    return '<header class="topbar"><h1 class="topbar-title">Rosters</h1></header>';
   }
 
   function renderToolbarSkeleton() {

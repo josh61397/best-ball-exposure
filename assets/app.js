@@ -1529,6 +1529,27 @@
     };
   };
 
+  // ---------- shared stat bar ----------
+  // Emit the standard top-of-page stat bar markup. Each stat is
+  //   { label: 'TOTAL ROSTERS', value: '177', key?: true }
+  // The first stat with `key: true` renders in the accent color.
+  // Use this on every data page so the summary strip looks identical.
+  BB.statBar = function (stats) {
+    if (!stats || !stats.length) return '';
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    return '<div class="stat-bar">' + stats.map(function (s) {
+      var keyCls = s.key ? ' is-key' : '';
+      return '<div class="stat-bar-item">' +
+        '<div class="stat-bar-label">' + esc(s.label) + '</div>' +
+        '<div class="stat-bar-value' + keyCls + '">' + (s.html || esc(s.value)) + '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+  };
+
   // ---------- formatting helpers ----------
   BB.fmtPct = function (x) {
     if (x == null || isNaN(x)) return '—';

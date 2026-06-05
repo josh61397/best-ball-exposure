@@ -41,11 +41,15 @@
   --shadow:         var(--shadow-sm);
   --shadow-popover: 0 8px 24px rgba(10, 10, 10, 0.12);
 
-  /* position colors — domain identity, kept the same across modes */
-  --pos-qb:         #8B3FBF;
-  --pos-rb:         #1D8A4F;
-  --pos-wr:         #0A78D6;
-  --pos-te:         #B6741A;
+  /* subtle fills used by the topbar, stat bar, table header row, hover row */
+  --surface-subtle: #FAFAFA;
+  --border-faint:   #F3F4F6;
+
+  /* position colors — QB red, RB green, WR blue, TE amber per design spec */
+  --pos-qb:         #DC2626;
+  --pos-rb:         #16A34A;
+  --pos-wr:         #2563EB;
+  --pos-te:         #D97706;
   --pos-dst:        #6B7280;
 
   /* backward-compat aliases */
@@ -89,11 +93,15 @@
   --shadow:         none;
   --shadow-popover: 0 8px 24px rgba(0, 0, 0, 0.55);
 
+  /* subtle fills for dark mode */
+  --surface-subtle: #0D0D0D;
+  --border-faint:   #1A1A1A;
+
   /* position colors — brighter variants for dark backgrounds */
-  --pos-qb:         #C66CFF;
-  --pos-rb:         #5AC46D;
-  --pos-wr:         #6CCFFF;
-  --pos-te:         #F5B452;
+  --pos-qb:         #EF4444;
+  --pos-rb:         #22C55E;
+  --pos-wr:         #60A5FA;
+  --pos-te:         #F59E0B;
   --pos-dst:        #9CA3AF;
 
   /* aliases inherit the new values via the same names above */
@@ -1886,3 +1894,463 @@ p.lede {
   font-weight: 400;
 }
 .combo-panel-head strong { font-weight: 600; }
+
+/* =========================================================================
+   STEP 4 — SHARED DESIGN-SYSTEM COMPONENTS
+   ---------------------------------------------------------------------------
+   Every button, chip, badge, table, input, empty state, loading state,
+   topbar, and stat bar on the site renders through one of the classes
+   below. Page-level CSS should never define a one-off variant. Reuse —
+   or extend the shared component, not bypass it.
+
+   Section order:
+     1. Buttons (.btn-primary / .btn-secondary / .btn-ghost)
+     2. Filter chips (.chip)
+     3. Position badges (.badge.pos-*)
+     4. Data tables (table.data)
+     5. Stat summary bar (.stat-bar)
+     6. Input fields (.field)
+     7. Empty states (.empty-state)
+     8. Loading states (.skeleton-row, .page-progress)
+     9. Topbar (.topbar)
+   ========================================================================= */
+
+/* ----- 1. Buttons -------------------------------------------------------
+   Three variants only — primary / secondary / ghost. All 32px tall, 12px
+   horizontal padding, Inter 700 11px uppercase 0.05em tracking, 2px radius,
+   no shadow. Legacy `.button` defaults to secondary so old markup adopts
+   the new look automatically. Add `.button.primary` to opt into yellow. */
+.btn,
+button.btn,
+a.btn,
+.button,
+button.button,
+a.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 120ms, color 120ms, border-color 120ms;
+}
+.btn-primary,
+.button.primary,
+button.button.primary {
+  background: var(--accent);
+  color: var(--accent-on);
+  border-color: var(--accent);
+}
+.btn-primary:hover,
+.button.primary:hover {
+  background: color-mix(in srgb, var(--accent) 88%, var(--text));
+  border-color: color-mix(in srgb, var(--accent) 88%, var(--text));
+}
+.btn-secondary,
+.button:not(.primary):not(.danger),
+button.button:not(.primary):not(.danger),
+a.button:not(.primary):not(.danger) {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+}
+.btn-secondary:hover,
+.button:not(.primary):not(.danger):hover {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 0;
+}
+.btn-ghost:hover {
+  color: var(--text);
+  background: transparent;
+}
+/* Danger keeps the same shape but with the negative color */
+button.danger,
+.btn.btn-danger {
+  background: transparent;
+  color: var(--negative);
+  border: 1px solid color-mix(in srgb, var(--negative) 45%, var(--border));
+}
+button.danger:hover,
+.btn.btn-danger:hover {
+  background: color-mix(in srgb, var(--negative) 12%, transparent);
+  border-color: var(--negative);
+}
+/* Buttons disabled */
+.btn:disabled,
+.button:disabled,
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ----- 2. Filter chips --------------------------------------------------
+   Used for position filters, platform filters, tournament filters. Same
+   typographic treatment as buttons; the variants differ only in color
+   when active. */
+.chip,
+.pos-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 120ms, color 120ms, border-color 120ms;
+}
+.chip:hover,
+.pos-btn:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+  background: transparent;
+}
+.chip.is-active,
+.chip.active,
+.pos-btn.active {
+  background: var(--accent);
+  color: var(--accent-on);
+  border-color: var(--accent);
+}
+/* Override the position-tinted chip backgrounds — chips are uniform yellow
+   when active. The body chip pos colors are no longer applied. */
+.pos-btn-qb,  .pos-btn-rb,  .pos-btn-wr,  .pos-btn-te,  .pos-btn-all { background: transparent; color: var(--text-muted); }
+.pos-btn-qb.active,
+.pos-btn-rb.active,
+.pos-btn-wr.active,
+.pos-btn-te.active,
+.pos-btn-all.active { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+
+/* ----- 3. Position badges ----------------------------------------------
+   QB red, RB green, WR blue, TE amber. 9px Inter 700 uppercase, tight
+   padding, 2px radius — same look on every page that shows position. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 2px;
+  border-radius: 2px;
+  border: 0;
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 9px;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.badge.pos-QB { background: color-mix(in srgb, var(--pos-qb) 16%, var(--bg)); color: var(--pos-qb); border: 0; }
+.badge.pos-RB { background: color-mix(in srgb, var(--pos-rb) 16%, var(--bg)); color: var(--pos-rb); border: 0; }
+.badge.pos-WR { background: color-mix(in srgb, var(--pos-wr) 16%, var(--bg)); color: var(--pos-wr); border: 0; }
+.badge.pos-TE { background: color-mix(in srgb, var(--pos-te) 16%, var(--bg)); color: var(--pos-te); border: 0; }
+
+/* ----- 4. Data tables ---------------------------------------------------
+   One standard table. No rounded corners, no zebra. Header row uses
+   --surface-subtle (sticky on scroll). Numeric cells right-aligned with
+   tabular monospace. First column is the player/team identity column
+   with 20px left padding. */
+table.data {
+  border-radius: 0 !important;
+  border-left: 0;
+  border-right: 0;
+  background: var(--bg);
+}
+table.data thead tr:first-child th:first-child,
+table.data thead tr:first-child th:last-child,
+table.data tbody tr:last-child td:first-child,
+table.data tbody tr:last-child td:last-child { border-radius: 0 !important; }
+table.data thead th {
+  height: 32px;
+  background: var(--surface-subtle);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  user-select: none;
+}
+table.data thead th .sort-ind { color: var(--accent); font-family: var(--font-body); margin-left: 4px; }
+table.data tbody td {
+  height: 36px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border-faint);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--text);
+  vertical-align: middle;
+}
+table.data tbody td.num,
+table.data thead th.num {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+table.data tbody tr:hover td { background: var(--surface-subtle); }
+table.data tbody td:first-child {
+  padding-left: 20px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--text);
+}
+table.data thead th:first-child { padding-left: 20px; }
+/* Sticky first column on wide tables (>1000px scroll width). Pages can
+   opt out via .data.no-sticky-col if needed. */
+.data-scroll {
+  overflow-x: auto;
+}
+table.data.has-sticky-first td:first-child,
+table.data.has-sticky-first th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--bg);
+}
+table.data.has-sticky-first thead th:first-child { background: var(--surface-subtle); }
+table.data.has-sticky-first tbody tr:hover td:first-child { background: var(--surface-subtle); }
+
+/* ----- 5. Stat summary bar ----------------------------------------------
+   Horizontal row of 4-6 metrics with 1px vertical dividers. Drops at the
+   top of any data page below the topbar. */
+.stat-bar {
+  display: flex;
+  align-items: stretch;
+  background: var(--surface-subtle);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin: 0 -24px 16px;
+  padding: 14px 24px;
+  gap: 0;
+}
+.stat-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 0 20px;
+  border-left: 1px solid var(--border);
+}
+.stat-bar-item:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+.stat-bar-label {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stat-bar-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stat-bar-value.is-key { color: var(--accent); }
+@media (max-width: 768px) {
+  .stat-bar { flex-wrap: wrap; gap: 12px; padding: 12px 16px; margin: 0 -16px 12px; }
+  .stat-bar-item { flex: 1 1 calc(50% - 6px); padding: 0; border-left: 0; }
+}
+
+/* ----- 6. Input fields --------------------------------------------------
+   Shared field shell — label above, input below. Inputs are 36px tall,
+   2px radius, yellow border on focus (no glow ring). */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.field-label,
+.filter-label {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.field-input,
+input[type=search],
+input[type=text],
+input[type=number],
+input[type=email],
+input[type=password],
+select,
+textarea {
+  height: 36px;
+  padding: 0 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1;
+  transition: border-color 120ms;
+}
+textarea { height: auto; padding: 8px 10px; line-height: 1.4; }
+.field-input:focus,
+input[type=search]:focus,
+input[type=text]:focus,
+input[type=number]:focus,
+input[type=email]:focus,
+input[type=password]:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--accent);
+}
+.field-input::placeholder,
+input::placeholder { color: var(--text-muted); }
+
+/* ----- 7. Empty states --------------------------------------------------
+   Short muted sentence + optional secondary CTA. No illustrations, no
+   emoji, no mascots. */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--text-secondary);
+}
+.empty-state h2 {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-secondary);
+  margin: 0 0 16px;
+}
+.empty-state p {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 16px;
+  max-width: 380px;
+}
+.empty-state .btn,
+.empty-state .button { margin-top: 0; }
+
+/* ----- 8. Loading states ------------------------------------------------
+   Skeleton rows mimic real row height. Page progress bar is a thin yellow
+   strip at the very top of the viewport. */
+.skeleton-row {
+  height: 36px;
+  background: var(--border-faint);
+  border-bottom: 1px solid var(--border-faint);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+.skeleton-row + .skeleton-row { animation-delay: 120ms; }
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+.page-progress {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-w, 72px);
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  z-index: 100;
+  transform: translateX(-100%);
+  transition: transform 800ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms;
+  pointer-events: none;
+}
+.page-progress.is-loading { transform: translateX(0); }
+.page-progress.is-done    { opacity: 0; }
+@media (max-width: 768px) {
+  .page-progress { left: 0; }
+}
+
+/* ----- 9. Topbar --------------------------------------------------------
+   Persistent header above the page content. Title on the left, max two
+   action buttons on the right. Sticky to the top of the scroll container. */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 56px;
+  padding: 0 24px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  margin: -24px -24px 16px;
+}
+.topbar-title,
+.topbar h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin: 0;
+}
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 768px) {
+  .topbar { padding: 0 16px; margin: -16px -16px 12px; }
+  .topbar-title, .topbar h1 { font-size: 18px; }
+}

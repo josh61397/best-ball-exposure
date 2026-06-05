@@ -52,10 +52,12 @@
   function renderHero(team, summary, byeWeek) {
     var stats = summary || { totalPicks: 0, rostersWithTeam: 0, stackedRosters: 0, stackRate: 0, fees: 0 };
     var totalRosters = BB.loadRosters().length;
-    return '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px;">' +
+    return '<header class="topbar">' +
+        '<h1 class="topbar-title">' + escapeHtml(team) + '</h1>' +
+      '</header>' +
+      '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px;">' +
         BB.teamLogoHTML(team, { size: 48, className: 'team-logo-hero' }) +
-        '<h1 style="margin:0;font-size:30px;">' + escapeHtml(team) + '</h1>' +
-        (byeWeek ? '<span class="badge" style="font-size:13px;padding:4px 10px;">Bye W' + byeWeek + '</span>' : '') +
+        (byeWeek ? '<span class="badge">Bye W' + byeWeek + '</span>' : '') +
       '</div>' +
       '<p class="lede" style="margin-top:6px;">' +
         stats.totalPicks + ' total picks across ' + stats.rostersWithTeam + ' of your ' + totalRosters + ' rosters.' +

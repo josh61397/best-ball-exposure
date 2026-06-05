@@ -80,10 +80,12 @@
       '<span class="adp-trend-icon" aria-hidden="true">📈</span>' +
       '<span>View ADP Trend</span>' +
     '</a>';
-    return '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">' +
-      teamLogo +
-      '<h1 style="margin:0;">' + escapeHtml(report.player) + '</h1>' + badge + team + byeBadge +
-      trendsBtn +
+    return '<header class="topbar">' +
+        '<h1 class="topbar-title">' + escapeHtml(report.player) + '</h1>' +
+        '<div class="topbar-actions">' + trendsBtn + '</div>' +
+      '</header>' +
+      '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">' +
+        teamLogo + badge + team + byeBadge +
       '</div>' +
       '<p class="lede">Drafted across ' + report.exposureCount + ' of your ' + report.totalRosters + ' rosters.</p>' +
       '<div class="cards">' +
@@ -322,12 +324,14 @@
         '<span>View ADP Trend</span>' +
       '</a>';
       contentEl.innerHTML =
+        '<header class="topbar">' +
+          '<h1 class="topbar-title">' + escapeHtml(report.player) + '</h1>' +
+          '<div class="topbar-actions">' + fallbackTrendsBtn + '</div>' +
+        '</header>' +
         '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">' +
           fallbackLogo +
-          '<h1 style="margin:0;">' + escapeHtml(report.player) + '</h1>' +
-          (report.position ? '<span class="badge pos-' + escapeHtml(report.position) + '" style="font-size:13px;padding:4px 10px;">' + escapeHtml(report.position) + '</span>' : '') +
-          (report.team ? '<span class="badge" style="font-size:13px;padding:4px 10px;">' + escapeHtml(report.team) + '</span>' : '') +
-          fallbackTrendsBtn +
+          (report.position ? '<span class="badge pos-' + escapeHtml(report.position) + '">' + escapeHtml(report.position) + '</span>' : '') +
+          (report.team ? '<span class="badge">' + escapeHtml(report.team) + '</span>' : '') +
         '</div>' +
         '<p class="lede">You haven\'t drafted ' + escapeHtml(report.player) + ' on any of your ' + rosters.length + ' rosters.</p>' +
         renderADPRow(report);
