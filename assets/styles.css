@@ -109,15 +109,37 @@
 
 * { box-sizing: border-box; }
 
+/* =========================================================================
+   Typography tokens — three families pull the entire system together:
+     --font-display: Barlow Condensed — page titles, big stat numbers
+     --font-body:    Inter            — body, nav, buttons, labels, badges
+     --font-mono:    JetBrains Mono   — every data cell number / percentage
+   Hierarchy is driven by weight contrast (700 paired with 400), never
+   everything at 500.
+   ========================================================================= */
+:root {
+  --font-display: 'Barlow Condensed', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
 html, body {
   margin: 0;
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
+  font-weight: 400;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Prose blocks (the lede paragraph, explanatory copy, tooltips) get the
+   readable 1.6 line-height. Data-dense areas stay at 1.4. */
+p { line-height: 1.6; }
+p.lede, .stat-sub, .empty-state p, .combo-panel-foot { line-height: 1.6; }
 
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
@@ -200,15 +222,17 @@ aside.sidebar {
   flex-shrink: 0;
 }
 /* When the brand mark is an actual image (our Draftolio logo), drop the
-   gradient tile and let the logo render on its own. With no text alongside
-   it, give the mark a bit more room so it's the visual anchor for the corner. */
+   gradient tile and let the logo span the sidebar's full available width
+   so it reads as the primary brand element rather than a tiny corner mark.
+   The image keeps its native aspect via object-fit. */
 .brand-mark.brand-mark-img {
   background: transparent;
   box-shadow: none;
   object-fit: contain;
   border-radius: 6px;
-  width: 40px;
-  height: 40px;
+  width: 100%;
+  height: auto;
+  max-height: 56px;
 }
 .brand-name {
   font-weight: 700;
@@ -308,6 +332,13 @@ aside.sidebar {
   justify-content: center;
   padding: 0;
 }
+/* In the collapsed sidebar there's barely any horizontal room — clamp the
+   image to a small square so the wide horizontal logo doesn't shrink into
+   illegibility. */
+:root[data-sidebar="collapsed"] .brand-mark.brand-mark-img {
+  width: 36px;
+  height: 36px;
+}
 :root[data-sidebar="collapsed"] .nav-label { display: none; }
 :root[data-sidebar="collapsed"] .sidebar-nav a {
   justify-content: center;
@@ -397,8 +428,36 @@ main {
   padding: 24px;
 }
 
-h1 { font-size: 22px; margin: 0 0 4px; font-weight: 600; }
-h2 { font-size: 16px; margin: 24px 0 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+/* Page titles — Barlow Condensed condensed-display flavour, tight tracking. */
+h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  margin: 0 0 4px;
+}
+/* Section headers — same display family, slightly smaller, muted color. */
+h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 24px 0 12px;
+}
+h3 {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 16px 0 8px;
+}
 p.lede { color: var(--text-dim); margin: 0 0 24px; }
 
 .card {
@@ -1698,3 +1757,227 @@ footer.site {
   .freq-grid { grid-template-columns: 1fr; }
   .freq-side { position: static; }
 }
+
+/* =========================================================================
+   Global typography enforcement
+   ---------------------------------------------------------------------------
+   These rules cap off the file so they always win over earlier component-
+   local font declarations. Every text element on the site routes through
+   one of the three faces (display / body / mono) with explicit weights.
+   ========================================================================= */
+
+/* ----- Numbers everywhere use JetBrains Mono w/ tabular figures. -----
+   .num is the canonical hook for table number cells; the others catch
+   inline numeric pills, stat sub-lines, percentages, dollar amounts. */
+table.data td.num,
+table.data th.num,
+.num,
+.bucket-cell,
+.bucket-cell .bucket-roster-pct,
+.bucket-cell .bucket-fee-pct,
+.bucket-pct,
+.rt-pct-num,
+.rt-page-info,
+.rt-roster-meta,
+.rt-roster-meta span,
+.hist-num,
+.hist-pct,
+.hist-x,
+.adp-stamp,
+.col-picker-count,
+.wl-pct,
+.wl-counts,
+.stat-value,
+.stat-sub,
+.sort-ind,
+code.stack-combo {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Display numbers — the big hero stats — switch to Barlow Condensed so they
+   read as headline numerals, not data cells. */
+.stat-value,
+.rt-count-num,
+.wl-pct,
+.hist-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.stat-value { font-size: 22px; line-height: 1.05; }
+.rt-count-num { font-size: 20px; line-height: 1.05; }
+.wl-pct { font-size: 44px; line-height: 1; letter-spacing: -0.02em; }
+.hist-num { font-size: 16px; line-height: 1.1; }
+
+/* ----- Table column headers — Inter 600 10px uppercase, tight tracking. */
+table.data thead th,
+table.data th {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 10px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+/* ----- Table body — Inter 500 12px for player/team text. ----- */
+table.data tbody td {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.4;
+}
+/* Numeric cells override back to the mono font (selector order keeps the
+   mono rule above winning, but make it explicit). */
+table.data tbody td.num { font-family: var(--font-mono); font-weight: 500; }
+
+/* Player name links inside table cells get the same body treatment. */
+.player-cell .player-name,
+.player-cell .player-name a {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 12.5px;
+}
+
+/* ----- Buttons / pill controls — Inter 700 11px uppercase. ----- */
+.button,
+button.button,
+a.button,
+.pos-btn,
+.seg-toggle button,
+.rt-page-btn,
+.col-picker-btn,
+.adp-trend-btn,
+.theme-toggle,
+.rt-page-btn {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+/* The body-style controls (search inputs, selects) stay sentence-case so
+   placeholder copy reads normally. */
+.toolbar input[type=search],
+.toolbar select,
+.filter-group input[type=search],
+.filter-group select {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ----- Badges / chips — Inter 700 10px uppercase. ----- */
+.badge {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.adp-stamp {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ----- Section / stat labels — Inter 600 10px uppercase, 0.06em tracking. */
+.stat-label,
+.filter-label,
+.col-picker-head,
+.wl-label,
+.rt-label {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 10px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+.stat-label { letter-spacing: 0.06em; }
+
+/* ----- Sidebar nav labels — Inter 500, slightly larger than chip text. */
+.sidebar-nav a {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sidebar-nav a.active { font-weight: 600; }
+
+/* Theme toggle inherits the button treatment but keeps sentence case for the
+   "Light mode" / "Dark mode" label so it reads naturally. */
+.theme-toggle { text-transform: none; letter-spacing: 0.02em; font-weight: 500; font-size: 12px; }
+
+/* ----- Misc tightening — kill stray italics in data views, force tabular. */
+table.data em,
+table.data i,
+.stat-value em,
+.stat-value i { font-style: normal; }
+
+/* Code-style stack-combo pills stay in JetBrains Mono. */
+code.stack-combo,
+.construction-code,
+.stack-combo {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Filter "stack" labels in the freq grid panel. */
+.freq-side h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+/* Empty-state heading uses display family for consistency with h1/h2. */
+.empty-state h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  text-transform: uppercase;
+}
+
+/* Footer site text — small, body, muted. */
+footer.site {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 11px;
+}
+
+/* Stat-card sub text (under the big number) stays muted body. */
+.stat-sub {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Combo panel + foot prose */
+.combo-panel-head,
+.combo-panel-foot,
+p.lede {
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+.combo-panel-head strong { font-weight: 600; }
