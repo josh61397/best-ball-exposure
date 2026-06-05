@@ -207,6 +207,41 @@
     });
   }
 
+  function renderDraftSlots(rosters) {
+    var el = document.getElementById('draft-slots');
+    if (!el) return;
+    if (!rosters.length) { el.innerHTML = ''; return; }
+    var d = BB.computeDraftSlotDistribution(rosters);
+    if (!d.totalRosters) { el.innerHTML = ''; return; }
+    var max = 0;
+    d.slots.forEach(function (s) { if (s.count > max) max = s.count; });
+    var bars = d.slots.map(function (s) {
+      var pct = max ? s.count / max : 0;
+      var barH = Math.max(2, Math.round(pct * 75));
+      var alpha = s.count ? 0.85 : 0.15;
+      var shareText = (s.pct * 100).toFixed(s.pct * 100 >= 10 ? 0 : 1) + '%';
+      var title = s.count + ' roster' + (s.count === 1 ? '' : 's') + ' drafted from slot ' + s.slot +
+        ' (' + shareText + ' of ' + d.totalRosters + ')';
+      return '<div class="hist-col" title="' + title + '">' +
+        '<div class="hist-num">' + s.count + '</div>' +
+        '<div class="hist-pct">' + (s.count ? shareText : '') + '</div>' +
+        '<div class="hist-bar" style="height:' + barH + 'px;background:var(--accent);opacity:' + alpha + ';"></div>' +
+        '<div class="hist-x">' + s.slot + '</div>' +
+      '</div>';
+    }).join('');
+    var html =
+      '<div class="card histogram-card slot-card">' +
+        '<div class="histogram-head">' +
+          '<span class="badge" style="background:var(--bg-elev-2);color:var(--text-dim);border-color:var(--border);">SLOT</span>' +
+          '<span class="histogram-meta">mode ' + (d.mode != null ? d.mode : '—') +
+            ' · ' + d.totalRosters + ' rosters · 1 = early / ' + d.maxSize + ' = late</span>' +
+        '</div>' +
+        '<div class="histogram-bars">' + bars + '</div>' +
+        '<div class="histogram-axis-label">Draft slot (round 1 pick #)</div>' +
+      '</div>';
+    el.innerHTML = html;
+  }
+
   function renderHistograms(rosters) {
     var histEl = document.getElementById('histograms');
     if (!histEl) return;
@@ -249,11 +284,13 @@
       rowCountEl.textContent = '0';
       renderRosterTypes([]);
       renderHistograms([]);
+      renderDraftSlots([]);
       return;
     }
 
     renderRosterTypes(rosters);
     renderHistograms(rosters);
+    renderDraftSlots(rosters);
     var rows = BB.computeRosterConstructions(rosters);
     var s = state.search.toLowerCase().trim();
     if (s) rows = rows.filter(function (r) { return r.key.indexOf(s) !== -1; });

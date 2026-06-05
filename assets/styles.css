@@ -887,6 +887,12 @@ table.data tbody tr[style*="--team-color"] td:first-child {
   width: 18px;
   height: 18px;
 }
+/* Fallback NFL shield shown when a player has no team assigned. Slightly
+   desaturated so it doesn't draw the eye like real team logos do. */
+.team-logo-nfl {
+  opacity: 0.55;
+  filter: grayscale(0.2);
+}
 .team-logo-hero {
   width: 36px;
   height: 36px;
@@ -1412,6 +1418,12 @@ table.construction-table tbody tr td {
   gap: 12px;
   margin-bottom: 20px;
 }
+/* Standalone slot histogram (12 bars instead of ~5) — full row, more
+   breathing room between columns so each slot label is legible. */
+.slot-card {
+  margin-bottom: 20px;
+}
+.slot-card .histogram-bars { gap: 6px; }
 .histogram-card {
   padding: 14px 16px;
   display: flex;
@@ -2397,6 +2409,12 @@ input::placeholder { color: var(--text-muted); }
   gap: 12px;
   padding: 18px 24px;
   flex-wrap: wrap;
+}
+.player-hero-logo {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .player-hero-name {
   font-family: var(--font-display);

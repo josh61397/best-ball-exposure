@@ -1006,6 +1006,194 @@
   //   QB: { buckets: [{count: 1, rosters: 4}, ...], total: 95, mean: 2.8, mode: 3, totalRosters: 30 },
   //   RB: { ... }, WR: { ... }, TE: { ... }
   // }
+  // Week 17 game stacks. For each of the 16 Week 17 NFL games, count how
+  // many rosters have a "game stack" on that game.
+  //
+  // A roster has a game stack on (A vs B) if it satisfies either side:
+  //   - A-anchored: ≥1 QB from A, ≥1 RB/WR/TE from A, ≥1 player from B
+  //   - B-anchored: ≥1 QB from B, ≥1 RB/WR/TE from B, ≥1 player from A
+  // A roster anchored on both sides is counted once (with bothAnchored++).
+  //
+  // Returns: [{
+  //   game: 'KC|LV', teamA, teamB,
+  //   count, pct, fees,
+  //   aAnchored, bAnchored, bothAnchored,
+  //   topPairs: { A: [{key, qb, catcher, count}, ...], B: [...] },
+  //   topBringBacks: { A: [{player, pos, count}, ...], B: [...] }
+  // }, ...]
+  BB.computeWeek17GameStacks = function (rosters) {
+    var schedule = window.BB_DATA && window.BB_DATA.schedule;
+    if (!schedule) return [];
+    var WEEK17_IDX = 16;
+    var PASS_CATCHERS = { RB: true, WR: true, TE: true };
+
+    // Enumerate unique Week 17 games once.
+    var seen = {};
+    var games = [];
+    Object.keys(schedule).forEach(function (team) {
+      var opp = schedule[team][WEEK17_IDX];
+      if (!opp || opp === 'BYE') return;
+      var a = team < opp ? team : opp;
+      var b = team < opp ? opp : team;
+      var key = a + '|' + b;
+      if (seen[key]) return;
+      seen[key] = true;
+      games.push({ key: key, teamA: a, teamB: b });
+    });
+
+    // Aggregator init.
+    var agg = {};
+    games.forEach(function (g) {
+      agg[g.key] = {
+        game: g.key, teamA: g.teamA, teamB: g.teamB,
+        count: 0, fees: 0,
+        aAnchored: 0, bAnchored: 0, bothAnchored: 0,
+        // For top-pairs we accumulate counters keyed by qb+catcher
+        // (limited to A-team pass catchers when A-anchored, and the
+        // reverse for B-anchored). Bring-backs are per-team counters.
+        _pairsA: {}, _pairsB: {},
+        _bringA: {}, _bringB: {},
+      };
+    });
+
+    var totalRosters = rosters.length;
+    var totalFees = 0;
+    rosters.forEach(function (r) {
+      totalFees += r.entryFee || 0;
+      // Bucket picks by team into { qbs, catchers, others }.
+      var byTeam = {};
+      (r.picks || []).forEach(function (p) {
+        if (!p.team || !p.player) return;
+        if (!byTeam[p.team]) byTeam[p.team] = { qbs: [], catchers: [], all: [] };
+        var bucket = byTeam[p.team];
+        bucket.all.push(p);
+        if (p.position === 'QB') bucket.qbs.push(p);
+        else if (PASS_CATCHERS[p.position]) bucket.catchers.push(p);
+      });
+
+      games.forEach(function (g) {
+        var A = byTeam[g.teamA];
+        var B = byTeam[g.teamB];
+        if (!A && !B) return;
+        var aAnchor = A && A.qbs.length && A.catchers.length && B && B.all.length;
+        var bAnchor = B && B.qbs.length && B.catchers.length && A && A.all.length;
+        if (!aAnchor && !bAnchor) return;
+        var a = agg[g.key];
+        a.count++;
+        a.fees += r.entryFee || 0;
+        if (aAnchor && bAnchor) a.bothAnchored++;
+        if (aAnchor) {
+          a.aAnchored++;
+          A.qbs.forEach(function (qb) {
+            A.catchers.forEach(function (c) {
+              var k = qb.player + '+' + c.player;
+              if (!a._pairsA[k]) a._pairsA[k] = { qb: qb.player, catcher: c.player, catcherPos: c.position, count: 0 };
+              a._pairsA[k].count++;
+            });
+          });
+          B.all.forEach(function (p) {
+            var k = p.player;
+            if (!a._bringB[k]) a._bringB[k] = { player: p.player, pos: p.position, count: 0 };
+            a._bringB[k].count++;
+          });
+        }
+        if (bAnchor) {
+          a.bAnchored++;
+          B.qbs.forEach(function (qb) {
+            B.catchers.forEach(function (c) {
+              var k = qb.player + '+' + c.player;
+              if (!a._pairsB[k]) a._pairsB[k] = { qb: qb.player, catcher: c.player, catcherPos: c.position, count: 0 };
+              a._pairsB[k].count++;
+            });
+          });
+          A.all.forEach(function (p) {
+            var k = p.player;
+            if (!a._bringA[k]) a._bringA[k] = { player: p.player, pos: p.position, count: 0 };
+            a._bringA[k].count++;
+          });
+        }
+      });
+    });
+
+    function topN(map, n) {
+      return Object.keys(map).map(function (k) { return map[k]; })
+        .sort(function (x, y) { return y.count - x.count; })
+        .slice(0, n);
+    }
+
+    var rows = games.map(function (g) {
+      var a = agg[g.key];
+      return {
+        game: a.game,
+        teamA: a.teamA,
+        teamB: a.teamB,
+        count: a.count,
+        pct: totalRosters ? a.count / totalRosters : 0,
+        fees: a.fees,
+        feesPct: totalFees ? a.fees / totalFees : 0,
+        aAnchored: a.aAnchored,
+        bAnchored: a.bAnchored,
+        bothAnchored: a.bothAnchored,
+        topPairs: { A: topN(a._pairsA, 5), B: topN(a._pairsB, 5) },
+        topBringBacks: { A: topN(a._bringA, 5), B: topN(a._bringB, 5) },
+      };
+    });
+
+    rows.sort(function (x, y) { return y.count - x.count; });
+    return rows;
+  };
+
+  // Draft-slot distribution: how often each starting slot (1..draftSize)
+  // appears across rosters. The slot is inferred from the round-1 pick's
+  // pickNumber (which is the slot in a snake draft).
+  // Returns: {
+  //   maxSize: 12,
+  //   totalRosters: 177,
+  //   slots: [{ slot: 1, count: 14, pct: 0.079 }, ...],
+  //   mode: 7,
+  // }
+  BB.computeDraftSlotDistribution = function (rosters) {
+    var bySlot = {};
+    var maxSize = 0;
+    var counted = 0;
+    rosters.forEach(function (r) {
+      var size = r.draftSize || 0;
+      if (size > maxSize) maxSize = size;
+      var slot = null;
+      // Prefer the round-1 pick whose pickNumber is the slot.
+      for (var i = 0; i < (r.picks || []).length; i++) {
+        var p = r.picks[i];
+        if (p.round === 1 && p.pickNumber) { slot = p.pickNumber; break; }
+      }
+      // Fallback: smallest overallPick on the roster.
+      if (slot == null) {
+        var minPick = null;
+        for (var j = 0; j < (r.picks || []).length; j++) {
+          var op = r.picks[j].overallPick;
+          if (op != null && (minPick == null || op < minPick)) minPick = op;
+        }
+        if (minPick != null) slot = minPick;
+      }
+      if (!slot) return;
+      bySlot[slot] = (bySlot[slot] || 0) + 1;
+      counted++;
+    });
+    if (!maxSize) maxSize = 12;
+    var slots = [];
+    var modeSlot = null, modeCount = -1;
+    for (var s = 1; s <= maxSize; s++) {
+      var c = bySlot[s] || 0;
+      slots.push({ slot: s, count: c, pct: counted ? c / counted : 0 });
+      if (c > modeCount) { modeCount = c; modeSlot = s; }
+    }
+    return {
+      maxSize: maxSize,
+      totalRosters: counted,
+      slots: slots,
+      mode: modeCount > 0 ? modeSlot : null,
+    };
+  };
+
   BB.computePositionHistograms = function (rosters) {
     var positions = ['QB', 'RB', 'WR', 'TE'];
     var out = {};
@@ -1391,17 +1579,19 @@
   // Hotlinks ESPN's NFL logo CDN. The path uses lowercase team codes,
   // which match our 2-3 letter codes verbatim for every team.
   var LOGO_BASE = 'https://a.espncdn.com/i/teamlogos/nfl/500/';
+  var NFL_LOGO_URL = 'https://a.espncdn.com/i/teamlogos/leagues/500/nfl.png';
   BB.teamLogoURL = function (team) {
-    if (!team) return null;
+    if (!team) return NFL_LOGO_URL;
     return LOGO_BASE + String(team).toLowerCase() + '.png';
   };
   BB.teamLogoHTML = function (team, opts) {
-    if (!team) return '';
     opts = opts || {};
     var size = opts.size || 18;
-    var url = BB.teamLogoURL(team);
-    var cls = 'team-logo' + (opts.className ? ' ' + opts.className : '');
-    return '<img class="' + cls + '" src="' + url + '" alt="' + team + '" ' +
+    var hasTeam = !!team;
+    var url = hasTeam ? BB.teamLogoURL(team) : NFL_LOGO_URL;
+    var altText = hasTeam ? team : 'NFL';
+    var cls = 'team-logo' + (opts.className ? ' ' + opts.className : '') + (hasTeam ? '' : ' team-logo-nfl');
+    return '<img class="' + cls + '" src="' + url + '" alt="' + altText + '" ' +
       'width="' + size + '" height="' + size + '" loading="lazy" ' +
       'onerror="this.style.visibility=\'hidden\'"/>';
   };
@@ -1413,7 +1603,7 @@
     var safe = String(name == null ? '' : name).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
-    var logo = team ? BB.teamLogoHTML(team, { size: opts.size || 18 }) : '<span class="team-logo team-logo-empty"></span>';
+    var logo = BB.teamLogoHTML(team, { size: opts.size || 18 });
     var inner = opts.linkToPlayer
       ? '<a href="player.html?name=' + encodeURIComponent(name || '') + '">' + safe + '</a>'
       : safe;

@@ -29,7 +29,7 @@
   // Persist selections.
   try {
     var saved = JSON.parse(localStorage.getItem('bb_stacks_state') || '{}');
-    if (saved.view === 'player' || saved.view === 'team' || saved.view === 'frequency') state.view = saved.view;
+    if (saved.view === 'player' || saved.view === 'team' || saved.view === 'frequency' || saved.view === 'week17') state.view = saved.view;
     if (saved.size === 3) state.player.size = 3;
     if (saved.showAll) state.player.showAll = true;
   } catch (e) {}
@@ -106,12 +106,14 @@
       rowLabelEl.textContent =
         state.view === 'player'    ? 'stacks' :
         state.view === 'frequency' ? 'QBs' :
+        state.view === 'week17'    ? 'games' :
                                      'teams';
     }
 
     searchEl.placeholder =
       state.view === 'player'    ? 'Search player or stack type…' :
       state.view === 'frequency' ? 'Search QB or team…' :
+      state.view === 'week17'    ? 'Search team code (e.g. KC)…' :
                                    'Search team or combo…';
     viewToggleEl.querySelectorAll('button').forEach(function (b) {
       b.classList.toggle('active', b.getAttribute('data-view') === state.view);
@@ -694,7 +696,132 @@
     }
     if (state.view === 'player')    return renderPlayer(rosters);
     if (state.view === 'frequency') return renderFrequency(rosters);
+    if (state.view === 'week17')    return renderWeek17(rosters);
     return renderTeam(rosters);
+  }
+
+  // ============================================================
+  // WEEK 17 GAME STACKS VIEW
+  // ============================================================
+  function renderWeek17(rosters) {
+    var rows = BB.computeWeek17GameStacks(rosters);
+    var search = state.search.toLowerCase().trim();
+    if (search) {
+      rows = rows.filter(function (r) {
+        return (r.teamA + ' ' + r.teamB).toLowerCase().indexOf(search) !== -1;
+      });
+    }
+    if (!rows.length) {
+      contentEl.innerHTML = '<div class="empty-state"><h2>No Week 17 games</h2><p>No schedule data, or no rosters with a Week 17 stack.</p></div>';
+      rowCountEl.textContent = '0';
+      return;
+    }
+    rowCountEl.textContent = rows.length.toLocaleString();
+
+    var rCount = rangeFor(rows, 'count');
+    var rPct = rangeFor(rows, 'pct');
+
+    var head = '<thead><tr>' +
+      '<th>Game</th>' +
+      '<th class="num">Rosters</th>' +
+      '<th class="num">Stack %</th>' +
+      '<th class="num" title="A-side: roster has QB+pass-catcher from team A and any player from team B">A-anchored</th>' +
+      '<th class="num" title="B-side: roster has QB+pass-catcher from team B and any player from team A">B-anchored</th>' +
+      '<th class="num" title="Roster anchored on both sides at once (QBs from both teams)">Both</th>' +
+      '<th class="num">Fees</th>' +
+    '</tr></thead>';
+
+    var body = rows.map(function (r) {
+      var isExpanded = !!(state.week17Expanded && state.week17Expanded[r.game]);
+      var chevron = '<button type="button" class="row-expand-btn" data-norm="' + escapeHtml(r.game) + '" aria-expanded="' + isExpanded + '">' +
+        '<span class="chevron">' + (isExpanded ? '▾' : '▸') + '</span></button>';
+      var logoA = BB.teamLogoHTML(r.teamA, { size: 18 });
+      var logoB = BB.teamLogoHTML(r.teamB, { size: 18 });
+      var teamHrefA = 'team.html?code=' + encodeURIComponent(r.teamA);
+      var teamHrefB = 'team.html?code=' + encodeURIComponent(r.teamB);
+      var gameCell =
+        '<span class="player-cell-with-expand">' + chevron +
+          '<span class="player-cell">' +
+            logoA + '<a class="stack-team" href="' + teamHrefA + '">' + r.teamA + '</a>' +
+            '<span style="color:var(--text-muted);margin:0 6px;">vs</span>' +
+            logoB + '<a class="stack-team" href="' + teamHrefB + '">' + r.teamB + '</a>' +
+          '</span>' +
+        '</span>';
+
+      var trClass = 'row-expandable' + (isExpanded ? ' is-expanded' : '');
+      var mainTr = '<tr class="' + trClass + '" data-norm="' + escapeHtml(r.game) + '">' +
+        '<td>' + gameCell + '</td>' +
+        '<td class="num"' + heatStyle(r.count, rCount) + '>' + r.count + '</td>' +
+        '<td class="num"' + heatStyle(r.pct, rPct) + '>' + BB.fmtPct(r.pct) + '</td>' +
+        '<td class="num">' + r.aAnchored + '</td>' +
+        '<td class="num">' + r.bAnchored + '</td>' +
+        '<td class="num">' + r.bothAnchored + '</td>' +
+        '<td class="num">' + BB.fmtMoney(r.fees) + '</td>' +
+      '</tr>';
+      var detailTr = isExpanded
+        ? '<tr class="row-expand-detail"><td colspan="7">' + renderWeek17Detail(r) + '</td></tr>'
+        : '';
+      return mainTr + detailTr;
+    }).join('');
+
+    contentEl.innerHTML =
+      '<div class="tbl-stacks-week17"><table class="data">' + head + '<tbody>' + body + '</tbody></table></div>' +
+      '<p style="color:var(--text-muted);font-size:11px;margin:8px 2px 0;">' +
+        'Game stack = QB + RB/WR/TE from one team plus any player from the other team. ' +
+        'Expand a row to see the most common QB + pass-catcher pairs and bring-backs.' +
+      '</p>';
+
+    contentEl.querySelectorAll('.row-expand-btn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleWeek17Expand(btn.getAttribute('data-norm'));
+      });
+    });
+    contentEl.querySelectorAll('tr.row-expandable').forEach(function (tr) {
+      tr.addEventListener('click', function (e) {
+        if (e.target.closest('a')) return;
+        if (e.target.closest('.row-expand-btn')) return;
+        toggleWeek17Expand(tr.getAttribute('data-norm'));
+      });
+    });
+  }
+
+  function toggleWeek17Expand(key) {
+    if (!state.week17Expanded) state.week17Expanded = {};
+    state.week17Expanded[key] = !state.week17Expanded[key];
+    render();
+  }
+
+  function renderWeek17Detail(row) {
+    function side(label, teamCode, pairs, bringBacks, oppCode) {
+      var pairsHtml = pairs.length
+        ? pairs.map(function (p) {
+            return '<li><strong>' + escapeHtml(p.qb) + '</strong> + ' +
+              '<span class="badge pos-' + escapeHtml(p.catcherPos) + '" style="font-size:10px;padding:1px 5px;">' + escapeHtml(p.catcherPos) + '</span> ' +
+              escapeHtml(p.catcher) + ' — <span class="num">' + p.count + '</span></li>';
+          }).join('')
+        : '<li style="color:var(--text-muted);">No ' + teamCode + '-anchored rosters.</li>';
+      var bringHtml = bringBacks.length
+        ? bringBacks.map(function (b) {
+            var pos = b.pos ? '<span class="badge pos-' + escapeHtml(b.pos) + '" style="font-size:10px;padding:1px 5px;">' + escapeHtml(b.pos) + '</span> ' : '';
+            return '<li>' + pos + escapeHtml(b.player) + ' — <span class="num">' + b.count + '</span></li>';
+          }).join('')
+        : '<li style="color:var(--text-muted);">—</li>';
+      return '<div style="flex:1;min-width:240px;">' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
+          BB.teamLogoHTML(teamCode, { size: 18 }) +
+          '<strong>' + teamCode + '-anchored</strong>' +
+          '<span style="color:var(--text-muted);font-size:11px;">QB + pass catcher from ' + teamCode + '</span>' +
+        '</div>' +
+        '<ul style="list-style:none;padding-left:0;margin:0 0 10px;font-size:12.5px;line-height:1.7;">' + pairsHtml + '</ul>' +
+        '<div style="color:var(--text-muted);font-size:11px;margin-bottom:4px;">Top bring-backs from ' + oppCode + '</div>' +
+        '<ul style="list-style:none;padding-left:0;margin:0;font-size:12.5px;line-height:1.7;">' + bringHtml + '</ul>' +
+      '</div>';
+    }
+    return '<div class="combo-panel"><div style="display:flex;gap:24px;flex-wrap:wrap;">' +
+      side(row.teamA, row.teamA, row.topPairs.A, row.topBringBacks.B, row.teamB) +
+      side(row.teamB, row.teamB, row.topPairs.B, row.topBringBacks.A, row.teamA) +
+    '</div></div>';
   }
 
   // Shared stat strip for every Stacks view — counts rosters being stacked,

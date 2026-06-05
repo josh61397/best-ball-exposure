@@ -90,8 +90,12 @@
       '</div>';
     }
 
+    // teamLogoHTML falls back to the NFL shield when team is missing.
+    var teamLogo = BB.teamLogoHTML(report.team, { size: 36, className: 'player-hero-logo' });
+
     return '<header class="player-hero">' +
         '<div class="player-hero-head">' +
+          teamLogo +
           '<h1 class="player-hero-name">' + escapeHtml(report.player) + '</h1>' +
           '<div class="player-hero-badges">' + posBadge + teamBadge + byeBadge + '</div>' +
           '<div class="player-hero-actions">' + trendsBtn + rostersBtn + '</div>' +
