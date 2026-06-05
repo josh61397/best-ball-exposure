@@ -285,15 +285,23 @@
     var pageRows = rows.slice(cStart, cEnd);
 
     var COLS = [
-      { key: 'key',   label: 'Construction',  sortable: true },
+      { key: 'key',   label: 'Construction',  sortable: true, required: true },
       { key: 'count', label: '# Rosters',     sortable: true, num: true },
       { key: 'pct',   label: '% of Rosters',  sortable: true, num: true },
     ];
 
+    if (!state.colPicker) {
+      state.colPicker = BB.makeColumnPicker({
+        storageKey: 'bb_cols_construction_v1',
+        scopeClass: 'tbl-construction',
+        columns: COLS,
+      });
+    }
+
     var head = '<thead><tr>' + COLS.map(function (c) {
       var ind = c.key === state.sortKey ? (state.sortDir === 'asc' ? '↑' : '↓') : '';
       var classes = (c.num ? 'num ' : '') + (c.sortable ? 'sortable' : '');
-      return '<th class="' + classes + '" data-key="' + c.key + '">' +
+      return '<th class="' + classes + '" data-key="' + c.key + '" data-col="' + c.key + '">' +
         c.label + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
     }).join('') + '</tr></thead>';
 
@@ -306,9 +314,9 @@
           '<span class="construction-sub">QB-RB-WR-TE · ' + r.totalPicks + ' picks</span>' +
         '</div>';
       return '<tr>' +
-        '<td>' + keyCell + '</td>' +
-        '<td class="num">' + r.count + '</td>' +
-        '<td class="num"' + heatStyle(r.pct, rPct) + '>' + BB.fmtPct(r.pct) + '</td>' +
+        '<td data-col="key">' + keyCell + '</td>' +
+        '<td class="num" data-col="count">' + r.count + '</td>' +
+        '<td class="num" data-col="pct"' + heatStyle(r.pct, rPct) + '>' + BB.fmtPct(r.pct) + '</td>' +
         '</tr>';
     }).join('') + '</tbody>';
 
@@ -322,7 +330,11 @@
         '</div>'
       : '';
 
-    contentEl.innerHTML = '<table class="data construction-table">' + head + body + '</table>' + pagerHtml;
+    contentEl.innerHTML =
+      '<div class="table-toolbar">' + state.colPicker.renderButton() + '</div>' +
+      '<div class="tbl-construction"><table class="data construction-table">' + head + body + '</table></div>' +
+      pagerHtml;
+    state.colPicker.bind(contentEl);
 
     contentEl.querySelectorAll('th.sortable').forEach(function (th) {
       th.addEventListener('click', function () {

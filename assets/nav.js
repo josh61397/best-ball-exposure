@@ -90,9 +90,9 @@
     var html =
       '<aside class="sidebar" id="site-nav">' +
         '<div class="sidebar-top">' +
-          '<a class="sidebar-brand" href="index.html" title="Best Ball Exposure">' +
-            '<span class="brand-mark">BB</span>' +
-            '<span class="brand-name">Best Ball <span class="accent">Exposure</span></span>' +
+          '<a class="sidebar-brand" href="index.html" title="Draftolio Pro">' +
+            '<img class="brand-mark brand-mark-img" src="assets/logo.png" alt="Draftolio Pro" />' +
+            '<span class="brand-name">Draftolio <span class="accent">Pro</span></span>' +
           '</a>' +
           '<button class="sidebar-collapse-btn" id="sidebar-collapse" type="button" ' +
             'aria-label="' + (collapsed ? 'Expand sidebar' : 'Collapse sidebar') + '" ' +

@@ -192,24 +192,37 @@
     };
 
     var headerCells = [
-      { key: 'tournament', label: 'Title',           group: 'Draft Info' },
+      { key: 'tournament', label: 'Title',           group: 'Draft Info', required: true },
       { key: 'draftedAt',  label: 'Date',            group: 'Draft Info', num: true },
       { key: 'format',     label: 'Type',            group: 'Draft Info' },
       { key: 'entryFee',   label: 'Fee',             group: 'Draft Info', num: true },
       { key: 'draftSize',  label: 'Size',            group: 'Draft Info', num: true },
       { key: 'position',   label: 'Position',        group: 'Draft Info', num: true },
-      { key: 'clvAdp',     label: 'ADP',             group: 'CLV',        num: true, tooltip: TT.clvAdp },
-      { key: 'clvDcv',     label: 'Draft Capital',   group: 'CLV',        num: true, tooltip: TT.clvDcv },
-      { key: 'rtvAdp',     label: 'ADP',             group: 'RTV',        num: true, tooltip: TT.rtvAdp },
-      { key: 'rtvDcv',     label: 'Draft Capital',   group: 'RTV',        num: true, tooltip: TT.rtvDcv },
+      { key: 'clvAdp',     label: 'CLV — ADP',           num: true, tooltip: TT.clvAdp,  group: 'CLV' },
+      { key: 'clvDcv',     label: 'CLV — Draft Capital', num: true, tooltip: TT.clvDcv,  group: 'CLV' },
+      { key: 'rtvAdp',     label: 'RTV — ADP',           num: true, tooltip: TT.rtvAdp,  group: 'RTV' },
+      { key: 'rtvDcv',     label: 'RTV — Draft Capital', num: true, tooltip: TT.rtvDcv,  group: 'RTV' },
     ];
 
+    if (!state.colPicker) {
+      state.colPicker = BB.makeColumnPicker({
+        storageKey: 'bb_cols_rosters_v1',
+        scopeClass: 'tbl-rosters',
+        columns: headerCells.map(function (c) {
+          return { key: c.key, label: c.label.replace(/^CLV — |^RTV — /, '') + (c.group === 'CLV' ? ' (CLV)' : c.group === 'RTV' ? ' (RTV)' : ''), required: c.required };
+        }),
+      });
+    }
+
     // Build two-tier header (group row + label row)
+    // Group cells get data-col-group plus a data-col list of the keys they
+    // cover, so the picker's hide rules can collapse the group header when
+    // every column under it is hidden.
     var groups = [];
     headerCells.forEach(function (c) {
       var last = groups[groups.length - 1];
-      if (last && last.label === c.group) last.span++;
-      else groups.push({ label: c.group, span: 1 });
+      if (last && last.label === c.group) { last.span++; last.keys.push(c.key); }
+      else groups.push({ label: c.group, span: 1, keys: [c.key] });
     });
     var GROUP_TOOLTIPS = { 'CLV': TT.clv, 'RTV': TT.rtv };
     var groupRow = '<tr class="hdr-group">' + groups.map(function (g) {
@@ -217,7 +230,10 @@
       var classes = g.label === 'Draft Info' ? '' : 'group-' + g.label.toLowerCase();
       var ttAttrs = tt ? ' class="' + classes + ' tooltip-trigger" data-tooltip="' + escapeHtml(tt) + '"' : ' class="' + classes + '"';
       var label = tt ? g.label + ' <span class="info-mark">ⓘ</span>' : g.label;
-      return '<th colspan="' + g.span + '"' + ttAttrs + '>' + label + '</th>';
+      // For non-Draft-Info groups, mark all member columns so the picker can
+      // know which to count when deciding whether to hide the whole group.
+      var groupAttr = ' data-col-group="' + g.label.toLowerCase().replace(/\s+/g, '-') + '"';
+      return '<th colspan="' + g.span + '"' + ttAttrs + groupAttr + '>' + label + '</th>';
     }).join('') + '</tr>';
 
     var headerRow = '<tr>' + headerCells.map(function (c) {
@@ -225,8 +241,11 @@
       var classes = (c.num ? 'num ' : '') + 'sortable' + (c.tooltip ? ' tooltip-trigger' : '');
       var ttAttr = c.tooltip ? ' data-tooltip="' + escapeHtml(c.tooltip) + '"' : '';
       var info = c.tooltip ? ' <span class="info-mark">ⓘ</span>' : '';
-      return '<th class="' + classes + '" data-key="' + c.key + '"' + ttAttr + '>' +
-        c.label + info + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
+      // Strip the "CLV —" / "RTV —" prefix in the actual header label since
+      // the group header above already conveys that context.
+      var displayLabel = c.label.replace(/^CLV — |^RTV — /, '');
+      return '<th class="' + classes + '" data-key="' + c.key + '" data-col="' + c.key + '"' + ttAttr + '>' +
+        displayLabel + info + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
     }).join('') + '</tr>';
 
     function fmtClvCell(v) {
@@ -249,28 +268,31 @@
         typeBadge += ' <span class="badge" style="margin-left:4px;">SF</span>';
       }
       var sfClvTip = ' title="Superflex roster — CLV disabled (no SF historical ADP)"';
-      var clvDashCell = '<td class="num"' + sfClvTip + '>—</td>';
+      var clvAdpDash = '<td class="num" data-col="clvAdp"' + sfClvTip + '>—</td>';
+      var clvDcvDash = '<td class="num" data-col="clvDcv"' + sfClvTip + '>—</td>';
       var titleCell = '<span class="title-cell">' + BB.platformLogoHTML(r.platform, { size: 16 }) +
         '<a href="' + escapeHtml(rosterHref) + '">' + escapeHtml(r.tournament || '(unknown)') + '</a></span>';
       return '<tr class="row-link' + (isSf ? ' superflex' : '') + '" data-href="' + escapeHtml(rosterHref) + '">' +
-        '<td>' + titleCell + '</td>' +
-        '<td class="num">' + fmtDate(r.draftedAt) + '</td>' +
-        '<td>' + typeBadge + '</td>' +
-        '<td class="num">' + (r.entryFee != null ? BB.fmtMoney(r.entryFee) : '—') + '</td>' +
-        '<td class="num">' + (r.draftSize != null ? r.draftSize : '—') + '</td>' +
-        '<td class="num">' + (pos != null ? pos : '—') + '</td>' +
-        (isSf ? clvDashCell : '<td class="num"' + BB.heatStyle(v.clv.totalADP, rClvAdp) + '>' + fmtClvCell(v.clv.totalADP) + '</td>') +
-        (isSf ? clvDashCell : '<td class="num"' + BB.heatStyle(v.dcvClv.total, rClvDcv, { invert: true }) + '>' + fmtClvCell(v.dcvClv.total) + '</td>') +
-        '<td class="num"' + BB.heatStyle(v.rtv.totalADP, rRtvAdp) + '>' + fmtClvCell(v.rtv.totalADP) + '</td>' +
-        '<td class="num"' + BB.heatStyle(v.dcvRtv.total, rRtvDcv, { invert: true }) + '>' + fmtClvCell(v.dcvRtv.total) + '</td>' +
+        '<td data-col="tournament">' + titleCell + '</td>' +
+        '<td class="num" data-col="draftedAt">' + fmtDate(r.draftedAt) + '</td>' +
+        '<td data-col="format">' + typeBadge + '</td>' +
+        '<td class="num" data-col="entryFee">' + (r.entryFee != null ? BB.fmtMoney(r.entryFee) : '—') + '</td>' +
+        '<td class="num" data-col="draftSize">' + (r.draftSize != null ? r.draftSize : '—') + '</td>' +
+        '<td class="num" data-col="position">' + (pos != null ? pos : '—') + '</td>' +
+        (isSf ? clvAdpDash : '<td class="num" data-col="clvAdp"' + BB.heatStyle(v.clv.totalADP, rClvAdp) + '>' + fmtClvCell(v.clv.totalADP) + '</td>') +
+        (isSf ? clvDcvDash : '<td class="num" data-col="clvDcv"' + BB.heatStyle(v.dcvClv.total, rClvDcv, { invert: true }) + '>' + fmtClvCell(v.dcvClv.total) + '</td>') +
+        '<td class="num" data-col="rtvAdp"' + BB.heatStyle(v.rtv.totalADP, rRtvAdp) + '>' + fmtClvCell(v.rtv.totalADP) + '</td>' +
+        '<td class="num" data-col="rtvDcv"' + BB.heatStyle(v.dcvRtv.total, rRtvDcv, { invert: true }) + '>' + fmtClvCell(v.dcvRtv.total) + '</td>' +
         '</tr>';
     }).join('');
 
     document.getElementById('table-wrap').innerHTML =
-      '<table class="data roster-table"><thead>' + groupRow + headerRow + '</thead><tbody>' + body + '</tbody></table>' +
+      '<div class="table-toolbar">' + state.colPicker.renderButton() + '</div>' +
+      '<div class="tbl-rosters"><table class="data roster-table"><thead>' + groupRow + headerRow + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<p style="color:var(--text-muted);font-size:12px;margin-top:8px;">' +
         'CLV uses market ADP at draft date when available; older drafts fall back to today\'s ADP (matches RTV). CLV is hidden for Superflex rosters (no SF historical ADP). RTV uses today\'s 1-QB ADP for all rosters including Superflex.' +
       '</p>';
+    state.colPicker.bind(document.getElementById('table-wrap'));
 
     document.querySelectorAll('.row-link').forEach(function (tr) {
       tr.addEventListener('click', function (e) {

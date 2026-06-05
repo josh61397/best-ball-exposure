@@ -75,9 +75,15 @@
     var teamLogo = report.team
       ? BB.teamLogoHTML(report.team, { size: 40, className: 'team-logo-hero' })
       : '';
+    var trendsHref = 'trends.html?view=chart&player=' + encodeURIComponent(report.player);
+    var trendsBtn = '<a class="adp-trend-btn" href="' + trendsHref + '">' +
+      '<span class="adp-trend-icon" aria-hidden="true">📈</span>' +
+      '<span>View ADP Trend</span>' +
+    '</a>';
     return '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">' +
       teamLogo +
       '<h1 style="margin:0;">' + escapeHtml(report.player) + '</h1>' + badge + team + byeBadge +
+      trendsBtn +
       '</div>' +
       '<p class="lede">Drafted across ' + report.exposureCount + ' of your ' + report.totalRosters + ' rosters.</p>' +
       '<div class="cards">' +
@@ -311,12 +317,17 @@
         return;
       }
       var fallbackLogo = report.team ? BB.teamLogoHTML(report.team, { size: 40, className: 'team-logo-hero' }) : '';
+      var fallbackTrendsBtn = '<a class="adp-trend-btn" href="trends.html?view=chart&player=' + encodeURIComponent(report.player) + '">' +
+        '<span class="adp-trend-icon" aria-hidden="true">📈</span>' +
+        '<span>View ADP Trend</span>' +
+      '</a>';
       contentEl.innerHTML =
         '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">' +
           fallbackLogo +
           '<h1 style="margin:0;">' + escapeHtml(report.player) + '</h1>' +
           (report.position ? '<span class="badge pos-' + escapeHtml(report.position) + '" style="font-size:13px;padding:4px 10px;">' + escapeHtml(report.position) + '</span>' : '') +
           (report.team ? '<span class="badge" style="font-size:13px;padding:4px 10px;">' + escapeHtml(report.team) + '</span>' : '') +
+          fallbackTrendsBtn +
         '</div>' +
         '<p class="lede">You haven\'t drafted ' + escapeHtml(report.player) + ' on any of your ' + rosters.length + ' rosters.</p>' +
         renderADPRow(report);

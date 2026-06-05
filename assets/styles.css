@@ -142,6 +142,14 @@ aside.sidebar {
   flex-shrink: 0;
   box-shadow: 0 1px 3px color-mix(in srgb, var(--accent) 35%, transparent);
 }
+/* When the brand mark is an actual image (our Draftolio logo), drop the
+   gradient tile and let the logo render on its own. */
+.brand-mark.brand-mark-img {
+  background: transparent;
+  box-shadow: none;
+  object-fit: contain;
+  border-radius: 6px;
+}
 .brand-name {
   font-weight: 700;
   font-size: 14px;
@@ -408,6 +416,129 @@ button.danger:hover { background: color-mix(in srgb, var(--danger) 12%, transpar
 
 /* Hide elements that don't match the current view (e.g. Chart vs Table on Trends) */
 .view-hidden { display: none !important; }
+
+/* "View ADP Trend" CTA shown next to the player name on player.html */
+.adp-trend-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-elev));
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  color: var(--accent);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: background 120ms, border-color 120ms;
+}
+.adp-trend-btn:hover {
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-elev));
+  border-color: var(--accent);
+  text-decoration: none;
+}
+.adp-trend-icon { font-size: 14px; line-height: 1; }
+
+/* Column visibility picker — appears above each data table */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.col-picker {
+  position: relative;
+  display: inline-block;
+}
+.col-picker-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg-elev);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms;
+}
+.col-picker-btn:hover {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+  color: var(--text);
+}
+.col-picker-btn[aria-expanded="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.col-picker-icon { color: var(--text-muted); flex-shrink: 0; }
+.col-picker-btn[aria-expanded="true"] .col-picker-icon { color: var(--accent); }
+.col-picker-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 99px;
+  background: var(--accent);
+  color: var(--accent-on);
+  font-size: 11px;
+  font-weight: 700;
+}
+.col-picker-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 220px;
+  max-height: 360px;
+  overflow-y: auto;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  z-index: 20;
+  padding: 8px 0;
+}
+.col-picker-head {
+  padding: 8px 14px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+.col-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 2px 0 4px;
+}
+.col-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+.col-picker-item:hover { background: var(--bg-elev-2); }
+.col-picker-item input[type=checkbox] {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
 
 /* Filter bar — position buttons on top, secondary filters below with labels */
 .filter-bar {

@@ -1411,6 +1411,124 @@
     return '<span class="player-cell"' + posAttr + '>' + logo + '<span class="player-name">' + inner + '</span></span>';
   };
 
+  // ---------- column visibility picker ----------
+  // Returns a small widget that you place above a data table to let the user
+  // show/hide columns. The widget injects a scoped <style> block that hides
+  // any <th>/<td> with `data-col="<key>"` inside the configured scopeClass.
+  //
+  // opts:
+  //   storageKey:  localStorage key for persisted hidden columns
+  //   scopeClass:  unique CSS class applied to the table's wrapper (e.g. 'tbl-exposures')
+  //   columns:     array of { key, label, required? } — required columns are
+  //                always visible and don't appear in the picker
+  //   label:       button label (default 'Columns')
+  //
+  // Returns:
+  //   renderButton():  HTML string for the toggle button + dropdown
+  //   bind(rootEl):    wire up click handlers within rootEl after innerHTML
+  //   isVisible(key):  true if a column is currently shown
+  BB.makeColumnPicker = function (opts) {
+    opts = opts || {};
+    var storageKey  = opts.storageKey || 'bb_cols_default';
+    var scopeClass  = opts.scopeClass || 'tbl-default';
+    var allColumns  = opts.columns || [];
+    var toggleable  = allColumns.filter(function (c) { return !c.required; });
+    var togKeys     = toggleable.map(function (c) { return c.key; });
+    var hidden      = {};
+    try {
+      var saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      if (Array.isArray(saved)) saved.forEach(function (k) {
+        if (togKeys.indexOf(k) !== -1) hidden[k] = true;
+      });
+    } catch (e) {}
+
+    function persist() {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(Object.keys(hidden)));
+      } catch (e) {}
+    }
+    function injectStyles() {
+      var id = 'col-picker-style-' + scopeClass;
+      var styleEl = document.getElementById(id);
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = id;
+        document.head.appendChild(styleEl);
+      }
+      var rules = Object.keys(hidden).map(function (k) {
+        return '.' + scopeClass + ' [data-col="' + k + '"] { display: none; }';
+      }).join('\n');
+      styleEl.textContent = rules;
+    }
+    function visibleCount() {
+      var hiddenCount = Object.keys(hidden).filter(function (k) { return togKeys.indexOf(k) !== -1; }).length;
+      return allColumns.length - hiddenCount;
+    }
+    function renderButton() {
+      var label = opts.label || 'Columns';
+      var checkboxes = toggleable.map(function (c) {
+        var checked = hidden[c.key] ? '' : 'checked';
+        return '<label class="col-picker-item">' +
+          '<input type="checkbox" data-col-key="' + c.key + '" ' + checked + '/>' +
+          '<span>' + (c.label || c.key) + '</span>' +
+        '</label>';
+      }).join('');
+      return '<div class="col-picker" data-scope="' + scopeClass + '">' +
+        '<button type="button" class="col-picker-btn" aria-haspopup="true" aria-expanded="false">' +
+          '<svg class="col-picker-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">' +
+            '<rect x="2"  y="2" width="4" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
+            '<rect x="10" y="2" width="4" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
+          '</svg>' +
+          '<span class="col-picker-label">' + label + '</span>' +
+          '<span class="col-picker-count">' + visibleCount() + '</span>' +
+        '</button>' +
+        '<div class="col-picker-panel" hidden>' +
+          '<div class="col-picker-head">Show / hide columns</div>' +
+          '<div class="col-picker-list">' + checkboxes + '</div>' +
+        '</div>' +
+      '</div>';
+    }
+    function bind(root) {
+      root = root || document;
+      var pickerEl = root.querySelector('.col-picker[data-scope="' + scopeClass + '"]');
+      if (!pickerEl) return;
+      var btn = pickerEl.querySelector('.col-picker-btn');
+      var panel = pickerEl.querySelector('.col-picker-panel');
+      var countEl = pickerEl.querySelector('.col-picker-count');
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var willOpen = panel.hidden;
+        panel.hidden = !willOpen;
+        btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      });
+      pickerEl.querySelectorAll('.col-picker-item input').forEach(function (input) {
+        input.addEventListener('change', function () {
+          var k = input.getAttribute('data-col-key');
+          if (input.checked) delete hidden[k];
+          else hidden[k] = true;
+          persist();
+          injectStyles();
+          if (countEl) countEl.textContent = visibleCount();
+        });
+      });
+      // Clicking outside closes the panel
+      function onDoc(e) {
+        if (!pickerEl.contains(e.target)) {
+          panel.hidden = true;
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      }
+      document.addEventListener('click', onDoc);
+    }
+    // Apply hide rules immediately so tables render correctly on first paint.
+    injectStyles();
+    return {
+      renderButton: renderButton,
+      bind: bind,
+      isVisible: function (k) { return !hidden[k]; },
+    };
+  };
+
   // ---------- formatting helpers ----------
   BB.fmtPct = function (x) {
     if (x == null || isNaN(x)) return '—';

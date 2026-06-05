@@ -34,13 +34,13 @@
     feesPct:    'Player\'s share of your total entry fees.\n\nFormula: this player\'s Fees / total entry fees across all rosters.\n\nHeat-mapped green→red relative to the currently visible rows.',
     myADP:      'Your average draft pick number for this player across the rosters where you drafted them.',
     marketADP:  'Market ADP today (Underdog when available, else DraftKings, else Drafters).',
-    clv:        'Closing Line Value per pick.\n\nFormula: My ADP − Market ADP.\n\nPositive (green) = you got the player later than market expected = value. Negative (red) = you reached.',
+    clv:        'Closing Line Value per pick — uses the market ADP from each draft\'s date (when available).\n\nFormula: avg(your pick # − historical market ADP).\n\nPositive (green) = you got the player later than the market was pricing them at the time = value. Negative (red) = you reached.',
+    rtv:        'Real-Time Value per pick — uses today\'s market ADP.\n\nFormula: avg(your pick # − today\'s market ADP).\n\nPositive (green) = the market now prices this player earlier than you paid = your picks aged well. Negative (red) = the market has cooled on them since you drafted.',
   };
 
   var COLS = [
-    { key: 'player',      label: 'Player',     sortable: true },
+    { key: 'player',      label: 'Player',     sortable: true, required: true },
     { key: 'position',    label: 'Pos',        sortable: true },
-    { key: 'team',        label: 'Tm',         sortable: true },
     { key: 'count',       label: 'Drafted',    sortable: true, num: true },
     { key: 'exposurePct', label: '% Drafted',  sortable: true, num: true, tooltip: TT.pctDrafted },
     { key: 'fees',        label: 'Fees',       sortable: true, num: true, tooltip: TT.fees },
@@ -48,7 +48,14 @@
     { key: 'myADP',       label: 'My ADP',     sortable: true, num: true, tooltip: TT.myADP },
     { key: 'marketADP',   label: 'ADP',        sortable: true, num: true, tooltip: TT.marketADP },
     { key: 'clv',         label: 'CLV',        sortable: true, num: true, tooltip: TT.clv },
+    { key: 'rtv',         label: 'RTV',        sortable: true, num: true, tooltip: TT.rtv },
   ];
+
+  var colPicker = BB.makeColumnPicker({
+    storageKey: 'bb_cols_exposures_v1',
+    scopeClass: 'tbl-exposures',
+    columns: COLS,
+  });
 
   function escapeHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -118,7 +125,7 @@
     return { min: min, max: max };
   }
 
-  function render() {
+  async function render() {
     var rosters = getFilteredRosters();
     if (!rosters.length) {
       contentEl.innerHTML = '<div class="empty-state"><h2>No rosters match these filters</h2><p>Try clearing filters or <a href="index.html">upload a CSV</a>.</p></div>';
@@ -126,7 +133,7 @@
       var sf = document.getElementById('sf-note'); if (sf) sf.textContent = '';
       return;
     }
-    return renderPlayers(rosters);
+    return await renderPlayers(rosters);
   }
 
   function renderComboPanel(playerRow, rosters) {
@@ -175,7 +182,7 @@
     '</div>';
   }
 
-  function renderPlayers(rosters) {
+  async function renderPlayers(rosters) {
     var rows = BB.computeExposures(rosters);
     var superflexExcluded = rows.__superflexExcluded || 0;
     var search = state.search.toLowerCase().trim();
@@ -185,6 +192,21 @@
       return true;
     });
     rows.__superflexExcluded = superflexExcluded;
+
+    // Merge in true historical CLV + RTV per player.
+    // aggregatePlayerValue is async because CLV needs the historical ADP
+    // snapshot for each draft date — those fetches are cached so subsequent
+    // renders are fast.
+    var values = await BB.aggregatePlayerValue(rosters);
+    var byNorm = {};
+    values.forEach(function (v) {
+      byNorm[window.BB_DATA.normalizeName(v.player)] = v;
+    });
+    rows.forEach(function (r) {
+      var v = byNorm[window.BB_DATA.normalizeName(r.player)];
+      r.clv = v ? v.clvAvg : null;
+      r.rtv = v ? v.rtvAvg : null;
+    });
 
     var key = state.sortKey;
     var dir = state.sortDir === 'asc' ? 1 : -1;
@@ -220,7 +242,7 @@
       var classes = (c.num ? 'num ' : '') + (c.sortable ? 'sortable' : '') + (c.tooltip ? ' tooltip-trigger' : '');
       var ttAttr = c.tooltip ? ' data-tooltip="' + c.tooltip.replace(/"/g, '&quot;') + '"' : '';
       var info = c.tooltip ? ' <span class="info-mark">ⓘ</span>' : '';
-      return '<th class="' + classes + '" data-key="' + c.key + '"' + ttAttr + '>' +
+      return '<th class="' + classes + '" data-key="' + c.key + '" data-col="' + c.key + '"' + ttAttr + '>' +
         c.label + info + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
     }).join('') + '</tr></thead>';
 
@@ -248,16 +270,16 @@
       var trClass = 'row-expandable' + (isExpanded ? ' is-expanded' : '');
       var posAttr = r.position ? ' data-pos="' + escapeHtml(r.position) + '"' : '';
       var mainTr = '<tr class="' + trClass + '" data-norm="' + escapeHtml(normName) + '"' + posAttr + '>' +
-        '<td>' + combinedCell + '</td>' +
-        '<td>' + (r.position ? '<span class="badge pos-' + escapeHtml(r.position) + '">' + escapeHtml(r.position) + '</span>' : '—') + '</td>' +
-        '<td>' + escapeHtml(r.team || '—') + '</td>' +
-        '<td class="num"><span title="' + r.count + ' of ' + denom + ' rosters">' + r.count + '</span></td>' +
-        '<td class="num"' + heatStyle(r.exposurePct, rExp) + '>' + BB.fmtPct(r.exposurePct) + '</td>' +
-        '<td class="num">' + BB.fmtMoney(r.fees) + '</td>' +
-        '<td class="num"' + heatStyle(r.feesPct, rFees) + '>' + BB.fmtPct(r.feesPct) + '</td>' +
-        '<td class="num">' + BB.fmtADP(r.myADP) + '</td>' +
-        '<td class="num">' + BB.fmtADP(r.marketADP) + '</td>' +
-        '<td class="num ' + clvClass(r.clv) + '">' + clvText(r.clv) + '</td>' +
+        '<td data-col="player">' + combinedCell + '</td>' +
+        '<td data-col="position">' + (r.position ? '<span class="badge pos-' + escapeHtml(r.position) + '">' + escapeHtml(r.position) + '</span>' : '—') + '</td>' +
+        '<td class="num" data-col="count"><span title="' + r.count + ' of ' + denom + ' rosters">' + r.count + '</span></td>' +
+        '<td class="num" data-col="exposurePct"' + heatStyle(r.exposurePct, rExp) + '>' + BB.fmtPct(r.exposurePct) + '</td>' +
+        '<td class="num" data-col="fees">' + BB.fmtMoney(r.fees) + '</td>' +
+        '<td class="num" data-col="feesPct"' + heatStyle(r.feesPct, rFees) + '>' + BB.fmtPct(r.feesPct) + '</td>' +
+        '<td class="num" data-col="myADP">' + BB.fmtADP(r.myADP) + '</td>' +
+        '<td class="num" data-col="marketADP">' + BB.fmtADP(r.marketADP) + '</td>' +
+        '<td class="num ' + clvClass(r.clv) + '" data-col="clv">' + clvText(r.clv) + '</td>' +
+        '<td class="num ' + clvClass(r.rtv) + '" data-col="rtv">' + clvText(r.rtv) + '</td>' +
         '</tr>';
       var detailTr = isExpanded
         ? '<tr class="row-expand-detail"><td colspan="' + colSpan + '">' + renderComboPanel(r, allRosters) + '</td></tr>'
@@ -265,7 +287,10 @@
       return mainTr + detailTr;
     }).join('') + '</tbody>';
 
-    contentEl.innerHTML = '<table class="data">' + head + body + '</table>';
+    contentEl.innerHTML =
+      '<div class="table-toolbar">' + colPicker.renderButton() + '</div>' +
+      '<div class="tbl-exposures"><table class="data">' + head + body + '</table></div>';
+    colPicker.bind(contentEl);
 
     // Wire up expand toggles. Use the chevron button as the click target so
     // clicks on the player name link, the row background, etc. don't fight

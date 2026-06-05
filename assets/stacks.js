@@ -139,7 +139,7 @@
   };
 
   var TEAM_COLS = [
-    { key: 'team',                  label: 'Team',         sortable: true },
+    { key: 'team',                  label: 'Team',         sortable: true, required: true },
     { key: 'totalPicks',            label: 'Picks',        sortable: true, num: true, tooltip: TEAM_TT.picks },
     { key: 'rostersWithTeam',       label: 'Rosters',      sortable: true, num: true },
     { key: 'pctWithTeam',           label: '% With',       sortable: true, num: true, tooltip: TEAM_TT.pctWithTeam },
@@ -149,6 +149,12 @@
     { key: 'topCombo',              label: 'Top Combo',    sortable: true, tooltip: TEAM_TT.topCombo },
     { key: 'fees',                  label: 'Fees',         sortable: true, num: true, tooltip: TEAM_TT.fees },
   ];
+
+  var teamColPicker = BB.makeColumnPicker({
+    storageKey: 'bb_cols_stacks_team_v1',
+    scopeClass: 'tbl-stacks-team',
+    columns: TEAM_COLS,
+  });
 
   function renderTeam(rosters) {
     var rows = BB.computeTeamStacks(rosters);
@@ -184,7 +190,7 @@
       var classes = (c.num ? 'num ' : '') + (c.sortable ? 'sortable' : '') + (c.tooltip ? ' tooltip-trigger' : '');
       var ttAttr = c.tooltip ? ' data-tooltip="' + c.tooltip.replace(/"/g, '&quot;') + '"' : '';
       var info = c.tooltip ? ' <span class="info-mark">ⓘ</span>' : '';
-      return '<th class="' + classes + '" data-key="' + c.key + '"' + ttAttr + '>' +
+      return '<th class="' + classes + '" data-key="' + c.key + '" data-col="' + c.key + '"' + ttAttr + '>' +
         c.label + info + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
     }).join('') + '</tr></thead>';
 
@@ -197,20 +203,23 @@
         '<span class="player-cell">' + BB.teamLogoHTML(r.team, { size: 18 }) +
         '<strong>' + escapeHtml(r.team) + '</strong></span></a>';
       return '<tr' + BB.teamColorStyle(r.team) + '>' +
-        '<td>' + teamCell + '</td>' +
-        '<td class="num">' + r.totalPicks + '</td>' +
-        '<td class="num">' + r.rostersWithTeam + '</td>' +
-        '<td class="num"' + heatStyle(r.pctWithTeam, rPct) + '>' + BB.fmtPct(r.pctWithTeam) + '</td>' +
-        '<td class="num">' + r.stackedRosters + '</td>' +
-        '<td class="num"' + heatStyle(r.stackRate, rStack) + '>' + BB.fmtPct(r.stackRate) + '</td>' +
-        '<td class="num">' + (r.avgPlayersWhenStacked != null ? r.avgPlayersWhenStacked.toFixed(2) : '—') + '</td>' +
-        '<td>' + (r.topCombo ? '<code class="stack-combo">' + escapeHtml(r.topCombo) + '</code>' +
+        '<td data-col="team">' + teamCell + '</td>' +
+        '<td class="num" data-col="totalPicks">' + r.totalPicks + '</td>' +
+        '<td class="num" data-col="rostersWithTeam">' + r.rostersWithTeam + '</td>' +
+        '<td class="num" data-col="pctWithTeam"' + heatStyle(r.pctWithTeam, rPct) + '>' + BB.fmtPct(r.pctWithTeam) + '</td>' +
+        '<td class="num" data-col="stackedRosters">' + r.stackedRosters + '</td>' +
+        '<td class="num" data-col="stackRate"' + heatStyle(r.stackRate, rStack) + '>' + BB.fmtPct(r.stackRate) + '</td>' +
+        '<td class="num" data-col="avgPlayersWhenStacked">' + (r.avgPlayersWhenStacked != null ? r.avgPlayersWhenStacked.toFixed(2) : '—') + '</td>' +
+        '<td data-col="topCombo">' + (r.topCombo ? '<code class="stack-combo">' + escapeHtml(r.topCombo) + '</code>' +
                   (r.topComboCount > 1 ? ' <span style="color:var(--text-muted);font-size:11px;">×' + r.topComboCount + '</span>' : '') : '—') + '</td>' +
-        '<td class="num">' + BB.fmtMoney(r.fees) + '</td>' +
+        '<td class="num" data-col="fees">' + BB.fmtMoney(r.fees) + '</td>' +
         '</tr>';
     }).join('') + '</tbody>';
 
-    contentEl.innerHTML = '<table class="data">' + head + body + '</table>';
+    contentEl.innerHTML =
+      '<div class="table-toolbar">' + teamColPicker.renderButton() + '</div>' +
+      '<div class="tbl-stacks-team"><table class="data">' + head + body + '</table></div>';
+    teamColPicker.bind(contentEl);
 
     contentEl.querySelectorAll('th.sortable').forEach(function (th) {
       th.addEventListener('click', function () {
@@ -226,12 +235,18 @@
   // PLAYER VIEW
   // ============================================================
   var PLAYER_COLS = [
-    { key: 'stack',  label: 'Stack',     sortable: false },
+    { key: 'stack',  label: 'Stack',     sortable: false, required: true },
     { key: 'type',   label: 'Type',      sortable: true },
     { key: 'count',  label: 'Rosters',   sortable: true, num: true },
     { key: 'pct',    label: 'Stack %',   sortable: true, num: true },
     { key: 'fees',   label: 'Fees',      sortable: true, num: true },
   ];
+
+  var playerColPicker = BB.makeColumnPicker({
+    storageKey: 'bb_cols_stacks_player_v1',
+    scopeClass: 'tbl-stacks-player',
+    columns: PLAYER_COLS,
+  });
 
   function renderStackCell(stack) {
     return '<div class="stack-cell">' + stack.players.map(function (p) {
@@ -282,7 +297,7 @@
     var head = '<thead><tr>' + PLAYER_COLS.map(function (c) {
       var ind = c.key === ps.sortKey ? (ps.sortDir === 'asc' ? '↑' : '↓') : '';
       var classes = (c.num ? 'num ' : '') + (c.sortable ? 'sortable' : '');
-      return '<th class="' + classes + '" data-key="' + c.key + '">' +
+      return '<th class="' + classes + '" data-key="' + c.key + '" data-col="' + c.key + '">' +
         c.label + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
     }).join('') + '</tr></thead>';
 
@@ -292,11 +307,11 @@
       var leadPos = (st.type || '').split('+')[0] || '';
       var posAttr = leadPos ? ' data-pos="' + leadPos + '"' : '';
       return '<tr' + posAttr + '>' +
-        '<td>' + renderStackCell(st) + '</td>' +
-        '<td><code class="stack-combo">' + escapeHtml(st.type) + '</code></td>' +
-        '<td class="num">' + st.count + '</td>' +
-        '<td class="num"' + heatStyle(st.pct, rPct) + '>' + BB.fmtPct(st.pct) + '</td>' +
-        '<td class="num">' + BB.fmtMoney(st.fees) + '</td>' +
+        '<td data-col="stack">' + renderStackCell(st) + '</td>' +
+        '<td data-col="type"><code class="stack-combo">' + escapeHtml(st.type) + '</code></td>' +
+        '<td class="num" data-col="count">' + st.count + '</td>' +
+        '<td class="num" data-col="pct"' + heatStyle(st.pct, rPct) + '>' + BB.fmtPct(st.pct) + '</td>' +
+        '<td class="num" data-col="fees">' + BB.fmtMoney(st.fees) + '</td>' +
         '</tr>';
     }).join('') + '</tbody>';
 
@@ -307,7 +322,11 @@
       : '';
     var perfNote = '<p style="color:var(--text-muted);font-size:11px;margin:2px 2px 0;">Computed in ' + elapsed.toFixed(0) + 'ms across ' + rosters.length + ' rosters.</p>';
 
-    contentEl.innerHTML = '<table class="data player-stacks-table">' + head + body + '</table>' + capNote + perfNote;
+    contentEl.innerHTML =
+      '<div class="table-toolbar">' + playerColPicker.renderButton() + '</div>' +
+      '<div class="tbl-stacks-player"><table class="data player-stacks-table">' + head + body + '</table></div>' +
+      capNote + perfNote;
+    playerColPicker.bind(contentEl);
 
     contentEl.querySelectorAll('th.sortable').forEach(function (th) {
       th.addEventListener('click', function () {
@@ -444,15 +463,28 @@
   };
 
   var FREQ_COLS = [
-    { key: 'qb',           label: 'QB',       sortable: false },
+    { key: 'qb',           label: 'QB',       sortable: false, required: true },
     { key: 'totalRosters', label: 'Rosters',  sortable: true, num: true },
     { key: 'avgSize',      label: 'Avg Size', sortable: true, num: true, tooltip: FREQ_TT.avg },
-    { key: 'b0',           label: '0',        sortable: true, num: true, tooltip: FREQ_TT.bucket },
-    { key: 'b1',           label: '1',        sortable: true, num: true, tooltip: FREQ_TT.bucket },
-    { key: 'b2',           label: '2',        sortable: true, num: true, tooltip: FREQ_TT.bucket },
-    { key: 'b3',           label: '3+',       sortable: true, num: true, tooltip: FREQ_TT.bucket },
+    { key: 'b0',           label: 'Stack 0',  sortable: true, num: true, tooltip: FREQ_TT.bucket },
+    { key: 'b1',           label: 'Stack 1',  sortable: true, num: true, tooltip: FREQ_TT.bucket },
+    { key: 'b2',           label: 'Stack 2',  sortable: true, num: true, tooltip: FREQ_TT.bucket },
+    { key: 'b3',           label: 'Stack 3+', sortable: true, num: true, tooltip: FREQ_TT.bucket },
     { key: 'fees',         label: 'Fees',     sortable: true, num: true, tooltip: FREQ_TT.fees },
   ];
+
+  var freqColPicker = BB.makeColumnPicker({
+    storageKey: 'bb_cols_stacks_freq_v1',
+    scopeClass: 'tbl-stacks-freq',
+    columns: FREQ_COLS,
+  });
+
+  // The header label shown above the table column differs from the picker
+  // label — the picker says "Stack 0/1/2/3+" so it's clear which option,
+  // but the table column just shows "0/1/2/3+" for compactness.
+  var FREQ_HEADER_LABELS = {
+    b0: '0', b1: '1', b2: '2', b3: '3+',
+  };
 
   function bucketKeyToVal(row, key) {
     if (key === 'b0') return row.buckets[0];
@@ -462,11 +494,12 @@
     return row[key];
   }
 
-  function renderBucketCell(count, total, range) {
+  function renderBucketCell(count, total, range, colKey) {
     var pct  = total ? count / total : 0;
     var heat = heatStyle(pct, range);
-    if (!total) return '<td class="num bucket-cell"' + heat + '>—</td>';
-    return '<td class="num bucket-cell"' + heat + '>' + BB.fmtPct(pct) + '</td>';
+    var colAttr = colKey ? ' data-col="' + colKey + '"' : '';
+    if (!total) return '<td class="num bucket-cell"' + colAttr + heat + '>—</td>';
+    return '<td class="num bucket-cell"' + colAttr + heat + '>' + BB.fmtPct(pct) + '</td>';
   }
 
   function renderTeammatePanel(row) {
@@ -569,8 +602,9 @@
       var classes = (c.num ? 'num ' : '') + (c.sortable ? 'sortable' : '') + (c.tooltip ? ' tooltip-trigger' : '');
       var ttAttr = c.tooltip ? ' data-tooltip="' + c.tooltip.replace(/"/g, '&quot;') + '"' : '';
       var info = c.tooltip ? ' <span class="info-mark">ⓘ</span>' : '';
-      return '<th class="' + classes + '" data-key="' + c.key + '"' + ttAttr + '>' +
-        c.label + info + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
+      var displayLabel = FREQ_HEADER_LABELS[c.key] || c.label;
+      return '<th class="' + classes + '" data-key="' + c.key + '" data-col="' + c.key + '"' + ttAttr + '>' +
+        displayLabel + info + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
     }).join('') + '</tr></thead>';
 
     var colSpan = FREQ_COLS.length;
@@ -600,14 +634,14 @@
       var trClass = 'row-expandable' + (isExpanded ? ' is-expanded' : '');
       var mainTr = '<tr class="' + trClass + '" data-pos="QB" data-norm="' + escapeHtml(r.normName) + '"' +
         BB.teamColorStyle(r.team) + '>' +
-        '<td>' + qbCell + '</td>' +
-        '<td class="num">' + r.totalRosters + '</td>' +
-        '<td class="num"' + heatStyle(r.avgSize, rAvg) + '>' + r.avgSize.toFixed(2) + '</td>' +
-        renderBucketCell(r.buckets[0], r.totalRosters, rB0) +
-        renderBucketCell(r.buckets[1], r.totalRosters, rB1) +
-        renderBucketCell(r.buckets[2], r.totalRosters, rB2) +
-        renderBucketCell(r.buckets[3], r.totalRosters, rB3) +
-        '<td class="num">' + BB.fmtMoney(r.fees) + '</td>' +
+        '<td data-col="qb">' + qbCell + '</td>' +
+        '<td class="num" data-col="totalRosters">' + r.totalRosters + '</td>' +
+        '<td class="num" data-col="avgSize"' + heatStyle(r.avgSize, rAvg) + '>' + r.avgSize.toFixed(2) + '</td>' +
+        renderBucketCell(r.buckets[0], r.totalRosters, rB0, 'b0') +
+        renderBucketCell(r.buckets[1], r.totalRosters, rB1, 'b1') +
+        renderBucketCell(r.buckets[2], r.totalRosters, rB2, 'b2') +
+        renderBucketCell(r.buckets[3], r.totalRosters, rB3, 'b3') +
+        '<td class="num" data-col="fees">' + BB.fmtMoney(r.fees) + '</td>' +
         '</tr>';
       var detailTr = isExpanded
         ? '<tr class="row-expand-detail"><td colspan="' + colSpan + '">' + renderTeammatePanel(r) + '</td></tr>'
@@ -615,7 +649,10 @@
       return mainTr + detailTr;
     }).join('') + '</tbody>';
 
-    contentEl.innerHTML = '<table class="data">' + head + body + '</table>';
+    contentEl.innerHTML =
+      '<div class="table-toolbar">' + freqColPicker.renderButton() + '</div>' +
+      '<div class="tbl-stacks-freq"><table class="data">' + head + body + '</table></div>';
+    freqColPicker.bind(contentEl);
 
     // Wire up expand toggles.
     contentEl.querySelectorAll('.row-expand-btn').forEach(function (btn) {

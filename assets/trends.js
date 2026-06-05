@@ -376,12 +376,17 @@
       });
     }
 
+    // 216 = last pick of an 18-round, 12-team draft — used as the baseline
+    // for any player who wasn't ranked at the start of the range.
+    var BASELINE_ADP = 216;
+
     var rows = (endDay.players || []).map(function (endP) {
       var norm = window.BB_DATA.normalizeName(endP.name);
       var startP = startByNorm[norm];
-      var startADP = canonADP(startP);
+      var rawStart = canonADP(startP);
+      var startADP = rawStart != null ? rawStart : BASELINE_ADP;
       var endADP = canonADP(endP);
-      var adpChange = (startADP != null && endADP != null) ? (startADP - endADP) : null;
+      var adpChange = (endADP != null) ? (startADP - endADP) : null;
       var startDC = dcAt(startADP);
       var endDC = dcAt(endADP);
       var dcChange = (startDC != null && endDC != null) ? (endDC - startDC) : null;
@@ -393,7 +398,7 @@
         endADP: endADP,
         adpChange: adpChange,
         dcChange: dcChange,
-        isNew: startADP == null && endADP != null,
+        isNew: rawStart == null && endADP != null,
       };
     });
     return rows;
@@ -412,12 +417,24 @@
     var s = v.toFixed(digits == null ? 1 : digits);
     return (v > 0 ? '+' : (v < 0 ? '' : '')) + s;
   }
-  function changeCell(v, digits) {
-    if (v == null || isNaN(v)) return '<td class="num">—</td>';
+  function changeCell(v, colKey, digits) {
+    var colAttr = ' data-col="' + colKey + '"';
+    if (v == null || isNaN(v)) return '<td class="num"' + colAttr + '>—</td>';
     var arrow = v > 0 ? '▲' : (v < 0 ? '▼' : '');
     var cls   = v > 0 ? 'clv-pos' : (v < 0 ? 'clv-neg' : '');
-    return '<td class="num ' + cls + '">' + (arrow ? arrow + ' ' : '') + Math.abs(v).toFixed(digits == null ? 1 : digits) + '</td>';
+    return '<td class="num ' + cls + '"' + colAttr + '>' + (arrow ? arrow + ' ' : '') + Math.abs(v).toFixed(digits == null ? 1 : digits) + '</td>';
   }
+
+  var trendsColPicker = null;
+  var TREND_COLS = [
+    { key: 'team',      label: 'Team',     sortable: true, required: true },
+    { key: 'name',      label: 'Player',   sortable: true, required: true },
+    { key: 'pos',       label: 'Pos',      sortable: true },
+    { key: 'startADP',  label: 'Start ADP', sortable: true, num: true },
+    { key: 'endADP',    label: 'End ADP',   sortable: true, num: true },
+    { key: 'adpChange', label: 'ADP Change', sortable: true, num: true },
+    { key: 'dcChange',  label: 'Draft Capital Change', sortable: true, num: true },
+  ];
 
   function renderTable() {
     var ts = state.table;
@@ -466,19 +483,18 @@
       return;
     }
 
-    var COLS = [
-      { key: 'team',      label: 'Team',     sortable: true },
-      { key: 'name',      label: 'Player',   sortable: true },
-      { key: 'pos',       label: 'Pos',      sortable: true },
-      { key: 'startADP',  label: 'Start ADP', sortable: true, num: true },
-      { key: 'endADP',    label: 'End ADP',   sortable: true, num: true },
-      { key: 'adpChange', label: 'ADP Change', sortable: true, num: true },
-      { key: 'dcChange',  label: 'Draft Capital Change', sortable: true, num: true },
-    ];
-    var head = '<thead><tr>' + COLS.map(function (c) {
+    if (!trendsColPicker) {
+      trendsColPicker = BB.makeColumnPicker({
+        storageKey: 'bb_cols_trends_v1',
+        scopeClass: 'tbl-trends',
+        columns: TREND_COLS,
+      });
+    }
+
+    var head = '<thead><tr>' + TREND_COLS.map(function (c) {
       var ind = c.key === ts.sortKey ? (ts.sortDir === 'asc' ? '↑' : '↓') : '';
       var classes = (c.num ? 'num ' : '') + (c.sortable ? 'sortable' : '');
-      return '<th class="' + classes + '" data-key="' + c.key + '">' +
+      return '<th class="' + classes + '" data-key="' + c.key + '" data-col="' + c.key + '">' +
         c.label + (ind ? ' <span class="sort-ind">' + ind + '</span>' : '') + '</th>';
     }).join('') + '</tr></thead>';
 
@@ -495,20 +511,24 @@
       var posBadge = r.pos
         ? '<span class="badge pos-' + escapeHtml(r.pos) + '">' + escapeHtml(r.pos) + '</span>'
         : '—';
-      var startCell = r.startADP != null ? r.startADP.toFixed(1) : (r.isNew ? '<span style="color:var(--text-muted);" title="No snapshot for the start of this range">new</span>' : '—');
+      var startCell = r.startADP != null ? r.startADP.toFixed(1) : '—';
+      if (r.isNew) startCell = '<span title="Unranked at start of range — defaulted to 216">' + startCell + ' <span style="color:var(--text-muted);font-size:10px;">*</span></span>';
       var endCell   = r.endADP   != null ? r.endADP.toFixed(1)   : '—';
       return '<tr data-pos="' + escapeHtml(r.pos) + '"' + BB.teamColorStyle(r.team) + '>' +
-        '<td>' + teamCell + '</td>' +
-        '<td>' + playerCell + '</td>' +
-        '<td>' + posBadge + '</td>' +
-        '<td class="num">' + startCell + '</td>' +
-        '<td class="num">' + endCell + '</td>' +
-        changeCell(r.adpChange) +
-        changeCell(r.dcChange) +
+        '<td data-col="team">' + teamCell + '</td>' +
+        '<td data-col="name">' + playerCell + '</td>' +
+        '<td data-col="pos">' + posBadge + '</td>' +
+        '<td class="num" data-col="startADP">' + startCell + '</td>' +
+        '<td class="num" data-col="endADP">' + endCell + '</td>' +
+        changeCell(r.adpChange, 'adpChange') +
+        changeCell(r.dcChange,  'dcChange') +
       '</tr>';
     }).join('') + '</tbody>';
 
-    tableContainer.innerHTML = '<table class="data">' + head + body + '</table>';
+    tableContainer.innerHTML =
+      '<div class="table-toolbar">' + trendsColPicker.renderButton() + '</div>' +
+      '<div class="tbl-trends"><table class="data">' + head + body + '</table></div>';
+    trendsColPicker.bind(tableContainer);
 
     tableContainer.querySelectorAll('th.sortable').forEach(function (th) {
       th.addEventListener('click', function () {
@@ -607,6 +627,13 @@
       var savedView = localStorage.getItem('bb_trends_view');
       if (savedView === 'table' || savedView === 'chart') state.view = savedView;
     } catch (e) {}
+    // ?view=chart|table in the URL overrides saved preference (used by the
+    // player page's "View ADP Trend" button to force the Chart view).
+    var qsView = new URLSearchParams(location.search).get('view');
+    if (qsView === 'chart' || qsView === 'table') {
+      state.view = qsView;
+      try { localStorage.setItem('bb_trends_view', qsView); } catch (e) {}
+    }
 
     populatePlayerList();
     await loadIndex();
