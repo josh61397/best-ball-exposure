@@ -234,7 +234,7 @@
       contentEl.parentNode.insertBefore(sfNote, contentEl);
     }
     sfNote.textContent = superflexExcluded
-      ? superflexExcluded + ' Superflex roster' + (superflexExcluded === 1 ? '' : 's') + ' excluded from My ADP / CLV (no Superflex market ADP available). Counts and fees still include them.'
+      ? superflexExcluded + ' Superflex roster' + (superflexExcluded === 1 ? '' : 's') + ' excluded from My ADP / CLV / RTV (no Superflex market ADP available). Counts and fees still include them.'
       : '';
 
     var head = '<thead><tr>' + COLS.map(function (c) {

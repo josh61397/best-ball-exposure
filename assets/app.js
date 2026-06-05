@@ -726,6 +726,10 @@
 
     var byPlayer = {};
     rosters.forEach(function (r) {
+      // Superflex picks are skipped — we only have 1-QB market ADP, so
+      // mixing SF picks would distort CLV / RTV the same way it distorts
+      // MY ADP. Matches the exclusion in computeExposures.
+      if (BB.rosterIsSuperflex(r)) return;
       var date = r.draftedAt ? String(r.draftedAt).slice(0, 10) : null;
       var hist = date && historyByDate[date];
       r.picks.forEach(function (p) {
@@ -781,9 +785,13 @@
     });
   };
 
-  // Roll up all rosters into a self-grading summary.
+  // Roll up all rosters into a self-grading summary. Superflex rosters
+  // are excluded from CLV / RTV (no SF market ADP available), matching
+  // the exclusion in computeExposures / aggregatePlayerValue.
   BB.gradeRosters = async function (rosters) {
-    var drafts = await Promise.all(rosters.map(function (r) { return BB.rosterClvRtv(r); }));
+    var eligible = rosters.filter(function (r) { return !BB.rosterIsSuperflex(r); });
+    var superflexExcluded = rosters.length - eligible.length;
+    var drafts = await Promise.all(eligible.map(function (r) { return BB.rosterClvRtv(r); }));
     var clvGained = 0, clvLost = 0, clvEven = 0;
     var rtvGained = 0, rtvLost = 0, rtvEven = 0;
     var clvTotalSum = 0, rtvTotalSum = 0;
@@ -808,6 +816,8 @@
     });
     return {
       totalDrafts: rosters.length,
+      eligibleDrafts: eligible.length,
+      superflexExcluded: superflexExcluded,
       clvTotal: clvTotalSum,
       rtvTotal: rtvTotalSum,
       clvAvgPerDraft: clvDraftsCounted ? clvTotalSum / clvDraftsCounted : null,
