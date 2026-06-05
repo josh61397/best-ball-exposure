@@ -1175,7 +1175,7 @@ table.player-stacks-table tbody tr td {
 .construction-key {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
   min-width: 0;
 }
 .construction-code {
@@ -1189,6 +1189,11 @@ table.player-stacks-table tbody tr td {
   color: var(--text-muted);
   font-size: 11px;
   letter-spacing: 0.04em;
+}
+table.construction-table tbody tr td {
+  vertical-align: middle;
+  padding-top: 14px;
+  padding-bottom: 14px;
 }
 
 /* Roster Type archetypes — compact horizontal bar list. */
@@ -1493,7 +1498,8 @@ table.player-stacks-table tbody tr td {
   min-width: 0;
 }
 
-.row-expand-detail > td {
+.row-expand-detail > td,
+table.data tbody tr.row-expand-detail:hover > td {
   background: color-mix(in srgb, var(--accent) 5%, var(--bg-elev));
   padding: 0;
 }

@@ -10,7 +10,7 @@
   var rowCountEl = document.getElementById('row-count');
 
   var PAGE_SIZE = 25;
-  var CONSTRUCTION_PAGE_SIZE = 5;
+  var CONSTRUCTION_PAGE_SIZE = 10;
   var state = {
     sortKey: 'count',
     sortDir: 'desc',
