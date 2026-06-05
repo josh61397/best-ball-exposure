@@ -41,7 +41,9 @@
 
   async function renderTable() {
     var rosters = BB.loadRosters();
-    pageEl.innerHTML = renderHeader() + renderToolbarSkeleton() +
+    pageEl.innerHTML = renderHeader() +
+      '<div id="stat-bar-slot"></div>' +
+      renderToolbarSkeleton() +
       '<div id="table-wrap"><div class="empty-state" style="padding:24px;">Loading…</div></div>';
 
     if (!rosters.length) {
@@ -141,6 +143,22 @@
       rows.length === state.enriched.length
         ? rows.length + ' draft' + (rows.length === 1 ? '' : 's')
         : rows.length + ' of ' + state.enriched.length + ' drafts';
+
+    // Top stat bar — reflects the currently filtered rows.
+    var slot = document.getElementById('stat-bar-slot');
+    if (slot) {
+      var totalFees = rows.reduce(function (a, row) { return a + (row.roster.entryFee || 0); }, 0);
+      var clvVals = rows.map(function (row) { return row.value.clv && row.value.clv.totalADP; })
+                        .filter(function (v) { return v != null && !isNaN(v); });
+      var avgClv = clvVals.length ? clvVals.reduce(function (a, v) { return a + v; }, 0) / clvVals.length : null;
+      var sf = rows.filter(function (row) { return BB.rosterIsSuperflex(row.roster); }).length;
+      slot.innerHTML = BB.statBar([
+        { label: 'Drafts shown',  value: rows.length.toLocaleString(), key: true },
+        { label: 'Total fees',    value: BB.fmtMoney(totalFees) },
+        { label: 'Avg CLV / draft', value: avgClv == null ? '—' : (avgClv > 0 ? '+' : '') + avgClv.toFixed(1) },
+        { label: 'Superflex',     value: sf.toLocaleString() },
+      ]);
+    }
 
     // Sort
     var key = state.sortKey;

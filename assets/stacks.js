@@ -689,6 +689,7 @@
   // ============================================================
   function render() {
     var rosters = getFilteredRosters();
+    renderStatBar(rosters);
     if (!rosters.length) {
       contentEl.innerHTML = '<div class="empty-state"><h2>No rosters match these filters</h2><p>Try clearing filters or <a href="index.html">upload a CSV</a>.</p></div>';
       rowCountEl.textContent = '0';
@@ -697,6 +698,42 @@
     if (state.view === 'player')    return renderPlayer(rosters);
     if (state.view === 'frequency') return renderFrequency(rosters);
     return renderTeam(rosters);
+  }
+
+  // Shared stat strip for every Stacks view — counts rosters being stacked,
+  // their average stack size, and the share of fees spent on stacked rosters.
+  function renderStatBar(rosters) {
+    var slot = document.getElementById('stat-bar-slot');
+    if (!slot) return;
+    if (!rosters.length) { slot.innerHTML = ''; return; }
+    var stackedCount = 0;
+    var stackedSizeSum = 0;
+    var stackedFees = 0;
+    var totalFees = 0;
+    rosters.forEach(function (r) {
+      totalFees += r.entryFee || 0;
+      var byTeam = {};
+      (r.picks || []).forEach(function (p) {
+        if (!p.team) return;
+        (byTeam[p.team] = byTeam[p.team] || 0); byTeam[p.team]++;
+      });
+      var maxSameTeam = 0;
+      Object.keys(byTeam).forEach(function (t) { if (byTeam[t] > maxSameTeam) maxSameTeam = byTeam[t]; });
+      if (maxSameTeam >= 2) {
+        stackedCount++;
+        stackedSizeSum += maxSameTeam;
+        stackedFees += r.entryFee || 0;
+      }
+    });
+    var stackRate = rosters.length ? stackedCount / rosters.length : 0;
+    var avgSize = stackedCount ? stackedSizeSum / stackedCount : 0;
+    var feeShare = totalFees ? stackedFees / totalFees : 0;
+    slot.innerHTML = BB.statBar([
+      { label: 'Rosters in view', value: rosters.length.toLocaleString(), key: true },
+      { label: 'Stack rate',      value: BB.fmtPct(stackRate) },
+      { label: 'Avg stack size',  value: stackedCount ? avgSize.toFixed(2) : '—' },
+      { label: '% fees on stacks',value: BB.fmtPct(feeShare) },
+    ]);
   }
 
   // ============================================================

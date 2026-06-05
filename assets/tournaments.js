@@ -14,8 +14,37 @@
     });
   }
 
+  function renderStatBar(rosters) {
+    var slot = document.getElementById('stat-bar-slot');
+    if (!slot) return;
+    if (!rosters.length) { slot.innerHTML = ''; return; }
+    var totalFees = 0;
+    var tourneySet = {};
+    var platformSet = {};
+    var topFee = 0;
+    var topTourney = '—';
+    var feeByTourney = {};
+    rosters.forEach(function (r) {
+      totalFees += r.entryFee || 0;
+      if (r.tournament) tourneySet[r.tournament] = true;
+      if (r.platform)   platformSet[r.platform] = true;
+      var k = (r.tournament || '(unknown)');
+      feeByTourney[k] = (feeByTourney[k] || 0) + (r.entryFee || 0);
+    });
+    Object.keys(feeByTourney).forEach(function (k) {
+      if (feeByTourney[k] > topFee) { topFee = feeByTourney[k]; topTourney = k; }
+    });
+    slot.innerHTML = BB.statBar([
+      { label: 'Total entries',     value: rosters.length.toLocaleString(), key: true },
+      { label: 'Total fees',        value: BB.fmtMoney(totalFees) },
+      { label: 'Tournaments',       value: Object.keys(tourneySet).length.toLocaleString() },
+      { label: 'Top by fees',       value: topTourney },
+    ]);
+  }
+
   function renderYourEntries() {
     var rosters = BB.loadRosters();
+    renderStatBar(rosters);
     if (!rosters.length) {
       yourEl.innerHTML = '<div class="empty-state"><p>No rosters loaded. <a href="index.html">Upload</a> CSVs to see your tournament breakdown.</p></div>';
       return;

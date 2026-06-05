@@ -32,14 +32,14 @@
   }
 
   function renderHero(grade) {
-    var html = '<div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">';
-    html += statCard('Total drafts', grade.totalDrafts.toLocaleString());
-    html += statCard('Avg CLV / draft', fmtSigned(grade.clvAvgPerDraft), 'across ' + grade.totalDrafts + ' drafts', sigClass(grade.clvAvgPerDraft));
-    html += statCard('Total CLV', fmtSigned(grade.clvTotal), 'sum across every pick', sigClass(grade.clvTotal));
-    html += statCard('Avg RTV / draft', fmtSigned(grade.rtvAvgPerDraft), 'vs today\'s ADP', sigClass(grade.rtvAvgPerDraft));
-    html += statCard('Total RTV', fmtSigned(grade.rtvTotal), 'sum across every pick', sigClass(grade.rtvTotal));
-    html += '</div>';
-    return html;
+    // Use the shared stat bar component — same strip every data page uses.
+    return BB.statBar([
+      { label: 'Total drafts',     value: grade.totalDrafts.toLocaleString(), key: true },
+      { label: 'Avg CLV / draft',  value: fmtSigned(grade.clvAvgPerDraft) },
+      { label: 'Total CLV',        value: fmtSigned(grade.clvTotal) },
+      { label: 'Avg RTV / draft',  value: fmtSigned(grade.rtvAvgPerDraft) },
+      { label: 'Total RTV',        value: fmtSigned(grade.rtvTotal) },
+    ]);
   }
 
   function winLossCard(label, sub, gained, lost, even) {
