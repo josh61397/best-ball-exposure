@@ -80,7 +80,7 @@
       '<aside class="sidebar" id="site-nav">' +
         '<div class="sb-logo">' +
           '<a class="sb-logo-link" href="index.html" aria-label="Draftolio Pro home">' +
-            '<img class="sb-logo-mark" src="assets/logo%20transparent.png" alt="Draftolio Pro" />' +
+            '<img class="sb-logo-mark" src="assets/small%20logo.png" alt="Draftolio Pro" />' +
           '</a>' +
         '</div>' +
         '<nav class="sb-nav">' + navHtml + '</nav>' +
