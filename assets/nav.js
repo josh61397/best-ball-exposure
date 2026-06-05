@@ -98,7 +98,7 @@
       '<aside class="sidebar" id="site-nav">' +
         '<div class="sidebar-top">' +
           '<a class="sidebar-brand" href="index.html" title="Draftolio Pro">' +
-            '<img class="brand-mark brand-mark-img" src="assets/logo.png" alt="Draftolio Pro" />' +
+            '<img class="brand-mark brand-mark-img" src="assets/logo%20transparent.png" alt="Draftolio Pro" />' +
           '</a>' +
           '<button class="sidebar-collapse-btn" id="sidebar-collapse" type="button" ' +
             'aria-label="' + (collapsed ? 'Expand sidebar' : 'Collapse sidebar') + '" ' +
