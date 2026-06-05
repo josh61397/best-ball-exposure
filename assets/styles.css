@@ -1097,6 +1097,13 @@ code.stack-combo {
 }
 .checkbox-pill input[type=checkbox]:checked + span { color: var(--text); }
 
+/* Inline group of checkbox pills, e.g. the Trends "Compare" platform toggles. */
+.platform-toggle-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .stack-cell {
   display: flex;
   flex-direction: column;

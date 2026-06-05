@@ -10,6 +10,12 @@
     { key: 'drafters', label: 'Drafters',   color: 'var(--pos-qb)' },
   ];
 
+  // Series the user has toggled on for the current render. Drives line
+  // paths, dots, legend entries, and y-axis range.
+  function visibleSeries() {
+    return SERIES.filter(function (s) { return state.show[s.key]; });
+  }
+
   var state = {
     dates: [],             // list of YYYY-MM-DD strings
     selectedPlayer: '',
@@ -17,6 +23,10 @@
     perDayCache: {},       // date -> parsed JSON (player rows)
     series: null,          // { date -> { ud, dk, drafters, bb10, rtsports } } for selected player
     view: 'chart',         // 'chart' | 'table'
+    // Which platform lines to render on the chart. Underdog is always on
+    // (the primary best-ball ADP source); the others are opt-in via the
+    // Compare checkboxes.
+    show: { ud: true, dk: false, drafters: false },
     table: {
       range: '30',
       positions: [],       // [] = all
@@ -151,9 +161,10 @@
       return;
     }
 
-    // Compute Y range across all platforms (lower = better, invert)
+    // Compute Y range across visible platforms (lower = better, invert)
+    var visible = visibleSeries();
     var allValues = [];
-    SERIES.forEach(function (s) {
+    visible.forEach(function (s) {
       dataDates.forEach(function (d) {
         var v = series[d][s.key];
         if (v != null) allValues.push(v);
@@ -213,13 +224,13 @@
       return { x: x(i, dataDates.length), label: label };
     }).filter(Boolean);
 
-    var paths = SERIES.map(function (s) {
+    var paths = visible.map(function (s) {
       var d = buildPath(s.key);
       if (!d) return '';
       return '<path d="' + d + '" stroke="' + s.color + '" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>';
     }).join('');
 
-    var dots = SERIES.map(function (s) {
+    var dots = visible.map(function (s) {
       return dataDates.map(function (date, i) {
         var v = series[date][s.key];
         if (v == null) return '';
@@ -270,7 +281,7 @@
         var date = dataDates[i];
         var row = series[date];
         var lines = ['<strong>' + escapeHtml(date) + '</strong>'];
-        SERIES.forEach(function (s) {
+        visible.forEach(function (s) {
           var v = row[s.key];
           if (v != null) lines.push('<span style="display:inline-block;width:8px;height:8px;background:' + s.color + ';border-radius:50%;margin-right:6px;"></span>' + s.label + ': ' + BB.fmtADP(v));
         });
@@ -287,7 +298,7 @@
     var lastDate = dataDates[dataDates.length - 1];
     var firstDate = dataDates[0];
     var legendHtml = '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;">';
-    SERIES.forEach(function (s) {
+    visible.forEach(function (s) {
       var first = series[firstDate][s.key];
       var last = series[lastDate][s.key];
       if (last == null) return;
@@ -629,6 +640,32 @@
     }
     renderChart();
   });
+
+  // "Compare" platform checkboxes — toggle DK / Drafters on top of UD.
+  // Persisted so the user's last selection survives a page reload.
+  var platformToggleEl = document.getElementById('platform-toggles');
+  if (platformToggleEl) {
+    try {
+      var saved = JSON.parse(localStorage.getItem('bb_trends_compare') || '{}');
+      ['dk', 'drafters'].forEach(function (k) {
+        if (typeof saved[k] === 'boolean') state.show[k] = saved[k];
+      });
+    } catch (e) {}
+    platformToggleEl.querySelectorAll('input[type=checkbox][data-platform]').forEach(function (input) {
+      var key = input.getAttribute('data-platform');
+      input.checked = !!state.show[key];
+      input.addEventListener('change', function () {
+        state.show[key] = input.checked;
+        try {
+          localStorage.setItem('bb_trends_compare', JSON.stringify({
+            dk: !!state.show.dk,
+            drafters: !!state.show.drafters,
+          }));
+        } catch (e) {}
+        renderChart();
+      });
+    });
+  }
 
   (async function init() {
     // Restore persisted view
