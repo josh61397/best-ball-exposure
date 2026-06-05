@@ -178,7 +178,12 @@ aside.sidebar {
 :root          { --sb-active-bg: #FAFAFA; }
 [data-theme="dark"] { --sb-active-bg: #1C1C1C; }
 
-/* ----- Logo zone ----- */
+/* ----- Logo zone -----
+   Uses the actual logo image rather than a typographic mark. The image is
+   constrained to a 56×40 box inside the 72px-wide × 56px-tall logo zone,
+   leaving an 8px breathing gutter on the sides and ~8px top/bottom.
+   object-fit: contain keeps the image's native aspect ratio so the
+   wordmark never gets squashed. */
 .sb-logo {
   height: 56px;
   border-bottom: 1px solid var(--border);
@@ -186,28 +191,25 @@ aside.sidebar {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  padding: 0 8px;
 }
 .sb-logo-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  width: 100%;
+  height: 100%;
 }
 .sb-logo-link:hover { text-decoration: none; }
 .sb-logo-mark {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: var(--accent-on);
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 14px;
-  line-height: 1;
-  letter-spacing: -0.01em;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 56px;
+  max-height: 40px;
+  object-fit: contain;
+  background: transparent;
 }
 
 /* ----- Nav items (shared with footer utilities) ----- */
@@ -259,9 +261,20 @@ aside.sidebar {
   font-family: var(--font-body);
   font-weight: 500;
   font-size: 9px;
-  line-height: 1;
-  letter-spacing: 0.05em;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
+  /* Long single-word labels (CONSTRUCTION, TOURNAMENTS) would overflow
+     the 72px column at 9px. Allow them to wrap to two lines, centered,
+     within the row. Two lines of 9px text @ 1.15 = ~21px, plus the
+     18px icon + 4px gap = ~43px, still inside the 56px row. */
+  text-align: center;
+  padding: 0 4px;
+  width: 100%;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  hyphens: none;
 }
 
 /* ----- Bottom zone ----- */
