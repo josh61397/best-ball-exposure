@@ -128,17 +128,27 @@
       '</div>';
   }
 
-  function renderCombos(report) {
-    var combos = report.combos.slice(0, 50);
-    if (!combos.length) {
-      return '<h2>Combo ownership</h2><div class="empty-state"><p>No combo data — player is not on any of your rosters.</p></div>';
-    }
+  var COMBO_PAGE_SIZE = 10;
+  var COMBO_MAX = 100;
+  var combosState = { page: 0, combos: [], playerName: '' };
+
+  // Returns just the table + pager for the current page; wrapped by an
+  // outer container that the click handler swaps innerHTML on for paging.
+  function renderCombosTable() {
+    var combos = combosState.combos;
+    var totalPages = Math.max(1, Math.ceil(combos.length / COMBO_PAGE_SIZE));
+    if (combosState.page >= totalPages) combosState.page = totalPages - 1;
+    if (combosState.page < 0) combosState.page = 0;
+    var start = combosState.page * COMBO_PAGE_SIZE;
+    var end = Math.min(start + COMBO_PAGE_SIZE, combos.length);
+    var pageRows = combos.slice(start, end);
+
     var head = '<thead><tr>' +
       '<th>Teammate</th><th>Pos</th><th>Tm</th>' +
       '<th class="num">Co-Drafted</th><th class="num">Combo %</th>' +
       '<th class="num">Their %</th><th class="num">Lift</th>' +
       '</tr></thead>';
-    var body = combos.map(function (c) {
+    var body = pageRows.map(function (c) {
       var liftCls = c.lift == null ? '' : (c.lift >= 1.15 ? 'clv-pos' : (c.lift <= 0.85 ? 'clv-neg' : ''));
       return '<tr>' +
         '<td>' + playerCell(c.player, c.team, c.position) + '</td>' +
@@ -151,6 +161,52 @@
         '</tr>';
     }).join('');
 
+    var prevDisabled = combosState.page === 0;
+    var nextDisabled = combosState.page >= totalPages - 1;
+    var pagerHtml = combos.length > COMBO_PAGE_SIZE
+      ? '<div class="rt-pager">' +
+          '<button type="button" class="rt-page-btn" id="combos-prev"' + (prevDisabled ? ' disabled' : '') + '>‹ Prev</button>' +
+          '<span class="rt-page-info">Showing ' + (start + 1) + '–' + end + ' of ' + combos.length + '</span>' +
+          '<button type="button" class="rt-page-btn" id="combos-next"' + (nextDisabled ? ' disabled' : '') + '>Next ›</button>' +
+        '</div>'
+      : '';
+
+    return '<table class="data">' + head + '<tbody>' + body + '</tbody></table>' + pagerHtml;
+  }
+
+  function bindCombosPager() {
+    var wrap = document.getElementById('combos-section');
+    if (!wrap) return;
+    var prev = document.getElementById('combos-prev');
+    var next = document.getElementById('combos-next');
+    if (prev) {
+      prev.addEventListener('click', function () {
+        if (combosState.page === 0) return;
+        combosState.page--;
+        wrap.innerHTML = renderCombosTable();
+        bindCombosPager();
+      });
+    }
+    if (next) {
+      next.addEventListener('click', function () {
+        var totalPages = Math.max(1, Math.ceil(combosState.combos.length / COMBO_PAGE_SIZE));
+        if (combosState.page >= totalPages - 1) return;
+        combosState.page++;
+        wrap.innerHTML = renderCombosTable();
+        bindCombosPager();
+      });
+    }
+  }
+
+  function renderCombos(report) {
+    var combos = (report.combos || []).slice(0, COMBO_MAX);
+    if (!combos.length) {
+      return '<h2>Combo ownership</h2><div class="empty-state"><p>No combo data — player is not on any of your rosters.</p></div>';
+    }
+    combosState.combos = combos;
+    combosState.playerName = report.player;
+    combosState.page = 0;
+
     var note = '<p style="color:var(--text-dim);font-size:12px;margin:4px 0 12px;">' +
       '<strong>Combo %</strong> — of the rosters that have ' + escapeHtml(report.player) + ', what fraction also have the teammate. ' +
       '<strong>Lift</strong> — combo % ÷ teammate\'s overall exposure %. >1 means correlated; <1 anti-correlated.' +
@@ -158,7 +214,7 @@
 
     return '<h2>Combo ownership <span style="color:var(--text-muted);font-size:13px;font-weight:400;">(top ' + combos.length + ' teammates)</span></h2>' +
       note +
-      '<table class="data">' + head + '<tbody>' + body + '</tbody></table>';
+      '<div id="combos-section">' + renderCombosTable() + '</div>';
   }
 
   function renderRoundDistribution(report) {
@@ -214,6 +270,88 @@
     return min === max ? null : { min: min, max: max };
   }
 
+  var ROSTERS_PAGE_SIZE = 10;
+  var rostersState = { page: 0, enriched: [], clvRange: null, rtvRange: null, currentADP: null, playerName: '' };
+
+  function renderRostersTable() {
+    var enriched = rostersState.enriched;
+    var totalPages = Math.max(1, Math.ceil(enriched.length / ROSTERS_PAGE_SIZE));
+    if (rostersState.page >= totalPages) rostersState.page = totalPages - 1;
+    if (rostersState.page < 0) rostersState.page = 0;
+    var start = rostersState.page * ROSTERS_PAGE_SIZE;
+    var end = Math.min(start + ROSTERS_PAGE_SIZE, enriched.length);
+    var pageRows = enriched.slice(start, end);
+    var clvRange = rostersState.clvRange;
+    var rtvRange = rostersState.rtvRange;
+    var currentADP = rostersState.currentADP;
+
+    var TT = {
+      draftAdp:  'Market ADP (Underdog › DK › Drafters) on the day you submitted this draft.\nFalls back to today\'s ADP when no historical snapshot exists for that date.',
+      clv:       'CLV — your pick number minus the market ADP at draft date.\nPositive = you got the player later than the market was pricing them = value.',
+      todayAdp:  'Today\'s market ADP.',
+      rtv:       'RTV — your pick number minus today\'s market ADP.\nPositive = the market now prices this player earlier than you paid = your pick aged well.',
+    };
+
+    var head = '<thead><tr>' +
+      '<th>Tournament</th>' +
+      '<th>Platform</th>' +
+      '<th class="num">Pick</th>' +
+      '<th class="num tooltip-trigger" data-tooltip="' + escapeHtml(TT.draftAdp)  + '">Draft ADP <span class="info-mark">ⓘ</span></th>' +
+      '<th class="num tooltip-trigger" data-tooltip="' + escapeHtml(TT.clv)       + '">CLV <span class="info-mark">ⓘ</span></th>' +
+      '<th class="num tooltip-trigger" data-tooltip="' + escapeHtml(TT.todayAdp)  + '">Today\'s ADP <span class="info-mark">ⓘ</span></th>' +
+      '<th class="num tooltip-trigger" data-tooltip="' + escapeHtml(TT.rtv)       + '">RTV <span class="info-mark">ⓘ</span></th>' +
+      '<th class="num">Fee</th>' +
+      '<th></th>' +
+    '</tr></thead>';
+
+    var body = pageRows.map(function (e) {
+      var draftAdpCell = BB.fmtADP(e.draftADP) + (e.noHistory ? ' <span style="color:var(--text-muted);font-size:10px;" title="No history for this date — using today\'s ADP">~</span>' : '');
+      return '<tr>' +
+        '<td>' + escapeHtml(e.tournament || '(unknown)') + '</td>' +
+        '<td>' + (BB.platformLogoHTML(e.platform, { size: 16 }) || '<span class="badge">' + escapeHtml(e.platform) + '</span>') + '</td>' +
+        '<td class="num">' + (e.pick != null ? e.pick : '—') + '</td>' +
+        '<td class="num">' + draftAdpCell + '</td>' +
+        '<td class="num ' + deltaClass(e.clv) + '"' + BB.heatStyle(e.clv, clvRange) + '>' + fmtDelta(e.clv) + '</td>' +
+        '<td class="num">' + BB.fmtADP(currentADP) + '</td>' +
+        '<td class="num ' + deltaClass(e.rtv) + '"' + BB.heatStyle(e.rtv, rtvRange) + '>' + fmtDelta(e.rtv) + '</td>' +
+        '<td class="num">' + BB.fmtMoney(e.entryFee) + '</td>' +
+        '<td><a href="rosters.html?id=' + encodeURIComponent(e.rosterId) + '">View →</a></td>' +
+      '</tr>';
+    }).join('');
+
+    var prevDisabled = rostersState.page === 0;
+    var nextDisabled = rostersState.page >= totalPages - 1;
+    var pagerHtml = enriched.length > ROSTERS_PAGE_SIZE
+      ? '<div class="rt-pager">' +
+          '<button type="button" class="rt-page-btn" id="rosters-prev"' + (prevDisabled ? ' disabled' : '') + '>‹ Prev</button>' +
+          '<span class="rt-page-info">Showing ' + (start + 1) + '–' + end + ' of ' + enriched.length + '</span>' +
+          '<button type="button" class="rt-page-btn" id="rosters-next"' + (nextDisabled ? ' disabled' : '') + '>Next ›</button>' +
+        '</div>'
+      : '';
+
+    return '<table class="data">' + head + '<tbody>' + body + '</tbody></table>' + pagerHtml;
+  }
+
+  function bindRostersPager() {
+    var wrap = document.getElementById('rosters-table-wrap');
+    if (!wrap) return;
+    var prev = document.getElementById('rosters-prev');
+    var next = document.getElementById('rosters-next');
+    if (prev) prev.addEventListener('click', function () {
+      if (rostersState.page === 0) return;
+      rostersState.page--;
+      wrap.innerHTML = renderRostersTable();
+      bindRostersPager();
+    });
+    if (next) next.addEventListener('click', function () {
+      var totalPages = Math.max(1, Math.ceil(rostersState.enriched.length / ROSTERS_PAGE_SIZE));
+      if (rostersState.page >= totalPages - 1) return;
+      rostersState.page++;
+      wrap.innerHTML = renderRostersTable();
+      bindRostersPager();
+    });
+  }
+
   async function renderRosters(report) {
     if (!report.rostersWith.length) return '';
 
@@ -239,41 +377,12 @@
       return (a._pick.overallPick || 0) - (b._pick.overallPick || 0);
     });
 
-    // Pre-compute CLV / RTV values for heat-map range.
+    // Pre-compute the per-row enriched values once. Pagination then just
+    // slices into this array — no recomputation on Prev/Next.
+    var enriched = [];
     var clvVals = [], rtvVals = [];
+    var noHistCount = 0;
     rows.forEach(function (r) {
-      var pick = r._pick.overallPick;
-      if (pick == null) return;
-      var date = r.draftedAt ? String(r.draftedAt).slice(0, 10) : null;
-      var hist = date && histByDate[date];
-      var histRow = hist && hist[normName];
-      var draftADP = canonADP(histRow) != null ? canonADP(histRow) : currentADP;
-      if (draftADP != null) clvVals.push(pick - draftADP);
-      if (currentADP != null) rtvVals.push(pick - currentADP);
-    });
-    var clvRange = simpleRange(clvVals);
-    var rtvRange = simpleRange(rtvVals);
-
-    var TT = {
-      draftAdp:  'Market ADP (Underdog › DK › Drafters) on the day you submitted this draft.\nFalls back to today\'s ADP when no historical snapshot exists for that date.',
-      clv:       'CLV — your pick number minus the market ADP at draft date.\nPositive = you got the player later than the market was pricing them = value.',
-      todayAdp:  'Today\'s market ADP.',
-      rtv:       'RTV — your pick number minus today\'s market ADP.\nPositive = the market now prices this player earlier than you paid = your pick aged well.',
-    };
-
-    var head = '<thead><tr>' +
-      '<th>Tournament</th>' +
-      '<th>Platform</th>' +
-      '<th class="num">Pick</th>' +
-      '<th class="num tooltip-trigger" data-tooltip="' + escapeHtml(TT.draftAdp)  + '">Draft ADP <span class="info-mark">ⓘ</span></th>' +
-      '<th class="num tooltip-trigger" data-tooltip="' + escapeHtml(TT.clv)       + '">CLV <span class="info-mark">ⓘ</span></th>' +
-      '<th class="num tooltip-trigger" data-tooltip="' + escapeHtml(TT.todayAdp)  + '">Today\'s ADP <span class="info-mark">ⓘ</span></th>' +
-      '<th class="num tooltip-trigger" data-tooltip="' + escapeHtml(TT.rtv)       + '">RTV <span class="info-mark">ⓘ</span></th>' +
-      '<th class="num">Fee</th>' +
-      '<th></th>' +
-    '</tr></thead>';
-
-    var body = rows.map(function (r) {
       var pick = r._pick.overallPick;
       var date = r.draftedAt ? String(r.draftedAt).slice(0, 10) : null;
       var hist = date && histByDate[date];
@@ -282,26 +391,30 @@
       var draftADP = rawDraftADP != null ? rawDraftADP : currentADP;
       var clv = (pick != null && draftADP  != null) ? pick - draftADP  : null;
       var rtv = (pick != null && currentADP != null) ? pick - currentADP : null;
-      var noHistory = rawDraftADP == null && draftADP != null;
-      var draftAdpCell = BB.fmtADP(draftADP) + (noHistory ? ' <span style="color:var(--text-muted);font-size:10px;" title="No history for this date — using today\'s ADP">~</span>' : '');
-      return '<tr>' +
-        '<td>' + escapeHtml(r.tournament || '(unknown)') + '</td>' +
-        '<td>' + (BB.platformLogoHTML(r.platform, { size: 16 }) || '<span class="badge">' + escapeHtml(r.platform) + '</span>') + '</td>' +
-        '<td class="num">' + (pick != null ? pick : '—') + '</td>' +
-        '<td class="num">' + draftAdpCell + '</td>' +
-        '<td class="num ' + deltaClass(clv) + '"' + BB.heatStyle(clv, clvRange) + '>' + fmtDelta(clv) + '</td>' +
-        '<td class="num">' + BB.fmtADP(currentADP) + '</td>' +
-        '<td class="num ' + deltaClass(rtv) + '"' + BB.heatStyle(rtv, rtvRange) + '>' + fmtDelta(rtv) + '</td>' +
-        '<td class="num">' + BB.fmtMoney(r.entryFee) + '</td>' +
-        '<td><a href="rosters.html?id=' + encodeURIComponent(r.rosterId) + '">View →</a></td>' +
-      '</tr>';
-    }).join('');
+      var noHistory = rawDraftADP == null;
+      if (noHistory) noHistCount++;
+      if (pick != null && draftADP != null) clvVals.push(pick - draftADP);
+      if (pick != null && currentADP != null) rtvVals.push(pick - currentADP);
+      enriched.push({
+        rosterId: r.rosterId,
+        platform: r.platform,
+        tournament: r.tournament,
+        entryFee: r.entryFee,
+        pick: pick,
+        draftADP: draftADP,
+        clv: clv,
+        rtv: rtv,
+        noHistory: noHistory && draftADP != null,
+      });
+    });
 
-    var noHistCount = rows.filter(function (r) {
-      var date = r.draftedAt ? String(r.draftedAt).slice(0, 10) : null;
-      var hist = date && histByDate[date];
-      return !hist || !hist[normName];
-    }).length;
+    rostersState.enriched = enriched;
+    rostersState.clvRange = simpleRange(clvVals);
+    rostersState.rtvRange = simpleRange(rtvVals);
+    rostersState.currentADP = currentADP;
+    rostersState.playerName = report.player;
+    rostersState.page = 0;
+
     var foot = noHistCount
       ? '<p style="color:var(--text-muted);font-size:11px;margin:6px 2px 0;">' +
           noHistCount + ' roster' + (noHistCount === 1 ? '' : 's') + ' marked ~ had no ADP history for that date and show today\'s ADP instead.' +
@@ -311,7 +424,8 @@
     return '<section id="player-rosters" style="scroll-margin-top:16px;">' +
       '<h2>Rosters with ' + escapeHtml(report.player) +
       ' <span style="color:var(--text-muted);font-size:13px;font-weight:400;">(' + rows.length + ')</span></h2>' +
-      '<table class="data">' + head + '<tbody>' + body + '</tbody></table>' + foot +
+      '<div id="rosters-table-wrap">' + renderRostersTable() + '</div>' +
+      foot +
       '</section>';
   }
 
@@ -361,10 +475,12 @@
       renderCombos(report) +
       renderRoundDistribution(report) +
       '<div id="player-rosters-slot"><p style="color:var(--text-muted);font-size:13px;padding:8px 0;">Loading roster data…</p></div>';
+    bindCombosPager();
 
     var rostersHtml = await renderRosters(report);
     var slot = document.getElementById('player-rosters-slot');
     if (slot) slot.outerHTML = rostersHtml;
+    bindRostersPager();
   }
 
   init();

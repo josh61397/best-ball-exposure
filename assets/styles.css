@@ -2379,11 +2379,17 @@ input::placeholder { color: var(--text-muted); }
      2. subtitle bar ("Drafted across N of your M rosters")
      3. stats row (column-separated cells, no individual card boxes) */
 .player-hero {
-  background: var(--surface);
+  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 24px;
+  /* Extend to the edges of the main content area so the card stretches
+     to meet the sidebar; the surrounding main has 24px of padding we
+     undo with negative margins. */
+  margin: -24px -24px 24px;
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
 }
 .player-hero-head {
   display: flex;
@@ -2447,6 +2453,7 @@ input::placeholder { color: var(--text-muted); }
 .player-hero-subtitle {
   padding: 12px 24px;
   border-top: 1px solid var(--border);
+  background: var(--surface);
   color: var(--text-muted);
   font-size: 14px;
 }
@@ -2493,6 +2500,10 @@ input::placeholder { color: var(--text-muted); }
   .player-hero-stat:nth-child(4) { border-left: 0; border-top: 1px solid var(--border); }
   .player-hero-stat:nth-child(5),
   .player-hero-stat:nth-child(6) { border-top: 1px solid var(--border); }
+}
+@media (max-width: 800px) {
+  /* main switches to 16px padding here; track that with the negative margin. */
+  .player-hero { margin: -16px -16px 16px; }
 }
 @media (max-width: 600px) {
   .player-hero-head { padding: 14px 16px; }
