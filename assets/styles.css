@@ -294,6 +294,36 @@ aside.sidebar {
 }
 .sb-footer .sb-item { border-left: 2px solid transparent; }
 
+/* ADP-freshness pill above Night toggle. Green if fresh (< 36h), amber if stale. */
+.sb-adp-stamp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px 6px;
+}
+.sb-adp-stamp .adp-stamp {
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.sb-adp-stamp .adp-stamp.fresh {
+  color: var(--accent-2);
+  border-color: color-mix(in srgb, var(--accent-2) 40%, transparent);
+  background: color-mix(in srgb, var(--accent-2) 10%, transparent);
+}
+.sb-adp-stamp .adp-stamp.stale {
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 40%, transparent);
+  background: color-mix(in srgb, var(--warn) 10%, transparent);
+}
+
 /* =========================================================================
    Mobile — under 768px the rail becomes a bottom tab bar.
    Logo + bottom utilities hide; only nav items flagged data-mobile="1"

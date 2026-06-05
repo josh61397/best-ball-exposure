@@ -76,6 +76,26 @@
 
     var settingsActive = current === 'settings.html' ? ' is-active' : '';
 
+    // ADP-freshness pill shown just above the Night toggle. Green if the ADP
+    // data is under 36h old, amber otherwise. Hidden on mobile (no footer).
+    var adpStampHtml = '';
+    if (window.BB_DATA && window.BB_DATA.lastUpdated) {
+      var d = new Date(window.BB_DATA.lastUpdated);
+      if (!isNaN(d.getTime())) {
+        var ageH = Math.round((Date.now() - d.getTime()) / 36e5);
+        var ageLabel;
+        if (ageH < 1)       ageLabel = 'NOW';
+        else if (ageH < 48) ageLabel = ageH + 'H';
+        else                ageLabel = Math.round(ageH / 24) + 'D';
+        var fresh = ageH < 36;
+        adpStampHtml =
+          '<div class="sb-adp-stamp">' +
+            '<span class="adp-stamp ' + (fresh ? 'fresh' : 'stale') +
+            '" title="ADP last refreshed ' + d.toLocaleString() + '">ADP ' + ageLabel + '</span>' +
+          '</div>';
+      }
+    }
+
     var html =
       '<aside class="sidebar" id="site-nav">' +
         '<div class="sb-logo">' +
@@ -85,6 +105,7 @@
         '</div>' +
         '<nav class="sb-nav">' + navHtml + '</nav>' +
         '<div class="sb-footer">' +
+          adpStampHtml +
           '<button id="theme-toggle" class="sb-item sb-toggle" type="button" aria-label="Toggle night mode">' +
             '<span class="sb-icon">' + themeIcon + '</span>' +
             '<span class="sb-label">NIGHT</span>' +
