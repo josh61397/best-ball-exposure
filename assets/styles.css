@@ -741,6 +741,12 @@ table.data tbody tr:hover td { background: var(--bg-elev-2); }
 table.data tbody tr:hover td:first-child {
   box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 45%, transparent);
 }
+/* Expandable rows already signal their own state (chevron + is-expanded
+   accent border). The hover accent rail makes them feel doubly emphasized,
+   so suppress it here and let the team-color rail keep showing if set. */
+table.data tbody tr.row-expandable:hover td:first-child {
+  box-shadow: inset 3px 0 0 var(--team-color, transparent);
+}
 
 /* Bigger accent focus ring on interactive controls. */
 button:focus-visible,
@@ -843,6 +849,11 @@ table.data tbody tr[data-pos="TE"]:hover td:first-child { background: color-mix(
 .player-cell[data-pos="WR"] .player-name a { color: var(--pos-wr); }
 .player-cell[data-pos="TE"] .player-name a { color: var(--pos-te); }
 .player-cell[data-pos] .player-name a:hover { filter: brightness(1.15); }
+
+/* In dark mode, position colors don't have enough contrast against the
+   dark surface — drop back to the standard text color and let the team
+   logo + position badge carry the positional cue. */
+[data-theme="dark"] .player-cell[data-pos] .player-name a { color: var(--text); }
 
 /* Team-color left rail. Anything with --team-color set on it gets a
    thin colored stripe on its left edge: team rows on the Stacks page,
