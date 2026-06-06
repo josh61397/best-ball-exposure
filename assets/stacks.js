@@ -795,66 +795,62 @@
   }
 
   function renderWeek17Detail(row) {
-    function emptyBody(colspan, msg) {
-      return '<tr><td colspan="' + colspan + '" style="color:var(--text-muted);font-style:italic;">' + msg + '</td></tr>';
-    }
-    function pairsTable(pairs, teamCode) {
-      var body = pairs.length
-        ? pairs.map(function (p) {
-            return '<tr>' +
-              '<td>' + escapeHtml(p.qb) + '</td>' +
-              '<td><span class="player-cell" data-pos="' + escapeHtml(p.catcherPos) + '">' +
-                '<span class="badge pos-' + escapeHtml(p.catcherPos) + '">' + escapeHtml(p.catcherPos) + '</span> ' +
-                escapeHtml(p.catcher) +
-              '</span></td>' +
-              '<td class="num">' + p.count + '</td>' +
-            '</tr>';
-          }).join('')
-        : emptyBody(3, 'No ' + teamCode + '-anchored rosters.');
-      return '<table class="data combo-table" style="width:100%;">' +
-        '<thead><tr><th>QB</th><th>Pass catcher</th><th class="num">Rosters</th></tr></thead>' +
-        '<tbody>' + body + '</tbody>' +
-      '</table>';
-    }
-    function bringBacksTable(backs, oppCode) {
-      var body = backs.length
-        ? backs.map(function (b) {
-            var badge = b.pos
-              ? '<span class="badge pos-' + escapeHtml(b.pos) + '">' + escapeHtml(b.pos) + '</span> '
-              : '';
-            return '<tr>' +
-              '<td>' + badge + escapeHtml(b.player) + '</td>' +
-              '<td class="num">' + b.count + '</td>' +
-            '</tr>';
-          }).join('')
-        : emptyBody(2, 'No bring-backs from ' + oppCode + '.');
-      return '<table class="data combo-table" style="width:100%;">' +
-        '<thead><tr><th>Player from ' + oppCode + '</th><th class="num">Rosters</th></tr></thead>' +
-        '<tbody>' + body + '</tbody>' +
-      '</table>';
+    function chip(pos, name, count) {
+      var badge = pos ? '<span class="badge pos-' + escapeHtml(pos) + '">' + escapeHtml(pos) + '</span>' : '';
+      return '<span class="w17-chip">' + badge +
+        '<span class="w17-chip-name">' + escapeHtml(name) + '</span>' +
+        '<span class="w17-chip-count">' + count + '</span>' +
+      '</span>';
     }
     function side(teamCode, oppCode, pairs, bringBacks) {
+      // Pull unique QBs out of the pair list — almost always a single
+      // starter per team, in which case we hoist him into the heading
+      // and drop the redundant QB column from the table below.
+      var qbCounts = {};
+      pairs.forEach(function (p) { qbCounts[p.qb] = (qbCounts[p.qb] || 0) + p.count; });
+      var qbNames = Object.keys(qbCounts).sort(function (a, b) { return qbCounts[b] - qbCounts[a]; });
+      var qbLabel = qbNames.length === 1
+        ? '<strong>' + escapeHtml(qbNames[0]) + '</strong>'
+        : qbNames.length
+          ? qbNames.map(function (n) { return '<strong>' + escapeHtml(n) + '</strong>'; }).join(' / ')
+          : '<span style="color:var(--text-muted);">No QB on ' + escapeHtml(teamCode) + '</span>';
+
       var heading =
-        '<div class="combo-panel-head" style="margin-bottom:0;">' +
-          '<span style="display:inline-flex;align-items:center;gap:8px;">' +
-            BB.teamLogoHTML(teamCode, { size: 18 }) +
-            '<strong>' + escapeHtml(teamCode) + '-anchored</strong>' +
+        '<div class="w17-side-head">' +
+          '<span class="w17-side-team">' +
+            BB.teamLogoHTML(teamCode, { size: 20 }) +
+            '<span><span class="w17-side-team-code">' + escapeHtml(teamCode) + '</span>' +
+            '<span class="w17-side-qb">' + qbLabel + '</span></span>' +
           '</span>' +
-          '<span style="color:var(--text-muted);font-size:11px;">QB + pass catcher from ' + escapeHtml(teamCode) + '</span>' +
         '</div>';
-      var bringHead =
-        '<div class="combo-panel-head" style="margin:14px 0 0;">' +
-          '<span style="display:inline-flex;align-items:center;gap:8px;">' +
-            BB.teamLogoHTML(oppCode, { size: 16 }) +
-            '<strong style="font-weight:600;">Bring-backs</strong>' +
-          '</span>' +
-          '<span style="color:var(--text-muted);font-size:11px;">any player from ' + escapeHtml(oppCode) + '</span>' +
-        '</div>';
-      return '<div class="card w17-side">' +
+
+      // Pass catchers — compact chip row, ordered by frequency
+      var catcherCounts = {};
+      pairs.forEach(function (p) {
+        var k = p.catcher;
+        if (!catcherCounts[k]) catcherCounts[k] = { name: p.catcher, pos: p.catcherPos, count: 0 };
+        catcherCounts[k].count += p.count;
+      });
+      var catcherList = Object.keys(catcherCounts).map(function (k) { return catcherCounts[k]; })
+        .sort(function (a, b) { return b.count - a.count; });
+      var catcherChips = catcherList.length
+        ? catcherList.map(function (c) { return chip(c.pos, c.name, c.count); }).join('')
+        : '<span class="w17-empty">No ' + escapeHtml(teamCode) + '-anchored rosters.</span>';
+
+      var bringChips = bringBacks.length
+        ? bringBacks.map(function (b) { return chip(b.pos, b.player, b.count); }).join('')
+        : '<span class="w17-empty">No bring-backs.</span>';
+
+      return '<div class="w17-side">' +
         heading +
-        pairsTable(pairs, teamCode) +
-        bringHead +
-        bringBacksTable(bringBacks, oppCode) +
+        '<div class="w17-row">' +
+          '<div class="w17-row-label">Pass catchers</div>' +
+          '<div class="w17-chip-row">' + catcherChips + '</div>' +
+        '</div>' +
+        '<div class="w17-row">' +
+          '<div class="w17-row-label">Bring-backs <span style="color:var(--text-muted);font-weight:400;">· ' + escapeHtml(oppCode) + '</span></div>' +
+          '<div class="w17-chip-row">' + bringChips + '</div>' +
+        '</div>' +
       '</div>';
     }
     var tableHtml = renderWeek17RostersTable(row);

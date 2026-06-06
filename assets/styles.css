@@ -1533,6 +1533,23 @@ table.data tbody tr.row-expand-detail:hover > td {
   background: color-mix(in srgb, var(--accent) 5%, var(--bg-elev));
   padding: 0;
 }
+/* Week 17 expansion uses a calmer neutral background — the nested
+   anchored cards inside it look better against gray than the
+   accent-tinted cream used for other expansions. */
+.tbl-stacks-week17 .row-expand-detail > td,
+table.data tbody .tbl-stacks-week17 .row-expand-detail:hover > td {
+  background: var(--surface-subtle);
+}
+/* Suppress the global accent-yellow left rail + bg-elev-2 hover tint on
+   rows inside the matched-rosters table within the Week 17 detail panel.
+   The detail row's gray fill should read as the canvas; hovering individual
+   stack rows there shouldn't flash yellow. */
+.tbl-stacks-week17 .row-expand-detail table.data tbody tr:hover td {
+  background: transparent;
+}
+.tbl-stacks-week17 .row-expand-detail table.data tbody tr:hover td:first-child {
+  box-shadow: none;
+}
 .combo-panel {
   padding: 10px 14px 12px;
   border-top: 1px solid var(--border);
@@ -1579,19 +1596,93 @@ table.combo-table .badge {
 }
 
 /* Week 17 game-stack anchor breakdown. Two side-by-side cards (one per
-   team), each containing a small "Stack pairs" table and a "Bring-backs"
-   table — matches the existing combo-panel / combo-table look used on
-   the Stacks > Stack Size expansion. */
+   team). Heading hoists the anchoring QB up so the chip rows below
+   don't repeat his name; pass catchers and bring-backs are compact
+   chip rows instead of full tables. */
 .w17-anchor-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 12px;
-  margin-top: 16px;
+  gap: 10px;
+  margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
 }
-.w17-side { padding: 12px 14px; background: var(--bg-elev); }
-.w17-side .combo-table { background: transparent; margin-top: 6px; }
+.w17-side {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.w17-side-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.w17-side-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.w17-side-team-code {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  margin-right: 6px;
+}
+.w17-side-qb {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+.w17-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.w17-row-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.w17-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.w17-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px 3px 6px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+.w17-chip .badge { font-size: 9px; padding: 1px 4px; }
+.w17-chip-name { color: var(--text); }
+.w17-chip-count {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  padding-left: 4px;
+  border-left: 1px solid var(--border);
+  margin-left: 2px;
+}
+.w17-empty {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-style: italic;
+}
 
 /* Hover tooltips on column headers and any other element with data-tooltip. */
 .tooltip-trigger {
