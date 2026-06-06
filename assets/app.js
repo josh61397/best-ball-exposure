@@ -1053,6 +1053,7 @@
         // reverse for B-anchored). Bring-backs are per-team counters.
         _pairsA: {}, _pairsB: {},
         _bringA: {}, _bringB: {},
+        _matchedRosters: [],
       };
     });
 
@@ -1082,6 +1083,29 @@
         a.count++;
         a.fees += r.entryFee || 0;
         if (aAnchor && bAnchor) a.bothAnchored++;
+        // Collect per-roster detail for the expanded table view.
+        var mrAnchorPicks = aAnchor ? A : B;
+        var mrOppPicks = aAnchor ? B : A;
+        var anchorTeam = aAnchor ? g.teamA : g.teamB;
+        var oppTeam = aAnchor ? g.teamB : g.teamA;
+        // Full stack: every QB + every pass-catcher from the anchor team.
+        // Bring-backs: every player on the opposing team.
+        var stackPlayers = mrAnchorPicks.qbs.concat(mrAnchorPicks.catchers).map(function (p) {
+          return { player: p.player, pos: p.position, team: anchorTeam };
+        });
+        var bringBackPlayers = mrOppPicks.all.map(function (p) {
+          return { player: p.player, pos: p.position, team: oppTeam };
+        });
+        a._matchedRosters.push({
+          rosterId: r.rosterId,
+          tournament: r.tournament || '',
+          fees: r.entryFee || 0,
+          anchor: aAnchor && bAnchor ? 'both' : (aAnchor ? 'A' : 'B'),
+          anchorTeam: anchorTeam,
+          oppTeam: oppTeam,
+          stackPlayers: stackPlayers,
+          bringBacks: bringBackPlayers,
+        });
         if (aAnchor) {
           a.aAnchored++;
           A.qbs.forEach(function (qb) {
@@ -1136,6 +1160,7 @@
         bothAnchored: a.bothAnchored,
         topPairs: { A: topN(a._pairsA, 5), B: topN(a._pairsB, 5) },
         topBringBacks: { A: topN(a._bringA, 5), B: topN(a._bringB, 5) },
+        matchedRosters: a._matchedRosters,
       };
     });
 

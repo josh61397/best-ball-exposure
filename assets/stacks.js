@@ -818,10 +818,59 @@
         '<ul style="list-style:none;padding-left:0;margin:0;font-size:12.5px;line-height:1.7;">' + bringHtml + '</ul>' +
       '</div>';
     }
+    var tableHtml = renderWeek17RostersTable(row);
     return '<div class="combo-panel"><div style="display:flex;gap:24px;flex-wrap:wrap;">' +
       side(row.teamA, row.teamA, row.topPairs.A, row.topBringBacks.B, row.teamB) +
       side(row.teamB, row.teamB, row.topPairs.B, row.topBringBacks.A, row.teamA) +
-    '</div></div>';
+    '</div>' + tableHtml + '</div>';
+  }
+
+  function renderWeek17RostersTable(row) {
+    var matched = (row.matchedRosters || []).slice().sort(function (a, b) {
+      return (b.fees || 0) - (a.fees || 0);
+    });
+    if (!matched.length) return '';
+
+    var tableRows = matched.map(function (mr) {
+      function playerListCell(players, teamCode) {
+        if (!players.length) return '<span style="color:var(--text-muted);">—</span>';
+        var logo = teamCode ? BB.teamLogoHTML(teamCode, { size: 16 }) : '';
+        var parts = players.map(function (p) {
+          var badge = p.pos ? '<span class="badge pos-' + escapeHtml(p.pos) + '" style="font-size:10px;padding:1px 5px;">' + escapeHtml(p.pos) + '</span> ' : '';
+          return badge + escapeHtml(p.player);
+        });
+        return '<span style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;">' +
+          logo +
+          '<span>' + parts.join('<span style="color:var(--text-muted);margin:0 4px;">·</span>') + '</span>' +
+        '</span>';
+      }
+
+      var stackCell = playerListCell(mr.stackPlayers, mr.anchorTeam);
+      var bringHtml = playerListCell(mr.bringBacks, mr.oppTeam);
+
+      var href = 'rosters.html?id=' + encodeURIComponent(mr.rosterId);
+      return '<tr>' +
+        '<td style="font-size:12px;">' + stackCell + '</td>' +
+        '<td style="font-size:12px;">' + bringHtml + '</td>' +
+        '<td class="num" style="font-size:12px;">' + BB.fmtMoney(mr.fees) + '</td>' +
+        '<td style="font-size:12px;">' + escapeHtml(mr.tournament) + '</td>' +
+        '<td style="font-size:12px;"><a href="' + escapeHtml(href) + '" style="color:var(--accent);">View</a></td>' +
+      '</tr>';
+    }).join('');
+
+    return '<div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px;">' +
+      '<div style="color:var(--text-muted);font-size:11px;margin-bottom:6px;">All ' + matched.length + ' matching roster' + (matched.length === 1 ? '' : 's') + '</div>' +
+      '<table class="data" style="width:100%;">' +
+        '<thead><tr>' +
+          '<th>Stack</th>' +
+          '<th>Bring-backs</th>' +
+          '<th class="num">Fees</th>' +
+          '<th>Tournament</th>' +
+          '<th></th>' +
+        '</tr></thead>' +
+        '<tbody>' + tableRows + '</tbody>' +
+      '</table>' +
+    '</div>';
   }
 
   // Shared stat strip for every Stacks view — counts rosters being stacked,
