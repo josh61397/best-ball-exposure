@@ -1578,6 +1578,21 @@ table.combo-table .badge {
   line-height: 1.4;
 }
 
+/* Week 17 game-stack anchor breakdown. Two side-by-side cards (one per
+   team), each containing a small "Stack pairs" table and a "Bring-backs"
+   table — matches the existing combo-panel / combo-table look used on
+   the Stacks > Stack Size expansion. */
+.w17-anchor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.w17-side { padding: 12px 14px; background: var(--bg-elev); }
+.w17-side .combo-table { background: transparent; margin-top: 6px; }
+
 /* Hover tooltips on column headers and any other element with data-tooltip. */
 .tooltip-trigger {
   position: relative;

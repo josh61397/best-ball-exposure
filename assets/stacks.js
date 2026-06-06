@@ -781,9 +781,11 @@
       tr.addEventListener('click', function (e) {
         if (e.target.closest('a')) return;
         if (e.target.closest('.row-expand-btn')) return;
+        if (e.target.closest('[data-week17-prev], [data-week17-next]')) return;
         toggleWeek17Expand(tr.getAttribute('data-norm'));
       });
     });
+    bindWeek17RosterPagers();
   }
 
   function toggleWeek17Expand(key) {
@@ -793,37 +795,78 @@
   }
 
   function renderWeek17Detail(row) {
-    function side(label, teamCode, pairs, bringBacks, oppCode) {
-      var pairsHtml = pairs.length
+    function emptyBody(colspan, msg) {
+      return '<tr><td colspan="' + colspan + '" style="color:var(--text-muted);font-style:italic;">' + msg + '</td></tr>';
+    }
+    function pairsTable(pairs, teamCode) {
+      var body = pairs.length
         ? pairs.map(function (p) {
-            return '<li><strong>' + escapeHtml(p.qb) + '</strong> + ' +
-              '<span class="badge pos-' + escapeHtml(p.catcherPos) + '" style="font-size:10px;padding:1px 5px;">' + escapeHtml(p.catcherPos) + '</span> ' +
-              escapeHtml(p.catcher) + ' — <span class="num">' + p.count + '</span></li>';
+            return '<tr>' +
+              '<td>' + escapeHtml(p.qb) + '</td>' +
+              '<td><span class="player-cell" data-pos="' + escapeHtml(p.catcherPos) + '">' +
+                '<span class="badge pos-' + escapeHtml(p.catcherPos) + '">' + escapeHtml(p.catcherPos) + '</span> ' +
+                escapeHtml(p.catcher) +
+              '</span></td>' +
+              '<td class="num">' + p.count + '</td>' +
+            '</tr>';
           }).join('')
-        : '<li style="color:var(--text-muted);">No ' + teamCode + '-anchored rosters.</li>';
-      var bringHtml = bringBacks.length
-        ? bringBacks.map(function (b) {
-            var pos = b.pos ? '<span class="badge pos-' + escapeHtml(b.pos) + '" style="font-size:10px;padding:1px 5px;">' + escapeHtml(b.pos) + '</span> ' : '';
-            return '<li>' + pos + escapeHtml(b.player) + ' — <span class="num">' + b.count + '</span></li>';
+        : emptyBody(3, 'No ' + teamCode + '-anchored rosters.');
+      return '<table class="data combo-table" style="width:100%;">' +
+        '<thead><tr><th>QB</th><th>Pass catcher</th><th class="num">Rosters</th></tr></thead>' +
+        '<tbody>' + body + '</tbody>' +
+      '</table>';
+    }
+    function bringBacksTable(backs, oppCode) {
+      var body = backs.length
+        ? backs.map(function (b) {
+            var badge = b.pos
+              ? '<span class="badge pos-' + escapeHtml(b.pos) + '">' + escapeHtml(b.pos) + '</span> '
+              : '';
+            return '<tr>' +
+              '<td>' + badge + escapeHtml(b.player) + '</td>' +
+              '<td class="num">' + b.count + '</td>' +
+            '</tr>';
           }).join('')
-        : '<li style="color:var(--text-muted);">—</li>';
-      return '<div style="flex:1;min-width:240px;">' +
-        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
-          BB.teamLogoHTML(teamCode, { size: 18 }) +
-          '<strong>' + teamCode + '-anchored</strong>' +
-          '<span style="color:var(--text-muted);font-size:11px;">QB + pass catcher from ' + teamCode + '</span>' +
-        '</div>' +
-        '<ul style="list-style:none;padding-left:0;margin:0 0 10px;font-size:12.5px;line-height:1.7;">' + pairsHtml + '</ul>' +
-        '<div style="color:var(--text-muted);font-size:11px;margin-bottom:4px;">Top bring-backs from ' + oppCode + '</div>' +
-        '<ul style="list-style:none;padding-left:0;margin:0;font-size:12.5px;line-height:1.7;">' + bringHtml + '</ul>' +
+        : emptyBody(2, 'No bring-backs from ' + oppCode + '.');
+      return '<table class="data combo-table" style="width:100%;">' +
+        '<thead><tr><th>Player from ' + oppCode + '</th><th class="num">Rosters</th></tr></thead>' +
+        '<tbody>' + body + '</tbody>' +
+      '</table>';
+    }
+    function side(teamCode, oppCode, pairs, bringBacks) {
+      var heading =
+        '<div class="combo-panel-head" style="margin-bottom:0;">' +
+          '<span style="display:inline-flex;align-items:center;gap:8px;">' +
+            BB.teamLogoHTML(teamCode, { size: 18 }) +
+            '<strong>' + escapeHtml(teamCode) + '-anchored</strong>' +
+          '</span>' +
+          '<span style="color:var(--text-muted);font-size:11px;">QB + pass catcher from ' + escapeHtml(teamCode) + '</span>' +
+        '</div>';
+      var bringHead =
+        '<div class="combo-panel-head" style="margin:14px 0 0;">' +
+          '<span style="display:inline-flex;align-items:center;gap:8px;">' +
+            BB.teamLogoHTML(oppCode, { size: 16 }) +
+            '<strong style="font-weight:600;">Bring-backs</strong>' +
+          '</span>' +
+          '<span style="color:var(--text-muted);font-size:11px;">any player from ' + escapeHtml(oppCode) + '</span>' +
+        '</div>';
+      return '<div class="card w17-side">' +
+        heading +
+        pairsTable(pairs, teamCode) +
+        bringHead +
+        bringBacksTable(bringBacks, oppCode) +
       '</div>';
     }
     var tableHtml = renderWeek17RostersTable(row);
-    return '<div class="combo-panel"><div style="display:flex;gap:24px;flex-wrap:wrap;">' +
-      side(row.teamA, row.teamA, row.topPairs.A, row.topBringBacks.B, row.teamB) +
-      side(row.teamB, row.teamB, row.topPairs.B, row.topBringBacks.A, row.teamA) +
-    '</div>' + tableHtml + '</div>';
+    var anchorPanel =
+      '<div class="w17-anchor-grid">' +
+        side(row.teamA, row.teamB, row.topPairs.A, row.topBringBacks.B) +
+        side(row.teamB, row.teamA, row.topPairs.B, row.topBringBacks.A) +
+      '</div>';
+    return '<div class="combo-panel">' + tableHtml + anchorPanel + '</div>';
   }
+
+  var WEEK17_ROSTERS_PAGE_SIZE = 5;
 
   function renderWeek17RostersTable(row) {
     var matched = (row.matchedRosters || []).slice().sort(function (a, b) {
@@ -831,7 +874,17 @@
     });
     if (!matched.length) return '';
 
-    var tableRows = matched.map(function (mr) {
+    if (!state.week17RosterPages) state.week17RosterPages = {};
+    var page = state.week17RosterPages[row.game] || 0;
+    var totalPages = Math.max(1, Math.ceil(matched.length / WEEK17_ROSTERS_PAGE_SIZE));
+    if (page >= totalPages) page = totalPages - 1;
+    if (page < 0) page = 0;
+    state.week17RosterPages[row.game] = page;
+    var start = page * WEEK17_ROSTERS_PAGE_SIZE;
+    var end = Math.min(start + WEEK17_ROSTERS_PAGE_SIZE, matched.length);
+    var pageRows = matched.slice(start, end);
+
+    var tableRows = pageRows.map(function (mr) {
       function playerListCell(players, teamCode) {
         if (!players.length) return '<span style="color:var(--text-muted);">—</span>';
         var logo = teamCode ? BB.teamLogoHTML(teamCode, { size: 16 }) : '';
@@ -858,19 +911,84 @@
       '</tr>';
     }).join('');
 
-    return '<div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px;">' +
-      '<div style="color:var(--text-muted);font-size:11px;margin-bottom:6px;">All ' + matched.length + ' matching roster' + (matched.length === 1 ? '' : 's') + '</div>' +
-      '<table class="data" style="width:100%;">' +
-        '<thead><tr>' +
-          '<th>Stack</th>' +
-          '<th>Bring-backs</th>' +
-          '<th class="num">Fees</th>' +
-          '<th>Tournament</th>' +
-          '<th></th>' +
-        '</tr></thead>' +
-        '<tbody>' + tableRows + '</tbody>' +
-      '</table>' +
+    var prevDisabled = page === 0;
+    var nextDisabled = page >= totalPages - 1;
+    var safeKey = escapeHtml(row.game);
+    var pagerHtml = matched.length > WEEK17_ROSTERS_PAGE_SIZE
+      ? '<div class="rt-pager">' +
+          '<button type="button" class="rt-page-btn" data-week17-prev="' + safeKey + '"' + (prevDisabled ? ' disabled' : '') + '>‹ Prev</button>' +
+          '<span class="rt-page-info">Showing ' + (start + 1) + '–' + end + ' of ' + matched.length + '</span>' +
+          '<button type="button" class="rt-page-btn" data-week17-next="' + safeKey + '"' + (nextDisabled ? ' disabled' : '') + '>Next ›</button>' +
+        '</div>'
+      : '';
+
+    return '<div>' +
+      '<div style="color:var(--text-muted);font-size:11px;margin-bottom:6px;">' +
+        matched.length + ' matching roster' + (matched.length === 1 ? '' : 's') +
+      '</div>' +
+      '<div data-week17-roster-wrap="' + safeKey + '">' +
+        '<table class="data" style="width:100%;">' +
+          '<thead><tr>' +
+            '<th>Stack</th>' +
+            '<th>Bring-backs</th>' +
+            '<th class="num">Fees</th>' +
+            '<th>Tournament</th>' +
+            '<th></th>' +
+          '</tr></thead>' +
+          '<tbody>' + tableRows + '</tbody>' +
+        '</table>' +
+        pagerHtml +
+      '</div>' +
     '</div>';
+  }
+
+  // Find the matched-rosters row for a given game key by re-running the
+  // computation. Cheap because the underlying data is already in memory.
+  function findWeek17RowByKey(rosters, key) {
+    var rows = BB.computeWeek17GameStacks(rosters);
+    for (var i = 0; i < rows.length; i++) if (rows[i].game === key) return rows[i];
+    return null;
+  }
+
+  function bindWeek17RosterPagers() {
+    contentEl.querySelectorAll('[data-week17-prev]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (btn.disabled) return;
+        var key = btn.getAttribute('data-week17-prev');
+        state.week17RosterPages[key] = Math.max(0, (state.week17RosterPages[key] || 0) - 1);
+        rerenderWeek17RosterTable(key);
+      });
+    });
+    contentEl.querySelectorAll('[data-week17-next]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (btn.disabled) return;
+        var key = btn.getAttribute('data-week17-next');
+        state.week17RosterPages[key] = (state.week17RosterPages[key] || 0) + 1;
+        rerenderWeek17RosterTable(key);
+      });
+    });
+  }
+
+  function rerenderWeek17RosterTable(key) {
+    var wrap = contentEl.querySelector('[data-week17-roster-wrap="' + cssEscape(key) + '"]');
+    if (!wrap) return;
+    var row = findWeek17RowByKey(getFilteredRosters(), key);
+    if (!row) return;
+    // Replace just the inner table+pager (the surrounding "N matching
+    // rosters" header sits outside this wrap so it doesn't blink).
+    var fresh = document.createElement('div');
+    fresh.innerHTML = renderWeek17RostersTable(row);
+    var innerWrap = fresh.querySelector('[data-week17-roster-wrap]');
+    if (innerWrap) wrap.innerHTML = innerWrap.innerHTML;
+    bindWeek17RosterPagers();
+  }
+
+  // Minimal CSS.escape polyfill for attribute selectors with pipe characters.
+  function cssEscape(s) {
+    if (window.CSS && CSS.escape) return CSS.escape(s);
+    return String(s).replace(/[^a-zA-Z0-9_-]/g, function (c) { return '\\' + c; });
   }
 
   // Shared stat strip for every Stacks view — counts rosters being stacked,
