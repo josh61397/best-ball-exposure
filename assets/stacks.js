@@ -703,6 +703,8 @@
   // ============================================================
   // WEEK 17 GAME STACKS VIEW
   // ============================================================
+  // Each row links to week17.html?game=<key> for a per-game deep dive
+  // (matched rosters + anchor breakdown). No in-table expansion.
   function renderWeek17(rosters) {
     var rows = BB.computeWeek17GameStacks(rosters);
     var search = state.search.toLowerCase().trim();
@@ -729,27 +731,28 @@
       '<th class="num" title="B-side: roster has QB+pass-catcher from team B and any player from team A">B-anchored</th>' +
       '<th class="num" title="Roster anchored on both sides at once (QBs from both teams)">Both</th>' +
       '<th class="num">Fees</th>' +
+      '<th></th>' +
     '</tr></thead>';
 
     var body = rows.map(function (r) {
-      var isExpanded = !!(state.week17Expanded && state.week17Expanded[r.game]);
-      var chevron = '<button type="button" class="row-expand-btn" data-norm="' + escapeHtml(r.game) + '" aria-expanded="' + isExpanded + '">' +
-        '<span class="chevron">' + (isExpanded ? '▾' : '▸') + '</span></button>';
       var logoA = BB.teamLogoHTML(r.teamA, { size: 18 });
       var logoB = BB.teamLogoHTML(r.teamB, { size: 18 });
       var teamHrefA = 'team.html?code=' + encodeURIComponent(r.teamA);
       var teamHrefB = 'team.html?code=' + encodeURIComponent(r.teamB);
       var gameCell =
-        '<span class="player-cell-with-expand">' + chevron +
-          '<span class="player-cell">' +
-            logoA + '<a class="stack-team" href="' + teamHrefA + '">' + r.teamA + '</a>' +
-            '<span style="color:var(--text-muted);margin:0 6px;">vs</span>' +
-            logoB + '<a class="stack-team" href="' + teamHrefB + '">' + r.teamB + '</a>' +
-          '</span>' +
+        '<span class="player-cell">' +
+          logoA + '<a class="stack-team" href="' + teamHrefA + '">' + r.teamA + '</a>' +
+          '<span style="color:var(--text-muted);margin:0 6px;">vs</span>' +
+          logoB + '<a class="stack-team" href="' + teamHrefB + '">' + r.teamB + '</a>' +
         '</span>';
 
-      var trClass = 'row-expandable' + (isExpanded ? ' is-expanded' : '');
-      var mainTr = '<tr class="' + trClass + '" data-norm="' + escapeHtml(r.game) + '">' +
+      var viewHref = 'week17.html?game=' + encodeURIComponent(r.game);
+      var disabled = r.count === 0;
+      var viewBtn = disabled
+        ? '<span class="rt-page-btn" style="opacity:0.4;cursor:not-allowed;">View Stack</span>'
+        : '<a class="rt-page-btn" href="' + viewHref + '">View Stack</a>';
+
+      return '<tr>' +
         '<td>' + gameCell + '</td>' +
         '<td class="num"' + heatStyle(r.count, rCount) + '>' + r.count + '</td>' +
         '<td class="num"' + heatStyle(r.pct, rPct) + '>' + BB.fmtPct(r.pct) + '</td>' +
@@ -757,234 +760,16 @@
         '<td class="num">' + r.bAnchored + '</td>' +
         '<td class="num">' + r.bothAnchored + '</td>' +
         '<td class="num">' + BB.fmtMoney(r.fees) + '</td>' +
+        '<td class="num">' + viewBtn + '</td>' +
       '</tr>';
-      var detailTr = isExpanded
-        ? '<tr class="row-expand-detail"><td colspan="7">' + renderWeek17Detail(r) + '</td></tr>'
-        : '';
-      return mainTr + detailTr;
     }).join('');
 
     contentEl.innerHTML =
       '<div class="tbl-stacks-week17"><table class="data">' + head + '<tbody>' + body + '</tbody></table></div>' +
       '<p style="color:var(--text-muted);font-size:11px;margin:8px 2px 0;">' +
         'Game stack = QB + RB/WR/TE from one team plus any player from the other team. ' +
-        'Expand a row to see the most common QB + pass-catcher pairs and bring-backs.' +
+        'Click <strong>View Stack</strong> for the per-game roster breakdown.' +
       '</p>';
-
-    contentEl.querySelectorAll('.row-expand-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        toggleWeek17Expand(btn.getAttribute('data-norm'));
-      });
-    });
-    contentEl.querySelectorAll('tr.row-expandable').forEach(function (tr) {
-      tr.addEventListener('click', function (e) {
-        if (e.target.closest('a')) return;
-        if (e.target.closest('.row-expand-btn')) return;
-        if (e.target.closest('[data-week17-prev], [data-week17-next]')) return;
-        toggleWeek17Expand(tr.getAttribute('data-norm'));
-      });
-    });
-    bindWeek17RosterPagers();
-  }
-
-  function toggleWeek17Expand(key) {
-    if (!state.week17Expanded) state.week17Expanded = {};
-    state.week17Expanded[key] = !state.week17Expanded[key];
-    render();
-  }
-
-  function renderWeek17Detail(row) {
-    function chip(pos, name, count) {
-      var badge = pos ? '<span class="badge pos-' + escapeHtml(pos) + '">' + escapeHtml(pos) + '</span>' : '';
-      return '<span class="w17-chip">' + badge +
-        '<span class="w17-chip-name">' + escapeHtml(name) + '</span>' +
-        '<span class="w17-chip-count">' + count + '</span>' +
-      '</span>';
-    }
-    function side(teamCode, oppCode, pairs, bringBacks) {
-      // Pull unique QBs out of the pair list — almost always a single
-      // starter per team, in which case we hoist him into the heading
-      // and drop the redundant QB column from the table below.
-      var qbCounts = {};
-      pairs.forEach(function (p) { qbCounts[p.qb] = (qbCounts[p.qb] || 0) + p.count; });
-      var qbNames = Object.keys(qbCounts).sort(function (a, b) { return qbCounts[b] - qbCounts[a]; });
-      var qbLabel = qbNames.length === 1
-        ? '<strong>' + escapeHtml(qbNames[0]) + '</strong>'
-        : qbNames.length
-          ? qbNames.map(function (n) { return '<strong>' + escapeHtml(n) + '</strong>'; }).join(' / ')
-          : '<span style="color:var(--text-muted);">No QB on ' + escapeHtml(teamCode) + '</span>';
-
-      var heading =
-        '<div class="w17-side-head">' +
-          '<span class="w17-side-team">' +
-            BB.teamLogoHTML(teamCode, { size: 20 }) +
-            '<span><span class="w17-side-team-code">' + escapeHtml(teamCode) + '</span>' +
-            '<span class="w17-side-qb">' + qbLabel + '</span></span>' +
-          '</span>' +
-        '</div>';
-
-      // Pass catchers — compact chip row, ordered by frequency
-      var catcherCounts = {};
-      pairs.forEach(function (p) {
-        var k = p.catcher;
-        if (!catcherCounts[k]) catcherCounts[k] = { name: p.catcher, pos: p.catcherPos, count: 0 };
-        catcherCounts[k].count += p.count;
-      });
-      var catcherList = Object.keys(catcherCounts).map(function (k) { return catcherCounts[k]; })
-        .sort(function (a, b) { return b.count - a.count; });
-      var catcherChips = catcherList.length
-        ? catcherList.map(function (c) { return chip(c.pos, c.name, c.count); }).join('')
-        : '<span class="w17-empty">No ' + escapeHtml(teamCode) + '-anchored rosters.</span>';
-
-      var bringChips = bringBacks.length
-        ? bringBacks.map(function (b) { return chip(b.pos, b.player, b.count); }).join('')
-        : '<span class="w17-empty">No bring-backs.</span>';
-
-      return '<div class="w17-side">' +
-        heading +
-        '<div class="w17-row">' +
-          '<div class="w17-row-label">Pass catchers</div>' +
-          '<div class="w17-chip-row">' + catcherChips + '</div>' +
-        '</div>' +
-        '<div class="w17-row">' +
-          '<div class="w17-row-label">Bring-backs <span style="color:var(--text-muted);font-weight:400;">· ' + escapeHtml(oppCode) + '</span></div>' +
-          '<div class="w17-chip-row">' + bringChips + '</div>' +
-        '</div>' +
-      '</div>';
-    }
-    var tableHtml = renderWeek17RostersTable(row);
-    var anchorPanel =
-      '<div class="w17-anchor-grid">' +
-        side(row.teamA, row.teamB, row.topPairs.A, row.topBringBacks.B) +
-        side(row.teamB, row.teamA, row.topPairs.B, row.topBringBacks.A) +
-      '</div>';
-    return '<div class="combo-panel">' + tableHtml + anchorPanel + '</div>';
-  }
-
-  var WEEK17_ROSTERS_PAGE_SIZE = 5;
-
-  function renderWeek17RostersTable(row) {
-    var matched = (row.matchedRosters || []).slice().sort(function (a, b) {
-      return (b.fees || 0) - (a.fees || 0);
-    });
-    if (!matched.length) return '';
-
-    if (!state.week17RosterPages) state.week17RosterPages = {};
-    var page = state.week17RosterPages[row.game] || 0;
-    var totalPages = Math.max(1, Math.ceil(matched.length / WEEK17_ROSTERS_PAGE_SIZE));
-    if (page >= totalPages) page = totalPages - 1;
-    if (page < 0) page = 0;
-    state.week17RosterPages[row.game] = page;
-    var start = page * WEEK17_ROSTERS_PAGE_SIZE;
-    var end = Math.min(start + WEEK17_ROSTERS_PAGE_SIZE, matched.length);
-    var pageRows = matched.slice(start, end);
-
-    var tableRows = pageRows.map(function (mr) {
-      function playerListCell(players, teamCode) {
-        if (!players.length) return '<span style="color:var(--text-muted);">—</span>';
-        var logo = teamCode ? BB.teamLogoHTML(teamCode, { size: 16 }) : '';
-        var parts = players.map(function (p) {
-          var badge = p.pos ? '<span class="badge pos-' + escapeHtml(p.pos) + '" style="font-size:10px;padding:1px 5px;">' + escapeHtml(p.pos) + '</span> ' : '';
-          return badge + escapeHtml(p.player);
-        });
-        return '<span style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;">' +
-          logo +
-          '<span>' + parts.join('<span style="color:var(--text-muted);margin:0 4px;">·</span>') + '</span>' +
-        '</span>';
-      }
-
-      var stackCell = playerListCell(mr.stackPlayers, mr.anchorTeam);
-      var bringHtml = playerListCell(mr.bringBacks, mr.oppTeam);
-
-      var href = 'rosters.html?id=' + encodeURIComponent(mr.rosterId);
-      return '<tr>' +
-        '<td style="font-size:12px;">' + stackCell + '</td>' +
-        '<td style="font-size:12px;">' + bringHtml + '</td>' +
-        '<td class="num" style="font-size:12px;">' + BB.fmtMoney(mr.fees) + '</td>' +
-        '<td style="font-size:12px;">' + escapeHtml(mr.tournament) + '</td>' +
-        '<td style="font-size:12px;"><a href="' + escapeHtml(href) + '" style="color:var(--accent);">View</a></td>' +
-      '</tr>';
-    }).join('');
-
-    var prevDisabled = page === 0;
-    var nextDisabled = page >= totalPages - 1;
-    var safeKey = escapeHtml(row.game);
-    var pagerHtml = matched.length > WEEK17_ROSTERS_PAGE_SIZE
-      ? '<div class="rt-pager">' +
-          '<button type="button" class="rt-page-btn" data-week17-prev="' + safeKey + '"' + (prevDisabled ? ' disabled' : '') + '>‹ Prev</button>' +
-          '<span class="rt-page-info">Showing ' + (start + 1) + '–' + end + ' of ' + matched.length + '</span>' +
-          '<button type="button" class="rt-page-btn" data-week17-next="' + safeKey + '"' + (nextDisabled ? ' disabled' : '') + '>Next ›</button>' +
-        '</div>'
-      : '';
-
-    return '<div>' +
-      '<div style="color:var(--text-muted);font-size:11px;margin-bottom:6px;">' +
-        matched.length + ' matching roster' + (matched.length === 1 ? '' : 's') +
-      '</div>' +
-      '<div data-week17-roster-wrap="' + safeKey + '">' +
-        '<table class="data" style="width:100%;">' +
-          '<thead><tr>' +
-            '<th>Stack</th>' +
-            '<th>Bring-backs</th>' +
-            '<th class="num">Fees</th>' +
-            '<th>Tournament</th>' +
-            '<th></th>' +
-          '</tr></thead>' +
-          '<tbody>' + tableRows + '</tbody>' +
-        '</table>' +
-        pagerHtml +
-      '</div>' +
-    '</div>';
-  }
-
-  // Find the matched-rosters row for a given game key by re-running the
-  // computation. Cheap because the underlying data is already in memory.
-  function findWeek17RowByKey(rosters, key) {
-    var rows = BB.computeWeek17GameStacks(rosters);
-    for (var i = 0; i < rows.length; i++) if (rows[i].game === key) return rows[i];
-    return null;
-  }
-
-  function bindWeek17RosterPagers() {
-    contentEl.querySelectorAll('[data-week17-prev]').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        if (btn.disabled) return;
-        var key = btn.getAttribute('data-week17-prev');
-        state.week17RosterPages[key] = Math.max(0, (state.week17RosterPages[key] || 0) - 1);
-        rerenderWeek17RosterTable(key);
-      });
-    });
-    contentEl.querySelectorAll('[data-week17-next]').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        if (btn.disabled) return;
-        var key = btn.getAttribute('data-week17-next');
-        state.week17RosterPages[key] = (state.week17RosterPages[key] || 0) + 1;
-        rerenderWeek17RosterTable(key);
-      });
-    });
-  }
-
-  function rerenderWeek17RosterTable(key) {
-    var wrap = contentEl.querySelector('[data-week17-roster-wrap="' + cssEscape(key) + '"]');
-    if (!wrap) return;
-    var row = findWeek17RowByKey(getFilteredRosters(), key);
-    if (!row) return;
-    // Replace just the inner table+pager (the surrounding "N matching
-    // rosters" header sits outside this wrap so it doesn't blink).
-    var fresh = document.createElement('div');
-    fresh.innerHTML = renderWeek17RostersTable(row);
-    var innerWrap = fresh.querySelector('[data-week17-roster-wrap]');
-    if (innerWrap) wrap.innerHTML = innerWrap.innerHTML;
-    bindWeek17RosterPagers();
-  }
-
-  // Minimal CSS.escape polyfill for attribute selectors with pipe characters.
-  function cssEscape(s) {
-    if (window.CSS && CSS.escape) return CSS.escape(s);
-    return String(s).replace(/[^a-zA-Z0-9_-]/g, function (c) { return '\\' + c; });
   }
 
   // Shared stat strip for every Stacks view — counts rosters being stacked,

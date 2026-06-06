@@ -1386,6 +1386,7 @@ table.construction-table tbody tr td {
   text-align: center;
 }
 .rt-page-btn {
+  display: inline-block;
   padding: 5px 12px;
   font-size: 12px;
   border-radius: 6px;
@@ -1394,7 +1395,10 @@ table.construction-table tbody tr td {
   color: var(--text);
   cursor: pointer;
   min-width: 78px;
+  text-align: center;
+  text-decoration: none;
 }
+a.rt-page-btn:hover { text-decoration: none; }
 .rt-page-btn:hover:not(:disabled) {
   background: color-mix(in srgb, var(--accent) 12%, var(--bg-elev));
   border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
@@ -1606,6 +1610,13 @@ table.combo-table .badge {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
+}
+/* Standalone variant on the per-game deep-dive page sits below its own
+   h2, no need for the in-expansion divider. */
+.w17-anchor-grid--standalone {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
 }
 .w17-side {
   background: var(--bg);
