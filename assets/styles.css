@@ -1437,13 +1437,19 @@ a.rt-page-btn:hover { text-decoration: none; }
 }
 .slot-card .histogram-bars { gap: 6px; }
 
-/* Two-column chart grid on Team Construction (slot + round-1 stacked on
-   the left, team exposure on the right). */
+/* Two-column chart grid on Team Construction.
+   Left column: SLOT + Round 1 stacked.
+   Right column: Teams.
+   Locked at 50/50 width on wider viewports; stacks to single column
+   under 720px. */
 .construction-charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin-bottom: 20px;
+}
+@media (max-width: 720px) {
+  .construction-charts-grid { grid-template-columns: 1fr; }
 }
 .construction-charts-col {
   display: flex;
@@ -1453,18 +1459,24 @@ a.rt-page-btn:hover { text-decoration: none; }
 }
 
 /* Team-exposure horizontal bar list (paired with the slot histogram).
-   The team card stretches to match the height of the left column (slot
-   + round-1 stacked) — flex column makes the list fill remaining space. */
+   Grid stretch (default) makes both columns the same height; min-height: 0
+   on the card lets the list flex-shrink below its content size so the
+   LEFT column drives the row height, then the list scrolls if the 32-team
+   list overflows. */
 .team-exposure-list {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  /* no max-height — show every team so the card matches the left column */
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 .construction-charts-grid > .card.histogram-card {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
 }
 .te-row {
   display: grid;
