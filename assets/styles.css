@@ -1281,6 +1281,14 @@ table.construction-table tbody tr td {
   letter-spacing: 0.01em;
   line-height: 1.2;
 }
+/* ⓘ tooltip trigger inside a roster-type label. */
+.rt-info {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  vertical-align: baseline;
+}
+.rt-info .info-mark { font-size: 12px; }
 .rt-desc-inline {
   font-size: 10.5px;
   color: var(--text-muted);

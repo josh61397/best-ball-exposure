@@ -155,13 +155,17 @@
         (isEmpty ? ' is-empty' : ' is-clickable') +
         (isExpanded ? ' is-expanded' : '');
 
+      var tooltipAttr = ' data-tooltip="' + escapeHtml(t.description).replace(/"/g, '&quot;') + '"';
       var main =
         '<div class="rt-row-main">' +
           '<div class="rt-label-block">' +
             '<span class="rt-chevron">' + chevronChar + '</span>' +
             '<div class="rt-label-text">' +
-              '<span class="rt-label">' + escapeHtml(t.label) + '</span>' +
-              '<span class="rt-desc-inline">' + escapeHtml(t.description) + '</span>' +
+              '<span class="rt-label">' + escapeHtml(t.label) +
+                ' <span class="tooltip-trigger rt-info"' + tooltipAttr + '>' +
+                  '<span class="info-mark">ⓘ</span>' +
+                '</span>' +
+              '</span>' +
             '</div>' +
           '</div>' +
           '<div class="rt-bar"><div class="rt-bar-fill" style="width:' + barPct.toFixed(1) + '%"></div></div>' +
@@ -184,6 +188,8 @@
         if (e.target.closest('a.rt-roster-item')) return;
         // Pager buttons handle their own clicks — don't toggle on those.
         if (e.target.closest('.rt-pager')) return;
+        // Info icon shouldn't toggle the row — only its hover tooltip.
+        if (e.target.closest('.rt-info')) return;
         var label = row.getAttribute('data-type');
         if (state.expandedType === label) {
           state.expandedType = null;
