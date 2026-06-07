@@ -115,6 +115,67 @@
     '</div>';
   }
 
+  // Bucket every matched roster by total game-stack size
+  // (anchor-side QB+catchers + opponent-side bring-backs).
+  // Buckets: 3, 4, 5, 6, 7+ — minimum legal stack is QB+catcher+1 bring-back.
+  function bucketsForSize(matched) {
+    var raw = {};
+    matched.forEach(function (mr) {
+      var n = (mr.stackPlayers ? mr.stackPlayers.length : 0) + (mr.bringBacks ? mr.bringBacks.length : 0);
+      if (n < 3) return; // shouldn't happen, but guard
+      var k = n >= 7 ? 7 : n; // 7 = "7+"
+      raw[k] = (raw[k] || 0) + 1;
+    });
+    var labels = [3, 4, 5, 6, 7];
+    var labelStr = { 3: '3', 4: '4', 5: '5', 6: '6', 7: '7+' };
+    var total = matched.length;
+    return labels.map(function (k) {
+      var c = raw[k] || 0;
+      return { label: labelStr[k], count: c, pct: total ? c / total : 0 };
+    });
+  }
+
+  function renderStackSizeHistogram(matched) {
+    var buckets = bucketsForSize(matched);
+    var max = 0;
+    buckets.forEach(function (b) { if (b.count > max) max = b.count; });
+    if (!max) return ''; // nothing to chart
+
+    var modeBucket = buckets.reduce(function (best, b) { return b.count > best.count ? b : best; }, buckets[0]);
+    var total = matched.length;
+    var avg = 0;
+    matched.forEach(function (mr) {
+      avg += (mr.stackPlayers ? mr.stackPlayers.length : 0) + (mr.bringBacks ? mr.bringBacks.length : 0);
+    });
+    avg = total ? avg / total : 0;
+
+    var bars = buckets.map(function (b) {
+      var ratio = max ? b.count / max : 0;
+      var barH = Math.max(2, Math.round(ratio * 75));
+      var alpha = b.count ? 0.85 : 0.15;
+      var pctText = total ? (b.pct * 100).toFixed(b.pct * 100 >= 10 ? 0 : 1) + '%' : '';
+      var title = b.count + ' roster' + (b.count === 1 ? '' : 's') + ' with ' + b.label + ' game-stack players';
+      return '<div class="hist-col" title="' + escapeHtml(title) + '">' +
+        '<div class="hist-num">' + b.count + '</div>' +
+        '<div class="hist-pct">' + (b.count ? pctText : '') + '</div>' +
+        '<div class="hist-bar" style="height:' + barH + 'px;background:var(--accent);opacity:' + alpha + ';"></div>' +
+        '<div class="hist-x">' + b.label + '</div>' +
+      '</div>';
+    }).join('');
+
+    return '<h2 style="margin-top:8px;">Stack depth</h2>' +
+      '<div class="card histogram-card slot-card">' +
+        '<div class="histogram-head">' +
+          '<span class="badge" style="background:var(--bg-elev-2);color:var(--text-dim);border-color:var(--border);">DEPTH</span>' +
+          '<span class="histogram-meta">avg ' + avg.toFixed(2).replace(/\.00$/, '') +
+            ' · mode ' + modeBucket.label +
+            ' · ' + total + ' roster' + (total === 1 ? '' : 's') + '</span>' +
+        '</div>' +
+        '<div class="histogram-bars">' + bars + '</div>' +
+        '<div class="histogram-axis-label"># of game-stack players per roster (QB + pass catchers + bring-backs)</div>' +
+      '</div>';
+  }
+
   function renderAnchorPanel(row) {
     return '<h2 style="margin-top:8px;">Anchor breakdown</h2>' +
       '<div class="w17-anchor-grid w17-anchor-grid--standalone">' +
@@ -241,6 +302,7 @@
 
     contentEl.innerHTML =
       renderHero(row, totalRosters, totalFees) +
+      renderStackSizeHistogram(row.matchedRosters || []) +
       '<div id="w17-rosters-slot">' + renderRostersTable(row) + '</div>' +
       renderAnchorPanel(row);
     bindPager();
