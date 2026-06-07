@@ -214,18 +214,22 @@
   }
 
   // Round-1 pick frequency — top 12 players you've taken with a round-1 pick
-  // across all rosters. Same horizontal-bar visual as the team-exposure list.
+  // across all 1-QB rosters. Superflex drafts are excluded because their
+  // round-1 picks have a totally different positional shape (QBs spike).
   function renderRound1Frequency(rosters) {
     if (!rosters || !rosters.length) return '';
+    var eligible = rosters.filter(function (r) {
+      return !(BB.rosterIsSuperflex && BB.rosterIsSuperflex(r));
+    });
+    var superflexExcluded = rosters.length - eligible.length;
+    if (!eligible.length) return '';
     var counts = {};
-    var samplePicks = 0;
-    rosters.forEach(function (r) {
+    eligible.forEach(function (r) {
       (r.picks || []).forEach(function (p) {
         if (p.round !== 1 || !p.player) return;
         var key = p.player;
         if (!counts[key]) counts[key] = { player: p.player, team: p.team || '', pos: p.position || '', count: 0 };
         counts[key].count++;
-        samplePicks++;
       });
     });
     var rows = Object.keys(counts).map(function (k) { return counts[k]; })
@@ -233,7 +237,7 @@
       .slice(0, 12);
     if (!rows.length) return '';
     var max = rows[0].count;
-    var totalRosters = rosters.length;
+    var totalRosters = eligible.length;
 
     var rowsHtml = rows.map(function (r) {
       var barW = max ? Math.max(2, Math.round((r.count / max) * 100)) : 0;
@@ -251,10 +255,12 @@
       '</div>';
     }).join('');
 
+    var metaText = 'most-taken players with your round-1 pick · top ' + rows.length +
+      (superflexExcluded ? ' · ' + superflexExcluded + ' Superflex roster' + (superflexExcluded === 1 ? '' : 's') + ' excluded' : '');
     return '<div class="card histogram-card">' +
       '<div class="histogram-head">' +
         '<span class="badge" style="background:var(--bg-elev-2);color:var(--text-dim);border-color:var(--border);">ROUND 1</span>' +
-        '<span class="histogram-meta">most-taken players with your round-1 pick (top ' + rows.length + ')</span>' +
+        '<span class="histogram-meta">' + metaText + '</span>' +
       '</div>' +
       '<div class="team-exposure-list r1-list">' + rowsHtml + '</div>' +
     '</div>';

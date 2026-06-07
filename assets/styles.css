@@ -1452,14 +1452,19 @@ a.rt-page-btn:hover { text-decoration: none; }
   min-width: 0;
 }
 
-/* Team-exposure horizontal bar list (paired with the slot histogram). */
+/* Team-exposure horizontal bar list (paired with the slot histogram).
+   The team card stretches to match the height of the left column (slot
+   + round-1 stacked) — flex column makes the list fill remaining space. */
 .team-exposure-list {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-height: 340px;
-  overflow-y: auto;
-  padding-right: 4px; /* room for scrollbar */
+  /* no max-height — show every team so the card matches the left column */
+}
+.construction-charts-grid > .card.histogram-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 .te-row {
   display: grid;
