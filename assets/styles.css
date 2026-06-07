@@ -1618,6 +1618,75 @@ table.combo-table .badge {
   padding-top: 0;
   border-top: 0;
 }
+
+/* Two-column chart strip on the Week 17 deep-dive page (stack depth +
+   anchor split). Collapses to single column under ~720px. */
+.w17-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 12px;
+  margin: 16px 0 8px;
+}
+
+/* Anchor-split donut + legend layout. */
+.w17-donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 6px;
+  flex-wrap: wrap;
+}
+.w17-donut { flex-shrink: 0; }
+.w17-donut-total {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  fill: var(--text);
+}
+.w17-donut-sub {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  fill: var(--text-muted);
+}
+.w17-donut-legend {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 160px;
+}
+.w17-donut-row {
+  display: grid;
+  grid-template-columns: 12px 14px 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+.w17-donut-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.w17-donut-label { color: var(--text); }
+.w17-donut-count {
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 24px;
+  text-align: right;
+}
+.w17-donut-pct {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+  text-align: right;
+}
 .w17-side {
   background: var(--bg);
   border: 1px solid var(--border);

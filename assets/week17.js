@@ -155,16 +155,17 @@
       var alpha = b.count ? 0.85 : 0.15;
       var pctText = total ? (b.pct * 100).toFixed(b.pct * 100 >= 10 ? 0 : 1) + '%' : '';
       var title = b.count + ' roster' + (b.count === 1 ? '' : 's') + ' with ' + b.label + ' game-stack players';
+      // Top = % of total (the question users actually read), bar in the
+      // middle, stack-size label sits below as the x-axis tick. Raw count
+      // is on the hover tooltip.
       return '<div class="hist-col" title="' + escapeHtml(title) + '">' +
-        '<div class="hist-num">' + b.count + '</div>' +
-        '<div class="hist-pct">' + (b.count ? pctText : '') + '</div>' +
+        '<div class="hist-num">' + (b.count ? pctText : '0%') + '</div>' +
         '<div class="hist-bar" style="height:' + barH + 'px;background:var(--accent);opacity:' + alpha + ';"></div>' +
         '<div class="hist-x">' + b.label + '</div>' +
       '</div>';
     }).join('');
 
-    return '<h2 style="margin-top:8px;">Stack depth</h2>' +
-      '<div class="card histogram-card slot-card">' +
+    return '<div class="card histogram-card slot-card">' +
         '<div class="histogram-head">' +
           '<span class="badge" style="background:var(--bg-elev-2);color:var(--text-dim);border-color:var(--border);">DEPTH</span>' +
           '<span class="histogram-meta">avg ' + avg.toFixed(2).replace(/\.00$/, '') +
@@ -172,8 +173,93 @@
             ' · ' + total + ' roster' + (total === 1 ? '' : 's') + '</span>' +
         '</div>' +
         '<div class="histogram-bars">' + bars + '</div>' +
-        '<div class="histogram-axis-label"># of game-stack players per roster (QB + pass catchers + bring-backs)</div>' +
+        '<div class="histogram-axis-label"># of game-stack players per roster</div>' +
       '</div>';
+  }
+
+  // Donut breaking the matched rosters into disjoint slices:
+  //   A-only:  anchored on A but not B
+  //   B-only:  anchored on B but not A
+  //   Both:    QBs on both teams contributed to anchors
+  function renderAnchorSplitDonut(row) {
+    var both = row.bothAnchored || 0;
+    var aOnly = Math.max(0, (row.aAnchored || 0) - both);
+    var bOnly = Math.max(0, (row.bAnchored || 0) - both);
+    var total = aOnly + bOnly + both;
+
+    var colorA = (BB.teamColor && BB.teamColor(row.teamA)) || '#5b9bd5';
+    var colorB = (BB.teamColor && BB.teamColor(row.teamB)) || '#ed7d31';
+    var colorBoth = '#9ca3af'; // muted gray so it doesn't compete with team colors
+
+    var slices = [
+      { key: 'a',    color: colorA,    count: aOnly, label: row.teamA + ' only', teamCode: row.teamA },
+      { key: 'b',    color: colorB,    count: bOnly, label: row.teamB + ' only', teamCode: row.teamB },
+      { key: 'both', color: colorBoth, count: both,  label: 'Both anchors',      teamCode: null },
+    ];
+
+    // Donut geometry. r = path radius (center of stroke); stroke = ring thickness.
+    var SIZE = 120, R = 42, STROKE = 22, C = 2 * Math.PI * R;
+    var arcs = '';
+    if (total === 0) {
+      arcs = '<circle cx="' + (SIZE/2) + '" cy="' + (SIZE/2) + '" r="' + R + '" fill="none" stroke="var(--border)" stroke-width="' + STROKE + '"/>';
+    } else if (slices.filter(function (s) { return s.count > 0; }).length === 1) {
+      // Single slice — draw as full ring, no dash math.
+      var only = slices.filter(function (s) { return s.count > 0; })[0];
+      arcs = '<circle cx="' + (SIZE/2) + '" cy="' + (SIZE/2) + '" r="' + R + '" fill="none" stroke="' + only.color + '" stroke-width="' + STROKE + '"/>';
+    } else {
+      // Stack arcs via stroke-dasharray, offsetting each next slice with stroke-dashoffset.
+      // Rotate -90deg so the first slice starts at 12 o'clock.
+      var offset = 0;
+      slices.forEach(function (s) {
+        if (s.count <= 0) return;
+        var len = (s.count / total) * C;
+        // Tiny visual guard so a ~0% slice still shows; we already excluded count <= 0.
+        var dash = Math.max(0.5, len);
+        arcs += '<circle cx="' + (SIZE/2) + '" cy="' + (SIZE/2) + '" r="' + R + '" fill="none"' +
+          ' stroke="' + s.color + '" stroke-width="' + STROKE + '"' +
+          ' stroke-dasharray="' + dash.toFixed(2) + ' ' + (C - dash).toFixed(2) + '"' +
+          ' stroke-dashoffset="' + (-offset).toFixed(2) + '"' +
+          ' transform="rotate(-90 ' + (SIZE/2) + ' ' + (SIZE/2) + ')"' +
+        '/>';
+        offset += len;
+      });
+    }
+
+    var donutSvg =
+      '<svg class="w17-donut" viewBox="0 0 ' + SIZE + ' ' + SIZE + '" width="120" height="120" aria-hidden="true">' +
+        arcs +
+        '<text x="' + (SIZE/2) + '" y="' + (SIZE/2 - 2) + '" text-anchor="middle" dominant-baseline="middle" class="w17-donut-total">' + total + '</text>' +
+        '<text x="' + (SIZE/2) + '" y="' + (SIZE/2 + 14) + '" text-anchor="middle" dominant-baseline="middle" class="w17-donut-sub">rosters</text>' +
+      '</svg>';
+
+    var legend = slices.map(function (s) {
+      var pctText = total ? ((s.count / total) * 100).toFixed((s.count / total) * 100 >= 10 ? 0 : 1) + '%' : '—';
+      var teamLogo = s.teamCode ? BB.teamLogoHTML(s.teamCode, { size: 14 }) : '<span style="display:inline-block;width:14px;height:14px;"></span>';
+      var dim = s.count === 0 ? 'opacity:0.45;' : '';
+      return '<li class="w17-donut-row" style="' + dim + '">' +
+        '<span class="w17-donut-swatch" style="background:' + s.color + ';"></span>' +
+        teamLogo +
+        '<span class="w17-donut-label">' + escapeHtml(s.label) + '</span>' +
+        '<span class="w17-donut-count">' + s.count + '</span>' +
+        '<span class="w17-donut-pct">' + pctText + '</span>' +
+      '</li>';
+    }).join('');
+
+    var empty = total === 0
+      ? '<div style="color:var(--text-muted);font-size:11px;margin-top:8px;">No rosters with a game stack on this matchup.</div>'
+      : '';
+
+    return '<div class="card histogram-card slot-card">' +
+      '<div class="histogram-head">' +
+        '<span class="badge" style="background:var(--bg-elev-2);color:var(--text-dim);border-color:var(--border);">ANCHORS</span>' +
+        '<span class="histogram-meta">how stacks split between sides</span>' +
+      '</div>' +
+      '<div class="w17-donut-wrap">' +
+        donutSvg +
+        '<ul class="w17-donut-legend">' + legend + '</ul>' +
+      '</div>' +
+      empty +
+    '</div>';
   }
 
   function renderAnchorPanel(row) {
@@ -300,9 +386,14 @@
     var totalFees = 0;
     rosters.forEach(function (r) { totalFees += r.entryFee || 0; });
 
+    var chartsRow = '<div class="w17-charts-grid">' +
+      renderStackSizeHistogram(row.matchedRosters || []) +
+      renderAnchorSplitDonut(row) +
+    '</div>';
+
     contentEl.innerHTML =
       renderHero(row, totalRosters, totalFees) +
-      renderStackSizeHistogram(row.matchedRosters || []) +
+      chartsRow +
       '<div id="w17-rosters-slot">' + renderRostersTable(row) + '</div>' +
       renderAnchorPanel(row);
     bindPager();
