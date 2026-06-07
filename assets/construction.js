@@ -233,8 +233,7 @@
       });
     });
     var rows = Object.keys(counts).map(function (k) { return counts[k]; })
-      .sort(function (a, b) { return b.count - a.count; })
-      .slice(0, 12);
+      .sort(function (a, b) { return b.count - a.count; });
     if (!rows.length) return '';
     var max = rows[0].count;
     var totalRosters = eligible.length;
@@ -255,7 +254,8 @@
       '</div>';
     }).join('');
 
-    var metaText = 'most-taken players with your round-1 pick · top ' + rows.length +
+    var metaText = rows.length + ' player' + (rows.length === 1 ? '' : 's') +
+      ' taken with your round-1 pick' +
       (superflexExcluded ? ' · ' + superflexExcluded + ' Superflex roster' + (superflexExcluded === 1 ? '' : 's') + ' excluded' : '');
     return '<div class="card histogram-card">' +
       '<div class="histogram-head">' +

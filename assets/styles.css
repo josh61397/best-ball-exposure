@@ -1555,9 +1555,16 @@ a.rt-page-btn:hover { text-decoration: none; }
   color: var(--text);
 }
 
-/* Round-1 list variant — wider first column to fit full player names,
-   smaller max-height so it doesn't dwarf the slot chart above it. */
-.r1-list { max-height: none; }
+/* Round-1 list variant — wider first column to fit full player names.
+   Scrolls internally so the left column stays a reasonable height
+   relative to the team chart on the right. Override the flex:1 base
+   from .team-exposure-list since this list lives in a non-flex slot. */
+.r1-list {
+  flex: 0 0 auto;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
 .r1-row { grid-template-columns: 180px 1fr 32px; }
 .r1-team { gap: 5px; }
 .r1-name {
