@@ -213,6 +213,124 @@
     });
   }
 
+  // Round-1 pick frequency — top 12 players you've taken with a round-1 pick
+  // across all rosters. Same horizontal-bar visual as the team-exposure list.
+  function renderRound1Frequency(rosters) {
+    if (!rosters || !rosters.length) return '';
+    var counts = {};
+    var samplePicks = 0;
+    rosters.forEach(function (r) {
+      (r.picks || []).forEach(function (p) {
+        if (p.round !== 1 || !p.player) return;
+        var key = p.player;
+        if (!counts[key]) counts[key] = { player: p.player, team: p.team || '', pos: p.position || '', count: 0 };
+        counts[key].count++;
+        samplePicks++;
+      });
+    });
+    var rows = Object.keys(counts).map(function (k) { return counts[k]; })
+      .sort(function (a, b) { return b.count - a.count; })
+      .slice(0, 12);
+    if (!rows.length) return '';
+    var max = rows[0].count;
+    var totalRosters = rosters.length;
+
+    var rowsHtml = rows.map(function (r) {
+      var barW = max ? Math.max(2, Math.round((r.count / max) * 100)) : 0;
+      var pct = totalRosters ? (r.count / totalRosters * 100).toFixed(r.count / totalRosters * 100 >= 10 ? 0 : 1) + '%' : '';
+      var logo = BB.teamLogoHTML(r.team, { size: 14 });
+      var posBadge = r.pos ? '<span class="badge pos-' + escapeHtml(r.pos) + '" style="font-size:9px;padding:1px 4px;">' + escapeHtml(r.pos) + '</span>' : '';
+      var playerHref = 'player.html?name=' + encodeURIComponent(r.player);
+      var title = r.player + ' — round 1 in ' + r.count + ' of ' + totalRosters + ' rosters (' + pct + ')';
+      return '<div class="te-row r1-row" title="' + escapeHtml(title) + '">' +
+        '<div class="te-team r1-team">' + logo + posBadge +
+          '<a class="te-code r1-name" href="' + playerHref + '">' + escapeHtml(r.player) + '</a>' +
+        '</div>' +
+        '<div class="te-bar-wrap"><div class="te-bar" style="width:' + barW + '%"></div></div>' +
+        '<div class="te-count">' + r.count + '</div>' +
+      '</div>';
+    }).join('');
+
+    return '<div class="card histogram-card">' +
+      '<div class="histogram-head">' +
+        '<span class="badge" style="background:var(--bg-elev-2);color:var(--text-dim);border-color:var(--border);">ROUND 1</span>' +
+        '<span class="histogram-meta">most-taken players with your round-1 pick (top ' + rows.length + ')</span>' +
+      '</div>' +
+      '<div class="team-exposure-list r1-list">' + rowsHtml + '</div>' +
+    '</div>';
+  }
+
+  // Horizontal team-exposure bar chart paired with the draft-slot histogram.
+  // One row per NFL team that appears on your rosters, sorted by total
+  // picks desc. Each bar is broken into QB / RB / WR / TE segments so you
+  // can see the position mix at a glance.
+  function renderTeamExposure(rosters) {
+    if (!rosters || !rosters.length) return '';
+    // Per-team totals split by position.
+    var POSES = ['QB', 'RB', 'WR', 'TE'];
+    var byTeam = {};
+    rosters.forEach(function (r) {
+      (r.picks || []).forEach(function (p) {
+        if (!p.team) return;
+        if (!byTeam[p.team]) {
+          byTeam[p.team] = { team: p.team, total: 0, QB: 0, RB: 0, WR: 0, TE: 0, other: 0 };
+        }
+        var t = byTeam[p.team];
+        t.total++;
+        if (p.position && POSES.indexOf(p.position) !== -1) t[p.position]++;
+        else t.other++;
+      });
+    });
+    var teams = Object.keys(byTeam).map(function (k) { return byTeam[k]; })
+      .filter(function (t) { return t.total > 0; });
+    if (!teams.length) return '';
+    teams.sort(function (a, b) { return b.total - a.total; });
+    var max = teams[0].total;
+
+    var rows = teams.map(function (t) {
+      var pct = max ? (t.total / max) : 0;
+      var barW = Math.max(2, Math.round(pct * 100));
+      var logo = BB.teamLogoHTML(t.team, { size: 14 });
+
+      // Build a flex strip of position segments inside this team's bar.
+      var segments = POSES.map(function (pos) {
+        if (!t[pos]) return '';
+        var segPct = (t[pos] / t.total) * 100;
+        var title = t[pos] + ' ' + pos + (t[pos] === 1 ? '' : 's') + ' from ' + t.team;
+        return '<span class="te-bar-seg seg-' + pos + '" style="flex:' + t[pos] + ' 0 0;" title="' + escapeHtml(title) + '"></span>';
+      }).join('');
+      if (t.other) {
+        segments += '<span class="te-bar-seg seg-other" style="flex:' + t.other + ' 0 0;" title="' + t.other + ' other"></span>';
+      }
+
+      var rowTitle = t.total + ' picks from ' + t.team +
+        ' — QB ' + t.QB + ', RB ' + t.RB + ', WR ' + t.WR + ', TE ' + t.TE;
+      return '<div class="te-row" title="' + escapeHtml(rowTitle) + '">' +
+        '<div class="te-team">' + logo + '<a class="te-code" href="team.html?code=' + encodeURIComponent(t.team) + '">' + escapeHtml(t.team) + '</a></div>' +
+        '<div class="te-bar-wrap" style="width:' + barW + '%">' +
+          '<div class="te-bar-strip">' + segments + '</div>' +
+        '</div>' +
+        '<div class="te-count">' + t.total + '</div>' +
+      '</div>';
+    }).join('');
+
+    var legend =
+      '<div class="te-legend">' +
+        POSES.map(function (p) {
+          return '<span class="te-legend-item"><span class="te-legend-swatch seg-' + p + '"></span>' + p + '</span>';
+        }).join('') +
+      '</div>';
+
+    return '<div class="card histogram-card">' +
+      '<div class="histogram-head">' +
+        '<span class="badge" style="background:var(--bg-elev-2);color:var(--text-dim);border-color:var(--border);">TEAMS</span>' +
+        '<span class="histogram-meta">' + teams.length + ' NFL team' + (teams.length === 1 ? '' : 's') + ' · picks split by position</span>' +
+      '</div>' +
+      legend +
+      '<div class="team-exposure-list">' + rows + '</div>' +
+    '</div>';
+  }
+
   function renderDraftSlots(rosters) {
     var el = document.getElementById('draft-slots');
     if (!el) return;
@@ -230,12 +348,11 @@
         ' (' + shareText + ' of ' + d.totalRosters + ')';
       return '<div class="hist-col" title="' + title + '">' +
         '<div class="hist-num">' + s.count + '</div>' +
-        '<div class="hist-pct">' + (s.count ? shareText : '') + '</div>' +
         '<div class="hist-bar" style="height:' + barH + 'px;background:var(--accent);opacity:' + alpha + ';"></div>' +
         '<div class="hist-x">' + s.slot + '</div>' +
       '</div>';
     }).join('');
-    var html =
+    var slotCard =
       '<div class="card histogram-card slot-card">' +
         '<div class="histogram-head">' +
           '<span class="badge" style="background:var(--bg-elev-2);color:var(--text-dim);border-color:var(--border);">SLOT</span>' +
@@ -244,6 +361,14 @@
         '</div>' +
         '<div class="histogram-bars">' + bars + '</div>' +
         '<div class="histogram-axis-label">Draft slot (round 1 pick #)</div>' +
+      '</div>';
+
+    var round1Card = renderRound1Frequency(rosters);
+    var teamCard = renderTeamExposure(rosters);
+    var html =
+      '<div class="construction-charts-grid">' +
+        '<div class="construction-charts-col">' + slotCard + round1Card + '</div>' +
+        teamCard +
       '</div>';
     el.innerHTML = html;
   }

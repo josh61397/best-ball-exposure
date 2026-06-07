@@ -1433,9 +1433,125 @@ a.rt-page-btn:hover { text-decoration: none; }
 /* Standalone slot histogram (12 bars instead of ~5) — full row, more
    breathing room between columns so each slot label is legible. */
 .slot-card {
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 .slot-card .histogram-bars { gap: 6px; }
+
+/* Two-column chart grid on Team Construction (slot + round-1 stacked on
+   the left, team exposure on the right). */
+.construction-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.construction-charts-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* Team-exposure horizontal bar list (paired with the slot histogram). */
+.team-exposure-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 4px; /* room for scrollbar */
+}
+.te-row {
+  display: grid;
+  grid-template-columns: 64px 1fr 32px;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.te-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.te-code {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  font-size: 12px;
+}
+.te-code:hover { color: var(--accent); }
+.te-bar-wrap {
+  background: var(--bg-elev-2);
+  border-radius: 3px;
+  height: 10px;
+  overflow: hidden;
+}
+.te-bar {
+  background: var(--accent);
+  height: 100%;
+  border-radius: 3px;
+}
+/* Stacked position segments inside a team's bar. The wrapper width is
+   set per-row (relative to max-team-total); the strip fills it and
+   distributes children proportionally via flex-grow. */
+.te-bar-strip {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.te-bar-seg { height: 100%; min-width: 1px; }
+.te-bar-seg.seg-QB    { background: var(--pos-qb); }
+.te-bar-seg.seg-RB    { background: var(--pos-rb); }
+.te-bar-seg.seg-WR    { background: var(--pos-wr); }
+.te-bar-seg.seg-TE    { background: var(--pos-te); }
+.te-bar-seg.seg-other { background: var(--text-muted); opacity: 0.5; }
+
+/* Legend strip above the team-exposure list. */
+.te-legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 6px 0 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.te-legend-item { display: inline-flex; align-items: center; gap: 5px; }
+.te-legend-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+.te-legend-swatch.seg-QB    { background: var(--pos-qb); }
+.te-legend-swatch.seg-RB    { background: var(--pos-rb); }
+.te-legend-swatch.seg-WR    { background: var(--pos-wr); }
+.te-legend-swatch.seg-TE    { background: var(--pos-te); }
+.te-count {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Round-1 list variant — wider first column to fit full player names,
+   smaller max-height so it doesn't dwarf the slot chart above it. */
+.r1-list { max-height: none; }
+.r1-row { grid-template-columns: 180px 1fr 32px; }
+.r1-team { gap: 5px; }
+.r1-name {
+  font-family: var(--font-body);
+  letter-spacing: 0;
+  font-size: 12px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .histogram-card {
   padding: 14px 16px;
   display: flex;
