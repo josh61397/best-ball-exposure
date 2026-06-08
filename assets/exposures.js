@@ -89,9 +89,9 @@
   }
 
   function clvClass(clv) {
-    if (clv == null) return '';
-    if (clv > 0.05) return 'clv-pos';
-    if (clv < -0.05) return 'clv-neg';
+    if (clv == null || isNaN(clv)) return '';
+    if (clv > 0) return 'clv-pos';
+    if (clv < 0) return 'clv-neg';
     return '';
   }
   function clvText(clv) {

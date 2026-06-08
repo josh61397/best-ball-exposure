@@ -821,6 +821,10 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
 
 .clv-pos { color: var(--accent-2); }
 .clv-neg { color: var(--danger); }
+/* Table cells need extra specificity to override the default
+   `table.data tbody td { color: var(--text) }` baseline color. */
+table.data tbody td.clv-pos { color: var(--accent-2); }
+table.data tbody td.clv-neg { color: var(--danger); }
 
 /* Position-tinted table rows. Applied to the first cell so the
    heat-map cells in later columns retain their own colors. */
