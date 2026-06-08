@@ -1555,17 +1555,23 @@ a.rt-page-btn:hover { text-decoration: none; }
   color: var(--text);
 }
 
-/* Round-1 list variant — wider first column to fit full player names.
-   Scrolls internally so the left column stays a reasonable height
-   relative to the team chart on the right. Override the flex:1 base
-   from .team-exposure-list since this list lives in a non-flex slot. */
+/* Round-1 / Top-12 ADP list variant — wider first column to fit full
+   player names. Wider count column to fit "Nr1 / Ntotal". Override
+   the inherited flex:1 base from .team-exposure-list. */
 .r1-list {
   flex: 0 0 auto;
-  max-height: 320px;
+  max-height: 360px;
   overflow-y: auto;
   padding-right: 4px;
 }
-.r1-row { grid-template-columns: 180px 1fr 32px; }
+.r1-row { grid-template-columns: 180px 1fr 64px; }
+.r1-r1count { font-weight: 700; }
+.r1-total {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 11px;
+  margin-left: 1px;
+}
 .r1-team { gap: 5px; }
 .r1-name {
   font-family: var(--font-body);

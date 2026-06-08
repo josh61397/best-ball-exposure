@@ -213,9 +213,11 @@
     });
   }
 
-  // Round-1 pick frequency — top 12 players you've taken with a round-1 pick
-  // across all 1-QB rosters. Superflex drafts are excluded because their
-  // round-1 picks have a totally different positional shape (QBs spike).
+  // Top-12 ADP exposure — fixed list of the 12 highest-ranked players by
+  // current 1-QB market ADP (Underdog). For each, show how many times
+  // you've drafted them in round 1 (the bar) and how many times across
+  // all rounds (smaller sub-count). Superflex rosters are excluded because
+  // their round-1 shape is unrelated to the 1-QB ADP list.
   function renderRound1Frequency(rosters) {
     if (!rosters || !rosters.length) return '';
     var eligible = rosters.filter(function (r) {
@@ -223,43 +225,65 @@
     });
     var superflexExcluded = rosters.length - eligible.length;
     if (!eligible.length) return '';
-    var counts = {};
+
+    // 12 highest-ranked players by UD ADP (ascending = lowest ADP first).
+    var adp = (window.BB_DATA && window.BB_DATA.adp) || [];
+    var top12 = adp
+      .filter(function (p) { return p.ud != null; })
+      .slice()
+      .sort(function (a, b) { return a.ud - b.ud; })
+      .slice(0, 12);
+    if (!top12.length) return '';
+
+    // For each top-12 player, count R1 picks and total picks across
+    // eligible (non-SF) rosters.
+    var normalize = (window.BB_DATA && window.BB_DATA.normalizeName)
+      ? window.BB_DATA.normalizeName
+      : function (s) { return String(s || '').toLowerCase().trim(); };
+    var stats = {};
+    top12.forEach(function (p) { stats[normalize(p.name)] = { r1: 0, total: 0 }; });
     eligible.forEach(function (r) {
       (r.picks || []).forEach(function (p) {
-        if (p.round !== 1 || !p.player) return;
-        var key = p.player;
-        if (!counts[key]) counts[key] = { player: p.player, team: p.team || '', pos: p.position || '', count: 0 };
-        counts[key].count++;
+        if (!p.player) return;
+        var k = normalize(p.player);
+        if (!stats[k]) return;
+        stats[k].total++;
+        if (p.round === 1) stats[k].r1++;
       });
     });
-    var rows = Object.keys(counts).map(function (k) { return counts[k]; })
-      .sort(function (a, b) { return b.count - a.count; });
-    if (!rows.length) return '';
-    var max = rows[0].count;
-    var totalRosters = eligible.length;
+
+    var rows = top12.map(function (p) {
+      var s = stats[normalize(p.name)] || { r1: 0, total: 0 };
+      return {
+        player: p.name, pos: p.pos || '', team: p.team || '',
+        ud: p.ud,
+        r1: s.r1, total: s.total,
+      };
+    });
+    var max = rows.reduce(function (m, r) { return Math.max(m, r.r1); }, 0);
 
     var rowsHtml = rows.map(function (r) {
-      var barW = max ? Math.max(2, Math.round((r.count / max) * 100)) : 0;
-      var pct = totalRosters ? (r.count / totalRosters * 100).toFixed(r.count / totalRosters * 100 >= 10 ? 0 : 1) + '%' : '';
+      var barW = max ? Math.max(2, Math.round((r.r1 / max) * 100)) : 0;
       var logo = BB.teamLogoHTML(r.team, { size: 14 });
       var posBadge = r.pos ? '<span class="badge pos-' + escapeHtml(r.pos) + '" style="font-size:9px;padding:1px 4px;">' + escapeHtml(r.pos) + '</span>' : '';
       var playerHref = 'player.html?name=' + encodeURIComponent(r.player);
-      var title = r.player + ' — round 1 in ' + r.count + ' of ' + totalRosters + ' rosters (' + pct + ')';
+      var title = r.player + ' (ADP ' + r.ud + ') — round 1 in ' + r.r1 + ' draft' + (r.r1 === 1 ? '' : 's') +
+        ', total ' + r.total + ' across all rounds';
+      var sub = '<span class="r1-total" title="total times drafted across all rounds">/ ' + r.total + '</span>';
       return '<div class="te-row r1-row" title="' + escapeHtml(title) + '">' +
         '<div class="te-team r1-team">' + logo + posBadge +
           '<a class="te-code r1-name" href="' + playerHref + '">' + escapeHtml(r.player) + '</a>' +
         '</div>' +
         '<div class="te-bar-wrap"><div class="te-bar" style="width:' + barW + '%"></div></div>' +
-        '<div class="te-count">' + r.count + '</div>' +
+        '<div class="te-count"><span class="r1-r1count">' + r.r1 + '</span> ' + sub + '</div>' +
       '</div>';
     }).join('');
 
-    var metaText = rows.length + ' player' + (rows.length === 1 ? '' : 's') +
-      ' taken with your round-1 pick' +
+    var metaText = 'top 12 players by current UD ADP — round-1 picks (bar) vs all rounds' +
       (superflexExcluded ? ' · ' + superflexExcluded + ' Superflex roster' + (superflexExcluded === 1 ? '' : 's') + ' excluded' : '');
     return '<div class="card histogram-card">' +
       '<div class="histogram-head">' +
-        '<span class="badge" style="background:var(--bg-elev-2);color:var(--text-dim);border-color:var(--border);">ROUND 1</span>' +
+        '<span class="badge" style="background:var(--bg-elev-2);color:var(--text-dim);border-color:var(--border);">TOP 12 ADP</span>' +
         '<span class="histogram-meta">' + metaText + '</span>' +
       '</div>' +
       '<div class="team-exposure-list r1-list">' + rowsHtml + '</div>' +
@@ -394,9 +418,10 @@
         var alpha = b.rosters ? 0.85 : 0.15;
         var pctOfTotal = h.totalRosters ? (b.rosters / h.totalRosters * 100) : 0;
         var pctText = h.totalRosters ? pctOfTotal.toFixed(pctOfTotal >= 10 ? 0 : 1) + '%' : '';
+        // Top label = % of total (the question users actually read). Raw
+        // roster count moved to the hover tooltip.
         return '<div class="hist-col" title="' + b.rosters + ' rosters drafted ' + b.count + ' ' + pos + 's (' + pctText + ' of ' + h.totalRosters + ')">' +
-          '<div class="hist-num">' + b.rosters + '</div>' +
-          (pctText ? '<div class="hist-pct">' + pctText + '</div>' : '') +
+          '<div class="hist-num">' + (b.rosters ? pctText : '0%') + '</div>' +
           '<div class="hist-bar" style="height:' + barH + 'px;background:var(--pos-' + pos.toLowerCase() + ');opacity:' + alpha + ';"></div>' +
           '<div class="hist-x">' + b.count + '</div>' +
         '</div>';
