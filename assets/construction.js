@@ -257,29 +257,27 @@
       return {
         player: p.name, pos: p.pos || '', team: p.team || '',
         ud: p.ud,
-        r1: s.r1, total: s.total,
+        total: s.total,
       };
     });
-    var max = rows.reduce(function (m, r) { return Math.max(m, r.r1); }, 0);
+    var max = rows.reduce(function (m, r) { return Math.max(m, r.total); }, 0);
 
     var rowsHtml = rows.map(function (r) {
-      var barW = max ? Math.max(2, Math.round((r.r1 / max) * 100)) : 0;
+      var barW = max ? Math.max(2, Math.round((r.total / max) * 100)) : 0;
       var logo = BB.teamLogoHTML(r.team, { size: 14 });
       var posBadge = r.pos ? '<span class="badge pos-' + escapeHtml(r.pos) + '" style="font-size:9px;padding:1px 4px;">' + escapeHtml(r.pos) + '</span>' : '';
       var playerHref = 'player.html?name=' + encodeURIComponent(r.player);
-      var title = r.player + ' (ADP ' + r.ud + ') — round 1 in ' + r.r1 + ' draft' + (r.r1 === 1 ? '' : 's') +
-        ', total ' + r.total + ' across all rounds';
-      var sub = '<span class="r1-total" title="total times drafted across all rounds">/ ' + r.total + '</span>';
+      var title = r.player + ' (ADP ' + r.ud + ') — drafted ' + r.total + ' time' + (r.total === 1 ? '' : 's') + ' across all rounds';
       return '<div class="te-row r1-row" title="' + escapeHtml(title) + '">' +
         '<div class="te-team r1-team">' + logo + posBadge +
           '<a class="te-code r1-name" href="' + playerHref + '">' + escapeHtml(r.player) + '</a>' +
         '</div>' +
         '<div class="te-bar-wrap"><div class="te-bar" style="width:' + barW + '%"></div></div>' +
-        '<div class="te-count"><span class="r1-r1count">' + r.r1 + '</span> ' + sub + '</div>' +
+        '<div class="te-count">' + r.total + '</div>' +
       '</div>';
     }).join('');
 
-    var metaText = 'top 12 players by current UD ADP — round-1 picks (bar) vs all rounds' +
+    var metaText = 'top 12 players by current UD ADP — total times drafted' +
       (superflexExcluded ? ' · ' + superflexExcluded + ' Superflex roster' + (superflexExcluded === 1 ? '' : 's') + ' excluded' : '');
     return '<div class="card histogram-card">' +
       '<div class="histogram-head">' +
