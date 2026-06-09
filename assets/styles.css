@@ -1244,6 +1244,38 @@ table.construction-table tbody tr td {
 }
 .rt-row:last-child { border-bottom: 0; }
 .rt-row.is-empty { opacity: 0.45; }
+.rt-row.is-clickable { cursor: pointer; }
+.rt-row.is-clickable:hover { background: var(--bg-elev-2); }
+.rt-row.is-selected {
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-elev));
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+/* Filtered-rosters table that appears below the build chart. */
+.build-rosters-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 18px 0 8px;
+}
+.build-rosters-header strong {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.tbl-build-rosters table.data { width: 100%; }
+.build-pick-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.build-pick-cell a { color: var(--text); }
+.build-pick-cell a:hover { color: var(--accent); }
+.build-clv-cell.clv-pos { color: var(--accent-2); }
+.build-clv-cell.clv-neg { color: var(--danger); }
 
 .rt-row-main {
   display: grid;

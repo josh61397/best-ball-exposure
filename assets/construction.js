@@ -26,6 +26,10 @@
     constructionPage: 0,
     // Which top-level tab is active: 'builds' | 'profile' | 'positions' | 'full-adp'.
     tab: 'profile',
+    // When non-null, the rosters table below the Roster Builds chart is
+    // filtered to rosters matching this archetype label.
+    selectedBuild: null,
+    selectedBuildPage: 0,
   };
   try {
     var savedTab = localStorage.getItem('bb_construction_tab');
@@ -109,9 +113,12 @@
 
     var rowsHtml = types.map(function (t) {
       var isEmpty = t.count === 0;
+      var isSelected = state.selectedBuild === t.label && !isEmpty;
       var pctText = isEmpty ? '—' : BB.fmtPct(t.pct);
       var barPct = max ? (t.count / max * 100) : 0;
-      var cls = 'rt-row' + (isEmpty ? ' is-empty' : '');
+      var cls = 'rt-row' +
+        (isEmpty ? ' is-empty' : ' is-clickable') +
+        (isSelected ? ' is-selected' : '');
 
       var tooltipAttr = ' data-tooltip="' + escapeHtml(t.description).replace(/"/g, '&quot;') + '"';
 
@@ -169,6 +176,180 @@
         '</div>' +
         rowsHtml +
       '</div>';
+
+    // Click a build to toggle the rosters filter below.
+    el.querySelectorAll('.rt-row.is-clickable').forEach(function (row) {
+      row.addEventListener('click', function (e) {
+        if (e.target.closest('.rt-info')) return;
+        var label = row.getAttribute('data-type');
+        if (state.selectedBuild === label) {
+          state.selectedBuild = null;
+        } else {
+          state.selectedBuild = label;
+          state.selectedBuildPage = 0;
+        }
+        // Re-render the chart to flip selection highlight, then refresh
+        // the table below.
+        renderRosterTypes(getFilteredRosters());
+        renderBuildRosters(getFilteredRosters());
+      });
+    });
+
+    // Refresh the table below to match current selection.
+    renderBuildRosters(getFilteredRosters());
+  }
+
+  var BUILD_ROSTERS_PAGE_SIZE = 10;
+
+  function renderBuildRosters(rosters) {
+    var el = document.getElementById('build-rosters');
+    if (!el) return;
+    if (!state.selectedBuild || !rosters.length) { el.innerHTML = ''; return; }
+
+    var label = state.selectedBuild;
+    var matching = rosters.filter(function (r) {
+      return BB.classifyRoster(r).indexOf(label) !== -1;
+    });
+    if (!matching.length) {
+      el.innerHTML =
+        '<div class="build-rosters-header">' +
+          '<div><strong>' + escapeHtml(label) + '</strong>' +
+            '<span style="color:var(--text-muted);margin-left:8px;">no matching rosters in the current view</span>' +
+          '</div>' +
+          '<button type="button" class="rt-page-btn" id="build-clear">× Clear filter</button>' +
+        '</div>';
+      var clearBtn = document.getElementById('build-clear');
+      if (clearBtn) clearBtn.addEventListener('click', function () {
+        state.selectedBuild = null;
+        renderRosterTypes(getFilteredRosters());
+      });
+      return;
+    }
+
+    // Sort: most recent first.
+    matching = matching.slice().sort(function (a, b) {
+      var da = a.draftedAt || ''; var db = b.draftedAt || '';
+      return db.localeCompare(da);
+    });
+    var totalPages = Math.max(1, Math.ceil(matching.length / BUILD_ROSTERS_PAGE_SIZE));
+    if (state.selectedBuildPage >= totalPages) state.selectedBuildPage = totalPages - 1;
+    if (state.selectedBuildPage < 0) state.selectedBuildPage = 0;
+    var start = state.selectedBuildPage * BUILD_ROSTERS_PAGE_SIZE;
+    var end = Math.min(start + BUILD_ROSTERS_PAGE_SIZE, matching.length);
+    var pageRows = matching.slice(start, end);
+
+    function dateText(r) {
+      if (!r.draftedAt) return '—';
+      var d = new Date(r.draftedAt);
+      if (isNaN(d.getTime())) return '—';
+      return (d.getMonth() + 1) + '/' + d.getDate() + '/' + String(d.getFullYear()).slice(-2);
+    }
+    function pickAtRound(r, n) {
+      return (r.picks || []).find(function (p) { return p.round === n; });
+    }
+    function pickCell(p) {
+      if (!p) return '—';
+      var logo = p.team ? BB.teamLogoHTML(p.team, { size: 14 }) : '';
+      var badge = p.position ? '<span class="badge pos-' + escapeHtml(p.position) + '" style="font-size:9px;padding:1px 4px;">' + escapeHtml(p.position) + '</span>' : '';
+      var name = '<a href="player.html?name=' + encodeURIComponent(p.player) + '">' + escapeHtml(p.player) + '</a>';
+      return '<span class="build-pick-cell">' + logo + badge + name + '</span>';
+    }
+
+    var tableRows = pageRows.map(function (r) {
+      var p1 = pickAtRound(r, 1);
+      var p2 = pickAtRound(r, 2);
+      var p3 = pickAtRound(r, 3);
+      var slot = p1 && p1.pickNumber ? p1.pickNumber : '—';
+      var fee = (r.entryFee != null) ? BB.fmtMoney(r.entryFee) : '—';
+      var href = 'rosters.html?id=' + encodeURIComponent(r.rosterId);
+      return '<tr data-roster="' + escapeHtml(r.rosterId) + '">' +
+        '<td>' + escapeHtml(r.tournament || '(unknown)') + '</td>' +
+        '<td>' + (BB.platformLogoHTML(r.platform, { size: 14 }) || escapeHtml(r.platform || '')) + '</td>' +
+        '<td>' + escapeHtml(dateText(r)) + '</td>' +
+        '<td class="num">' + slot + '</td>' +
+        '<td>' + pickCell(p1) + '</td>' +
+        '<td>' + pickCell(p2) + '</td>' +
+        '<td>' + pickCell(p3) + '</td>' +
+        '<td class="num">' + fee + '</td>' +
+        '<td class="num build-clv-cell">…</td>' +
+        '<td><a href="' + href + '" style="color:var(--accent);">View →</a></td>' +
+      '</tr>';
+    }).join('');
+
+    var head = '<thead><tr>' +
+      '<th>Tournament</th>' +
+      '<th>Platform</th>' +
+      '<th>Date</th>' +
+      '<th class="num">Slot</th>' +
+      '<th>R1</th>' +
+      '<th>R2</th>' +
+      '<th>R3</th>' +
+      '<th class="num">Fee</th>' +
+      '<th class="num">CLV</th>' +
+      '<th></th>' +
+    '</tr></thead>';
+
+    var prevDisabled = state.selectedBuildPage === 0;
+    var nextDisabled = state.selectedBuildPage >= totalPages - 1;
+    var pagerHtml = matching.length > BUILD_ROSTERS_PAGE_SIZE
+      ? '<div class="rt-pager">' +
+          '<button type="button" class="rt-page-btn" id="build-prev"' + (prevDisabled ? ' disabled' : '') + '>‹ Prev</button>' +
+          '<span class="rt-page-info">Showing ' + (start + 1) + '–' + end + ' of ' + matching.length + '</span>' +
+          '<button type="button" class="rt-page-btn" id="build-next"' + (nextDisabled ? ' disabled' : '') + '>Next ›</button>' +
+        '</div>'
+      : '';
+
+    el.innerHTML =
+      '<div class="build-rosters-header">' +
+        '<div><strong>' + escapeHtml(label) + '</strong>' +
+          '<span style="color:var(--text-muted);margin-left:8px;">' + matching.length + ' matching roster' + (matching.length === 1 ? '' : 's') + '</span>' +
+        '</div>' +
+        '<button type="button" class="rt-page-btn" id="build-clear">× Clear filter</button>' +
+      '</div>' +
+      '<div class="tbl-build-rosters"><table class="data">' + head + '<tbody>' + tableRows + '</tbody></table></div>' +
+      pagerHtml;
+
+    document.getElementById('build-clear').addEventListener('click', function () {
+      state.selectedBuild = null;
+      renderRosterTypes(getFilteredRosters());
+    });
+    var prevBtn = document.getElementById('build-prev');
+    var nextBtn = document.getElementById('build-next');
+    if (prevBtn) prevBtn.addEventListener('click', function () {
+      if (prevBtn.disabled) return;
+      state.selectedBuildPage--;
+      renderBuildRosters(getFilteredRosters());
+    });
+    if (nextBtn) nextBtn.addEventListener('click', function () {
+      if (nextBtn.disabled) return;
+      state.selectedBuildPage++;
+      renderBuildRosters(getFilteredRosters());
+    });
+
+    // Patch CLV values in async (per-roster fetch, but cached).
+    pageRows.forEach(function (r) {
+      var rowEl = el.querySelector('tr[data-roster="' + cssSafe(r.rosterId) + '"]');
+      if (!rowEl) return;
+      var cell = rowEl.querySelector('.build-clv-cell');
+      if (!cell) return;
+      if (BB.rosterIsSuperflex && BB.rosterIsSuperflex(r)) {
+        cell.textContent = '—';
+        cell.title = 'Superflex roster — excluded from CLV calc';
+        return;
+      }
+      BB.rosterClvRtv(r).then(function (v) {
+        var clv = v && v.clv && v.clv.totalADP;
+        if (clv == null) { cell.textContent = '—'; return; }
+        var sign = clv > 0 ? '+' : '';
+        cell.textContent = sign + clv.toFixed(1);
+        cell.classList.add(clv > 0 ? 'clv-pos' : (clv < 0 ? 'clv-neg' : ''));
+      }).catch(function () { cell.textContent = '—'; });
+    });
+  }
+
+  function cssSafe(s) {
+    if (window.CSS && CSS.escape) return CSS.escape(s);
+    return String(s).replace(/[^a-zA-Z0-9_-]/g, function (c) { return '\\' + c; });
   }
 
   // Top-12 ADP exposure — fixed list of the 12 highest-ranked players by
