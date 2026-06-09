@@ -1570,11 +1570,21 @@ a.rt-page-btn:hover { text-decoration: none; }
 .r1-row { grid-template-columns: 180px 1fr 36px; }
 
 /* Full ADP rendered as a standard data table with a bar graph inside
-   the Drafts column. The bar wrapper fills the cell so the bar's width
-   reads relative to the column. */
+   the Drafts column. All meta columns (#, Player, Pos, Team, ADP) hug
+   the left and shrink to content via `width: 1%; white-space: nowrap`,
+   so the Drafts column absorbs the remaining row width. */
 .tbl-full-adp { margin-top: 8px; }
-.tbl-full-adp table.data { width: 100%; }
-.tbl-full-adp .full-adp-bar-col { width: 30%; min-width: 180px; }
+.tbl-full-adp table.data { width: 100%; table-layout: auto; }
+.tbl-full-adp th,
+.tbl-full-adp td {
+  width: 1%;
+  white-space: nowrap;
+}
+.tbl-full-adp .full-adp-bar-col {
+  width: auto;          /* takes the remaining row width */
+  min-width: 240px;
+  white-space: normal;
+}
 .tbl-full-adp .full-adp-bar-wrap {
   width: 100%;
   height: 10px;
