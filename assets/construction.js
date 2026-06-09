@@ -87,138 +87,88 @@
     tourneyEl.value = state.tournament;
   }
 
-  function renderRosterTypeRosters(label, rosters) {
-    var matching = rosters.filter(function (r) {
-      return BB.classifyRoster(r).indexOf(label) !== -1;
-    });
-    if (!matching.length) {
-      return '<div class="rt-rosters"><div class="rt-empty">No matching rosters in the current view.</div></div>';
-    }
-    // Most recent first
-    matching.sort(function (a, b) {
-      var da = a.draftedAt || '';
-      var db = b.draftedAt || '';
-      return db.localeCompare(da);
-    });
-
-    var totalPages = Math.max(1, Math.ceil(matching.length / PAGE_SIZE));
-    var page = state.expandedPage;
-    if (page < 0) page = 0;
-    if (page >= totalPages) page = totalPages - 1;
-    state.expandedPage = page;
-    var start = page * PAGE_SIZE;
-    var end = Math.min(start + PAGE_SIZE, matching.length);
-    var displayed = matching.slice(start, end);
-
-    var rows = displayed.map(function (r) {
-      var dateText = '—';
-      if (r.draftedAt) {
-        var d = new Date(r.draftedAt);
-        if (!isNaN(d.getTime())) dateText = (d.getMonth() + 1) + '/' + d.getDate() + '/' + String(d.getFullYear()).slice(-2);
-      }
-      var href = 'rosters.html?id=' + encodeURIComponent(r.rosterId);
-      var fee = (r.entryFee != null) ? BB.fmtMoney(r.entryFee) : '—';
-      var pos = BB.rosterDraftPosition ? BB.rosterDraftPosition(r) : null;
-      return '<a class="rt-roster-item" href="' + escapeHtml(href) + '">' +
-        BB.platformLogoHTML(r.platform, { size: 14 }) +
-        '<span class="rt-roster-name">' + escapeHtml(r.tournament || '(unknown)') + '</span>' +
-        '<span class="rt-roster-meta">' +
-          '<span>' + escapeHtml(dateText) + '</span>' +
-          (pos != null ? '<span>pick&nbsp;' + pos + '</span>' : '') +
-          '<span>' + fee + '</span>' +
-        '</span>' +
-        '</a>';
-    }).join('');
-
-    var pagerHtml = '';
-    if (matching.length > PAGE_SIZE) {
-      var prevDisabled = page === 0;
-      var nextDisabled = page >= totalPages - 1;
-      pagerHtml =
-        '<div class="rt-pager" data-stop="1">' +
-          '<button type="button" class="rt-page-btn" data-page-act="prev"' + (prevDisabled ? ' disabled' : '') + '>‹ Prev</button>' +
-          '<span class="rt-page-info">Showing ' + (start + 1) + '-' + end + ' of ' + matching.length + ' · page ' + (page + 1) + ' of ' + totalPages + '</span>' +
-          '<button type="button" class="rt-page-btn" data-page-act="next"' + (nextDisabled ? ' disabled' : '') + '>Next ›</button>' +
-        '</div>';
-    }
-    return '<div class="rt-rosters">' + rows + '</div>' + pagerHtml;
-  }
+  // renderRosterTypeRosters (the per-build expansion) was removed when
+  // Roster Types went from clickable rows to a flat read-only chart.
 
   function renderRosterTypes(rosters) {
     var el = document.getElementById('roster-types');
     if (!el) return;
     if (!rosters.length) { el.innerHTML = ''; return; }
-    var types = BB.computeRosterTypes(rosters);
-    // Sort by count desc so most common archetypes float to the top.
-    types.sort(function (a, b) { return b.count - a.count; });
+    // Fast first paint with sync metrics; CLV column patches in after
+    // the async per-roster fetches resolve.
+    var syncTypes = BB.computeRosterTypes(rosters);
+    paintRosterTypes(el, syncTypes, null);
+    BB.computeRosterTypeStats(rosters).then(function (types) {
+      paintRosterTypes(el, types, true);
+    }).catch(function () { /* keep the sync render in place */ });
+  }
+
+  function paintRosterTypes(el, types, withClv) {
+    types = types.slice().sort(function (a, b) { return b.count - a.count; });
     var max = types.reduce(function (m, t) { return Math.max(m, t.count); }, 0);
 
     var rowsHtml = types.map(function (t) {
       var isEmpty = t.count === 0;
-      var isExpanded = !isEmpty && state.expandedType === t.label;
       var pctText = isEmpty ? '—' : BB.fmtPct(t.pct);
       var barPct = max ? (t.count / max * 100) : 0;
-      var chevronChar = isExpanded ? '▾' : (isEmpty ? '' : '▸');
-      var cls = 'rt-row' +
-        (isEmpty ? ' is-empty' : ' is-clickable') +
-        (isExpanded ? ' is-expanded' : '');
+      var cls = 'rt-row' + (isEmpty ? ' is-empty' : '');
 
       var tooltipAttr = ' data-tooltip="' + escapeHtml(t.description).replace(/"/g, '&quot;') + '"';
-      var main =
+
+      // Avg fee = total fees / count of matching rosters.
+      var feeText = isEmpty ? '—' : BB.fmtMoney(t.avgFee);
+      // Avg CLV — show "…" while loading, then populate. Color-coded
+      // green (>0) / red (<0) once known.
+      var clvVal = t.avgClv;
+      var clvText, clvCls;
+      if (!withClv) {
+        clvText = '<span class="rt-clv-loading">…</span>';
+        clvCls = 'rt-clv-num';
+      } else if (clvVal == null || isEmpty) {
+        clvText = '—';
+        clvCls = 'rt-clv-num';
+      } else {
+        var sign = clvVal > 0 ? '+' : '';
+        clvText = sign + clvVal.toFixed(1);
+        clvCls = 'rt-clv-num ' + (clvVal > 0 ? 'clv-pos' : (clvVal < 0 ? 'clv-neg' : ''));
+      }
+
+      return '<div class="' + cls + '" data-type="' + escapeHtml(t.label) + '">' +
         '<div class="rt-row-main">' +
           '<div class="rt-label-block">' +
-            '<span class="rt-chevron">' + chevronChar + '</span>' +
-            '<div class="rt-label-text">' +
-              '<span class="rt-label">' + escapeHtml(t.label) +
-                ' <span class="tooltip-trigger rt-info"' + tooltipAttr + '>' +
-                  '<span class="info-mark">ⓘ</span>' +
-                '</span>' +
+            '<span class="rt-label">' + escapeHtml(t.label) +
+              ' <span class="tooltip-trigger rt-info"' + tooltipAttr + '>' +
+                '<span class="info-mark">ⓘ</span>' +
               '</span>' +
-            '</div>' +
+            '</span>' +
           '</div>' +
           '<div class="rt-bar"><div class="rt-bar-fill" style="width:' + barPct.toFixed(1) + '%"></div></div>' +
           '<div class="rt-stats">' +
-            '<span class="rt-count-num">' + t.count + '</span>' +
+            '<span class="rt-count-num" title="rosters matching this build">' + t.count + '</span>' +
             '<span class="rt-pct-num">' + pctText + '</span>' +
+            '<span class="rt-fee-num" title="avg entry fee on matching rosters">' + feeText + '</span>' +
+            '<span class="' + clvCls + '" title="avg CLV per matching draft (Superflex excluded)">' + clvText + '</span>' +
           '</div>' +
-        '</div>';
-
-      var expansion = isExpanded ? renderRosterTypeRosters(t.label, rosters) : '';
-
-      return '<div class="' + cls + '" data-type="' + escapeHtml(t.label) + '">' + main + expansion + '</div>';
+        '</div>' +
+      '</div>';
     }).join('');
 
-    el.innerHTML = '<div class="roster-types-list">' + rowsHtml + '</div>';
-
-    el.querySelectorAll('.rt-row.is-clickable').forEach(function (row) {
-      row.addEventListener('click', function (e) {
-        // Let clicks on inner links go through (they navigate to roster detail).
-        if (e.target.closest('a.rt-roster-item')) return;
-        // Pager buttons handle their own clicks — don't toggle on those.
-        if (e.target.closest('.rt-pager')) return;
-        // Info icon shouldn't toggle the row — only its hover tooltip.
-        if (e.target.closest('.rt-info')) return;
-        var label = row.getAttribute('data-type');
-        if (state.expandedType === label) {
-          state.expandedType = null;
-        } else {
-          state.expandedType = label;
-          state.expandedPage = 0; // reset paging when opening a new type
-        }
-        renderRosterTypes(getFilteredRosters());
-      });
-    });
-
-    el.querySelectorAll('.rt-page-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        if (btn.disabled) return;
-        var act = btn.getAttribute('data-page-act');
-        if (act === 'prev') state.expandedPage -= 1;
-        else if (act === 'next') state.expandedPage += 1;
-        renderRosterTypes(getFilteredRosters());
-      });
-    });
+    el.innerHTML =
+      '<div class="roster-types-list">' +
+        '<div class="rt-row rt-header">' +
+          '<div class="rt-row-main">' +
+            '<div class="rt-label-block"><span class="rt-col-label">Build</span></div>' +
+            '<div class="rt-bar"></div>' +
+            '<div class="rt-stats">' +
+              '<span class="rt-col-label">Rosters</span>' +
+              '<span class="rt-col-label">%</span>' +
+              '<span class="rt-col-label">Avg fee</span>' +
+              '<span class="rt-col-label">Avg CLV</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        rowsHtml +
+      '</div>';
   }
 
   // Top-12 ADP exposure — fixed list of the 12 highest-ranked players by

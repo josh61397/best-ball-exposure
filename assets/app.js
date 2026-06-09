@@ -1285,14 +1285,18 @@
     var rbsFirst5 = countInRounds('RB', 5);
     var rbsFirst6 = countInRounds('RB', 6);
     var totalRBs  = countAll('RB');
+    var wrsFirst5 = countInRounds('WR', 5);
     var qbsFirst6  = countInRounds('QB', 6);
+    var qbsFirst8  = countInRounds('QB', 8);
     var qbsFirst10 = countInRounds('QB', 10);
     var tesFirst4 = countInRounds('TE', 4);
 
     if (rbsFirst6 === 0) types.push('Zero RB');
+    if (wrsFirst5 === 0) types.push('Zero WR');
     if (rbsFirst2 === 1 && rbsFirst5 === 1) types.push('Hero RB');
     if (rbsFirst4 >= 3) types.push('RB Heavy');
     if (qbsFirst6 >= 1) types.push('Elite QB');
+    if (qbsFirst8 >= 2) types.push('Double QB Elite');
     if (tesFirst4 >= 1) types.push('Elite TE');
     if (qbsFirst10 === 0) types.push('Late QB');
     if (totalRBs === 4) types.push('Hyper Fragile');
@@ -1304,13 +1308,15 @@
   // Returns an array of { label, description, count, pct, fees }.
   BB.computeRosterTypes = function (rosters) {
     var LABELS = [
-      { label: 'Zero RB',       description: 'No RBs in first 6 rounds' },
-      { label: 'Hero RB',       description: '1 RB in first 2 rounds, only 1 RB through 5 rounds' },
-      { label: 'RB Heavy',      description: '3+ RBs in first 4 rounds' },
-      { label: 'Elite QB',      description: 'Took a QB in first 6 rounds' },
-      { label: 'Elite TE',      description: 'Took a TE in first 4 rounds' },
-      { label: 'Late QB',       description: 'No QBs in first 10 rounds' },
-      { label: 'Hyper Fragile', description: 'Only 4 RBs on the roster' },
+      { label: 'Zero RB',         description: 'No RBs in first 6 rounds' },
+      { label: 'Zero WR',         description: 'No WRs in first 5 rounds' },
+      { label: 'Hero RB',         description: '1 RB in first 2 rounds, only 1 RB through 5 rounds' },
+      { label: 'RB Heavy',        description: '3+ RBs in first 4 rounds' },
+      { label: 'Elite QB',        description: 'Took a QB in first 6 rounds' },
+      { label: 'Double QB Elite', description: '2 QBs in first 8 rounds' },
+      { label: 'Elite TE',        description: 'Took a TE in first 4 rounds' },
+      { label: 'Late QB',         description: 'No QBs in first 10 rounds' },
+      { label: 'Hyper Fragile',   description: 'Only 4 RBs on the roster' },
     ];
     var counts = {};
     var fees = {};
@@ -1334,7 +1340,51 @@
         count: counts[l.label],
         pct: total ? counts[l.label] / total : 0,
         fees: fees[l.label],
+        avgFee: counts[l.label] ? fees[l.label] / counts[l.label] : 0,
       };
+    });
+  };
+
+  // Same as computeRosterTypes, but additionally returns avgClv per
+  // archetype. CLV is computed via BB.rosterClvRtv (uses historical ADP
+  // when available, else falls back to today's ADP), and Superflex
+  // rosters are excluded from the CLV avg only — they still contribute
+  // to count / fees.
+  BB.computeRosterTypeStats = async function (rosters) {
+    var base = BB.computeRosterTypes(rosters);
+    // Precompute per-roster CLV totalADP, in parallel.
+    var clvByRoster = {};
+    var clvResults = await Promise.all(rosters.map(async function (r) {
+      if (BB.rosterIsSuperflex && BB.rosterIsSuperflex(r)) {
+        return { rosterId: r.rosterId, clv: null };
+      }
+      try {
+        var v = await BB.rosterClvRtv(r);
+        var totalADP = v && v.clv && v.clv.totalADP;
+        return { rosterId: r.rosterId, clv: totalADP };
+      } catch (e) {
+        return { rosterId: r.rosterId, clv: null };
+      }
+    }));
+    clvResults.forEach(function (x) { clvByRoster[x.rosterId] = x.clv; });
+
+    // Aggregate CLV per archetype.
+    var clvSum = {}, clvCount = {};
+    base.forEach(function (b) { clvSum[b.label] = 0; clvCount[b.label] = 0; });
+    rosters.forEach(function (r) {
+      var clv = clvByRoster[r.rosterId];
+      if (clv == null) return;
+      BB.classifyRoster(r).forEach(function (t) {
+        if (clvSum[t] != null) { clvSum[t] += clv; clvCount[t]++; }
+      });
+    });
+
+    return base.map(function (b) {
+      var n = clvCount[b.label] || 0;
+      return Object.assign({}, b, {
+        avgClv: n ? clvSum[b.label] / n : null,
+        clvSampleSize: n,
+      });
     });
   };
 
