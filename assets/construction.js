@@ -24,8 +24,8 @@
     expandedPage: 0,
     // Pagination for the Roster Constructions table.
     constructionPage: 0,
-    // Which top-level tab is active: 'builds' | 'profile' | 'positions'.
-    tab: 'builds',
+    // Which top-level tab is active: 'builds' | 'profile' | 'positions' | 'full-adp'.
+    tab: 'profile',
   };
   try {
     var savedTab = localStorage.getItem('bb_construction_tab');

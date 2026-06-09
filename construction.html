@@ -17,8 +17,8 @@
     <header class="topbar"><h1 class="topbar-title">Team construction</h1></header>
 
     <div class="seg-toggle" id="construction-tabs" role="tablist" style="margin-bottom:16px;">
-      <button type="button" data-tab="builds" class="active">Roster Builds</button>
-      <button type="button" data-tab="profile">Draft Profile</button>
+      <button type="button" data-tab="builds">Roster Builds</button>
+      <button type="button" data-tab="profile" class="active">Draft Profile</button>
       <button type="button" data-tab="positions">Position Counts</button>
       <button type="button" data-tab="full-adp">Full ADP</button>
     </div>
@@ -53,12 +53,12 @@
       </div>
     </div>
 
-    <div data-tab-pane="builds">
+    <div data-tab-pane="builds" hidden>
       <h2 style="margin-top:8px;">Roster types <span style="color:var(--text-muted);font-size:13px;font-weight:400;">— a roster can match multiple</span></h2>
       <div id="roster-types"></div>
     </div>
 
-    <div data-tab-pane="profile" hidden>
+    <div data-tab-pane="profile">
       <h2 style="margin-top:8px;">Draft profile</h2>
       <div id="draft-slots"></div>
     </div>
