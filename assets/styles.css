@@ -1567,12 +1567,18 @@ a.rt-page-btn:hover { text-decoration: none; }
   overflow-y: auto;
   padding-right: 4px;
 }
-/* Full-ADP tab — bigger list since it owns the whole tab pane. */
-.r1-list--tall {
-  max-height: calc(100vh - 240px);
-  min-height: 400px;
-}
 .r1-row { grid-template-columns: 180px 1fr 36px; }
+
+/* Full ADP rendered as a standard data table with a bar graph inside
+   the Drafts column. The bar wrapper fills the cell so the bar's width
+   reads relative to the column. */
+.tbl-full-adp { margin-top: 8px; }
+.tbl-full-adp table.data { width: 100%; }
+.tbl-full-adp .full-adp-bar-col { width: 30%; min-width: 180px; }
+.tbl-full-adp .full-adp-bar-wrap {
+  width: 100%;
+  height: 10px;
+}
 .r1-team { gap: 5px; }
 .r1-name {
   font-family: var(--font-body);

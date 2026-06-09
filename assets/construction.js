@@ -296,9 +296,9 @@
     '</div>';
   }
 
-  // Full-ADP exposure — same visual as Top-12 ADP but extended to the
-  // top 200 players by current UD ADP. Renders into its own tab pane.
-  // Scrolls internally so the page stays a sane height.
+  // Full-ADP exposure — top 200 players by current UD ADP rendered as a
+  // standard data table (like the other tables on the site) with a bar
+  // graph inside the Drafts column.
   function renderFullAdp(rosters) {
     var el = document.getElementById('full-adp');
     if (!el) return;
@@ -321,7 +321,6 @@
       ? window.BB_DATA.normalizeName
       : function (s) { return String(s || '').toLowerCase().trim(); };
 
-    // Count total picks across eligible rosters, only for the top-200 names.
     var totalByNorm = {};
     top200.forEach(function (p) { totalByNorm[normalize(p.name)] = 0; });
     eligible.forEach(function (r) {
@@ -332,8 +331,9 @@
       });
     });
 
-    var rows = top200.map(function (p) {
+    var rows = top200.map(function (p, ix) {
       return {
+        rank: ix + 1,
         player: p.name, pos: p.pos || '', team: p.team || '',
         ud: p.ud,
         total: totalByNorm[normalize(p.name)] || 0,
@@ -341,32 +341,53 @@
     });
     var max = rows.reduce(function (m, r) { return Math.max(m, r.total); }, 0);
 
-    var rowsHtml = rows.map(function (r) {
+    var head = '<thead><tr>' +
+      '<th class="num">#</th>' +
+      '<th>Player</th>' +
+      '<th>Pos</th>' +
+      '<th>Team</th>' +
+      '<th class="num">ADP</th>' +
+      '<th class="full-adp-bar-col">Drafts</th>' +
+      '<th class="num">Count</th>' +
+    '</tr></thead>';
+
+    var body = rows.map(function (r) {
       var barW = max ? Math.max(2, Math.round((r.total / max) * 100)) : 0;
-      var logo = BB.teamLogoHTML(r.team, { size: 14 });
-      var posBadge = r.pos ? '<span class="badge pos-' + escapeHtml(r.pos) + '" style="font-size:9px;padding:1px 4px;">' + escapeHtml(r.pos) + '</span>' : '';
+      var logo = BB.teamLogoHTML(r.team, { size: 16 });
+      var posBadge = r.pos
+        ? '<span class="badge pos-' + escapeHtml(r.pos) + '">' + escapeHtml(r.pos) + '</span>'
+        : '—';
       var playerHref = 'player.html?name=' + encodeURIComponent(r.player);
-      var title = r.player + ' (ADP ' + r.ud + ') — drafted ' + r.total + ' time' + (r.total === 1 ? '' : 's') + ' across all rounds';
-      return '<div class="te-row r1-row" title="' + escapeHtml(title) + '">' +
-        '<div class="te-team r1-team">' + logo + posBadge +
-          '<a class="te-code r1-name" href="' + playerHref + '">' + escapeHtml(r.player) + '</a>' +
-        '</div>' +
-        '<div class="te-bar-wrap"><div class="te-bar" style="width:' + barW + '%"></div></div>' +
-        '<div class="te-count">' + r.total + '</div>' +
-      '</div>';
+      var teamHref = r.team ? 'team.html?code=' + encodeURIComponent(r.team) : '#';
+      var playerCellHtml =
+        '<span class="player-cell" data-pos="' + escapeHtml(r.pos || '') + '">' +
+          logo +
+          '<span class="player-name"><a href="' + playerHref + '">' + escapeHtml(r.player) + '</a></span>' +
+        '</span>';
+      var teamCellHtml = r.team
+        ? '<a class="stack-team" href="' + teamHref + '">' + escapeHtml(r.team) + '</a>'
+        : '—';
+      var barHtml = '<div class="te-bar-wrap full-adp-bar-wrap"><div class="te-bar" style="width:' + barW + '%"></div></div>';
+      return '<tr>' +
+        '<td class="num" style="color:var(--text-muted);">' + r.rank + '</td>' +
+        '<td>' + playerCellHtml + '</td>' +
+        '<td>' + posBadge + '</td>' +
+        '<td>' + teamCellHtml + '</td>' +
+        '<td class="num">' + r.ud.toFixed(1) + '</td>' +
+        '<td class="full-adp-bar-col">' + barHtml + '</td>' +
+        '<td class="num">' + r.total + '</td>' +
+      '</tr>';
     }).join('');
 
-    var metaText = 'top ' + rows.length + ' players by current UD ADP — total times drafted' +
-      (superflexExcluded ? ' · ' + superflexExcluded + ' Superflex roster' + (superflexExcluded === 1 ? '' : 's') + ' excluded' : '');
+    var footNote = superflexExcluded
+      ? '<p style="color:var(--text-muted);font-size:11px;margin:6px 2px 0;">' +
+          superflexExcluded + ' Superflex roster' + (superflexExcluded === 1 ? '' : 's') +
+          ' excluded — top-200 ADP is 1-QB only.</p>'
+      : '';
 
     el.innerHTML =
-      '<div class="card histogram-card">' +
-        '<div class="histogram-head">' +
-          '<span class="badge" style="background:var(--bg-elev-2);color:var(--text-dim);border-color:var(--border);">FULL ADP</span>' +
-          '<span class="histogram-meta">' + metaText + '</span>' +
-        '</div>' +
-        '<div class="team-exposure-list r1-list r1-list--tall">' + rowsHtml + '</div>' +
-      '</div>';
+      '<div class="tbl-full-adp"><table class="data">' + head + '<tbody>' + body + '</tbody></table></div>' +
+      footNote;
   }
 
   // Horizontal team-exposure bar chart paired with the draft-slot histogram.
