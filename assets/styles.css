@@ -1567,6 +1567,11 @@ a.rt-page-btn:hover { text-decoration: none; }
   overflow-y: auto;
   padding-right: 4px;
 }
+/* Full-ADP tab — bigger list since it owns the whole tab pane. */
+.r1-list--tall {
+  max-height: calc(100vh - 240px);
+  min-height: 400px;
+}
 .r1-row { grid-template-columns: 180px 1fr 36px; }
 .r1-team { gap: 5px; }
 .r1-name {

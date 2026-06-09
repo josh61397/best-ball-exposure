@@ -16,6 +16,12 @@
   <main>
     <header class="topbar"><h1 class="topbar-title">Team construction</h1></header>
 
+    <div class="seg-toggle" id="construction-tabs" role="tablist" style="margin-bottom:16px;">
+      <button type="button" data-tab="builds" class="active">Roster Builds</button>
+      <button type="button" data-tab="profile">Draft Profile</button>
+      <button type="button" data-tab="positions">Position Counts</button>
+      <button type="button" data-tab="full-adp">Full ADP</button>
+    </div>
 
     <div class="filter-bar">
       <div class="filter-row">
@@ -47,17 +53,28 @@
       </div>
     </div>
 
-    <h2 style="margin-top:8px;">Roster types <span style="color:var(--text-muted);font-size:13px;font-weight:400;">— a roster can match multiple</span></h2>
-    <div id="roster-types"></div>
+    <div data-tab-pane="builds">
+      <h2 style="margin-top:8px;">Roster types <span style="color:var(--text-muted);font-size:13px;font-weight:400;">— a roster can match multiple</span></h2>
+      <div id="roster-types"></div>
+    </div>
 
-    <h2>Draft profile</h2>
-    <div id="draft-slots"></div>
+    <div data-tab-pane="profile" hidden>
+      <h2 style="margin-top:8px;">Draft profile</h2>
+      <div id="draft-slots"></div>
+    </div>
 
-    <h2>Position counts per roster</h2>
-    <div id="histograms"></div>
+    <div data-tab-pane="positions" hidden>
+      <h2 style="margin-top:8px;">Position counts per roster</h2>
+      <div id="histograms"></div>
 
-    <h2>Roster constructions</h2>
-    <div id="content"></div>
+      <h2>Roster constructions</h2>
+      <div id="content"></div>
+    </div>
+
+    <div data-tab-pane="full-adp" hidden>
+      <h2 style="margin-top:8px;">Full ADP exposure</h2>
+      <div id="full-adp"></div>
+    </div>
   </main>
 
   <footer class="site">All data stored locally.</footer>

@@ -24,7 +24,15 @@
     expandedPage: 0,
     // Pagination for the Roster Constructions table.
     constructionPage: 0,
+    // Which top-level tab is active: 'builds' | 'profile' | 'positions'.
+    tab: 'builds',
   };
+  try {
+    var savedTab = localStorage.getItem('bb_construction_tab');
+    if (savedTab === 'builds' || savedTab === 'profile' || savedTab === 'positions' || savedTab === 'full-adp') {
+      state.tab = savedTab;
+    }
+  } catch (e) {}
 
   function escapeHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -288,6 +296,79 @@
     '</div>';
   }
 
+  // Full-ADP exposure — same visual as Top-12 ADP but extended to the
+  // top 200 players by current UD ADP. Renders into its own tab pane.
+  // Scrolls internally so the page stays a sane height.
+  function renderFullAdp(rosters) {
+    var el = document.getElementById('full-adp');
+    if (!el) return;
+    if (!rosters || !rosters.length) { el.innerHTML = ''; return; }
+    var eligible = rosters.filter(function (r) {
+      return !(BB.rosterIsSuperflex && BB.rosterIsSuperflex(r));
+    });
+    var superflexExcluded = rosters.length - eligible.length;
+    if (!eligible.length) { el.innerHTML = ''; return; }
+
+    var adp = (window.BB_DATA && window.BB_DATA.adp) || [];
+    var top200 = adp
+      .filter(function (p) { return p.ud != null; })
+      .slice()
+      .sort(function (a, b) { return a.ud - b.ud; })
+      .slice(0, 200);
+    if (!top200.length) { el.innerHTML = ''; return; }
+
+    var normalize = (window.BB_DATA && window.BB_DATA.normalizeName)
+      ? window.BB_DATA.normalizeName
+      : function (s) { return String(s || '').toLowerCase().trim(); };
+
+    // Count total picks across eligible rosters, only for the top-200 names.
+    var totalByNorm = {};
+    top200.forEach(function (p) { totalByNorm[normalize(p.name)] = 0; });
+    eligible.forEach(function (r) {
+      (r.picks || []).forEach(function (p) {
+        if (!p.player) return;
+        var k = normalize(p.player);
+        if (totalByNorm[k] != null) totalByNorm[k]++;
+      });
+    });
+
+    var rows = top200.map(function (p) {
+      return {
+        player: p.name, pos: p.pos || '', team: p.team || '',
+        ud: p.ud,
+        total: totalByNorm[normalize(p.name)] || 0,
+      };
+    });
+    var max = rows.reduce(function (m, r) { return Math.max(m, r.total); }, 0);
+
+    var rowsHtml = rows.map(function (r) {
+      var barW = max ? Math.max(2, Math.round((r.total / max) * 100)) : 0;
+      var logo = BB.teamLogoHTML(r.team, { size: 14 });
+      var posBadge = r.pos ? '<span class="badge pos-' + escapeHtml(r.pos) + '" style="font-size:9px;padding:1px 4px;">' + escapeHtml(r.pos) + '</span>' : '';
+      var playerHref = 'player.html?name=' + encodeURIComponent(r.player);
+      var title = r.player + ' (ADP ' + r.ud + ') — drafted ' + r.total + ' time' + (r.total === 1 ? '' : 's') + ' across all rounds';
+      return '<div class="te-row r1-row" title="' + escapeHtml(title) + '">' +
+        '<div class="te-team r1-team">' + logo + posBadge +
+          '<a class="te-code r1-name" href="' + playerHref + '">' + escapeHtml(r.player) + '</a>' +
+        '</div>' +
+        '<div class="te-bar-wrap"><div class="te-bar" style="width:' + barW + '%"></div></div>' +
+        '<div class="te-count">' + r.total + '</div>' +
+      '</div>';
+    }).join('');
+
+    var metaText = 'top ' + rows.length + ' players by current UD ADP — total times drafted' +
+      (superflexExcluded ? ' · ' + superflexExcluded + ' Superflex roster' + (superflexExcluded === 1 ? '' : 's') + ' excluded' : '');
+
+    el.innerHTML =
+      '<div class="card histogram-card">' +
+        '<div class="histogram-head">' +
+          '<span class="badge" style="background:var(--bg-elev-2);color:var(--text-dim);border-color:var(--border);">FULL ADP</span>' +
+          '<span class="histogram-meta">' + metaText + '</span>' +
+        '</div>' +
+        '<div class="team-exposure-list r1-list r1-list--tall">' + rowsHtml + '</div>' +
+      '</div>';
+  }
+
   // Horizontal team-exposure bar chart paired with the draft-slot histogram.
   // One row per NFL team that appears on your rosters, sorted by total
   // picks desc. Each bar is broken into QB / RB / WR / TE segments so you
@@ -445,12 +526,14 @@
       renderRosterTypes([]);
       renderHistograms([]);
       renderDraftSlots([]);
+      renderFullAdp([]);
       return;
     }
 
     renderRosterTypes(rosters);
     renderHistograms(rosters);
     renderDraftSlots(rosters);
+    renderFullAdp(rosters);
     var rows = BB.computeRosterConstructions(rosters);
     var s = state.search.toLowerCase().trim();
     if (s) rows = rows.filter(function (r) { return r.key.indexOf(s) !== -1; });
@@ -553,6 +636,38 @@
   platformEl.addEventListener('change', function (e) { state.platform = e.target.value; state.constructionPage = 0; render(); });
   tourneyEl.addEventListener('change', function (e) { state.tournament = e.target.value; state.constructionPage = 0; render(); });
   if (contextEl) contextEl.addEventListener('change', function (e) { state.context = e.target.value; state.constructionPage = 0; render(); });
+
+  // Tab switching — show only the active pane and persist the choice.
+  function applyTab() {
+    var toggle = document.getElementById('construction-tabs');
+    if (toggle) {
+      toggle.querySelectorAll('button[data-tab]').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-tab') === state.tab);
+      });
+    }
+    document.querySelectorAll('[data-tab-pane]').forEach(function (pane) {
+      var match = pane.getAttribute('data-tab-pane') === state.tab;
+      pane.hidden = !match;
+    });
+    // The "shapes" counter at the right of the filter bar is meaningful
+    // only for the Roster Constructions section (under Position Counts).
+    // Hide it on other tabs.
+    var rowCountLabel = rowCountEl && rowCountEl.parentElement;
+    if (rowCountLabel) rowCountLabel.style.visibility = state.tab === 'positions' ? '' : 'hidden';
+    // The construction-search input only filters the constructions table.
+    if (searchEl) searchEl.parentElement.style.visibility = state.tab === 'positions' ? '' : 'hidden';
+  }
+  var tabsEl = document.getElementById('construction-tabs');
+  if (tabsEl) {
+    tabsEl.querySelectorAll('button[data-tab]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.tab = btn.getAttribute('data-tab');
+        try { localStorage.setItem('bb_construction_tab', state.tab); } catch (e) {}
+        applyTab();
+      });
+    });
+  }
+  applyTab();
 
   populateFilters();
   render();
